@@ -1,0 +1,29 @@
+FROM ros:noetic-ros-core
+
+# Change default shell used by Docker to bash
+SHELL ["/bin/bash", "-c"]
+
+# Install common dependencies and prepare the environment.
+RUN apt-get update \
+  && apt-get -y install python3-pip python3-rosdep build-essential curl ccache catkin-lint \
+     ros-noetic-roslint python3-catkin-tools python3-osrf-pycommon ros-noetic-catkin clang-format-11 python3-yapf yapf3 \
+  && rosdep init \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "export PATH=\"/usr/lib/ccache:$PATH\"" >> ~/.bashrc \
+  && echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
+
+# Copy the workspace and install additional dependencies.
+WORKDIR /rover-soft
+COPY src ./src
+RUN apt-get update \
+  && rosdep update \
+  && rosdep install --from-paths src -iy
+
+# Build the project.
+ENV CCACHE_NOHASHDIR=true
+ENV CCACHE_BASEDIR="/rover-soft"
+ENV CCACHE_DIR="/rover-soft/ccache"
+RUN source /opt/ros/$ROS_DISTRO/setup.bash \
+  && catkin build --cmake-args -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CC_COMPILER_LAUNCHER=ccache \
+  && ccache -s && ccache -z \
+  && echo "source $PWD/devel/setup.bash" >> ~/.bashrc
