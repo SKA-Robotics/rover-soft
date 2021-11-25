@@ -60,7 +60,5 @@ $ docker run -it registry.gitlab.com/ska_robotics/sirius/rover-soft/rover-soft:s
 Our project's documentation is avaiable [here](https://ska_robotics.gitlab.io).
 Further information about the software is also available in detailed descriptions of each package.
 
----
-<center>
+#
 Copyright &copy; 2021, SKA Robotics Warsaw University of Technology
-</center>
