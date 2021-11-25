@@ -1,0 +1,38 @@
+
+sirius:
+    wheels_left:
+      hardware_interface:
+        joints:
+          - wheel_left_top
+          - wheel_left_bottom
+    wheels_right:
+      hardware_interface:
+        joints:
+          - wheel_right_top
+          - wheel_right_bottom
+    controller:
+      wheels_left_state:
+        type: joint_state_controller/JointStateController
+        publish_rate: 20
+        joints:
+          - left_front_wheel
+          - left_back_wheel
+      wheels_right_state:
+        type: joint_state_controller/JointStateController
+        publish_rate: 20
+        joints:
+          - right_front_wheel
+          - right_back_wheel
+      wheels:
+        type        : "diff_drive_controller/DiffDriveController"
+        left_wheel  : 
+          - 'left_front_wheel'
+          - 'left_back_wheel'
+        right_wheel : 
+          - 'right_front_wheel'
+          - 'right_back_wheel'
+        publish_rate: 20               # default: 50
+        pose_covariance_diagonal : [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+        twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+        wheel_separation : 0.6
+        wheel_radius : 0.2

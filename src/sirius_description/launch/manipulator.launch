@@ -1,0 +1,9 @@
+<launch>
+    <param name="robot_description" command="$(find xacro)/xacro '$(find sirius_description)/urdf/manipulator.urdf.xacro'"/>
+    <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen"></node> -->
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" output="screen"></node>
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+        <!-- <param name="publish_frequency" type="double" value="10.0"/> -->
+    </node>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find sirius_description)/urdf/manipulator.rviz" required="true" output="screen"/>
+</launch>
