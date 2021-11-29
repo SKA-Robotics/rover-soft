@@ -2,7 +2,7 @@
 <package format="2">
   <name>sirius_description</name>
   <version>0.2.0</version>
-  <description>The sirius_description package</description>
+  <description>Sirius hardware description</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

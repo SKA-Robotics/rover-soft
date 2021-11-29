@@ -2,7 +2,7 @@
 <package format="2">
   <name>web_interface</name>
   <version>0.1.0</version>
-  <description>The web_interface package</description>
+  <description>Web interface allowing teleoperation and monitoring using browser</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

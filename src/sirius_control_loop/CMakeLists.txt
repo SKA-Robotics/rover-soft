@@ -8,8 +8,8 @@ project(sirius_control_loop)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  controller_manager
   combined_robot_hw
+  controller_manager
   roscpp
 )
 
@@ -105,7 +105,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES sirius_control_loop
-  CATKIN_DEPENDS controller_manager combined_robot_hw roscpp
+  CATKIN_DEPENDS combined_robot_hw controller_manager roscpp
 #  DEPENDS system_lib
 )
 
