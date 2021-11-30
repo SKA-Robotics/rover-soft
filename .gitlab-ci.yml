@@ -8,7 +8,7 @@ variables:
 # Then builds project checking for build errors.
 #
 # Uses build cache created by latest pipeline run on develop branch.
-# This way we skip rebuilding majority of the packages (those that didn't change since branchind from develop) each run.
+# This way we skip rebuilding majority of the packages (those that didn't change since branching from develop) each run.
 #
 # Different job is executed for the main branch, which doesn't use any cache.
 run-code-checks:
@@ -38,7 +38,7 @@ run-code-checks:
     # Automatically format code
     - curl https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py | python3 - -r src --clang-format-executable clang-format-11
     - if [[ -n $(find ./src/ -type f -name "*.py") ]] ; then yapf3 --diff --recursive ./src/ ; fi
-    # Build the project
+    # Try to build the project and save cache on success
     - catkin build --cmake-args -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CC_COMPILER_LAUNCHER=ccache
     - ccache -s
   except:

@@ -18,7 +18,7 @@ Enter the project's workspace:
 $ cd rover-soft
 ```
 
-Use `rosdep` to install any missing depenencies:
+Use `rosdep` to install any missing dependencies:
 ```bash
 $ sudo rosdep init
 $ rosdep update
