@@ -85,4 +85,4 @@ deploy-main-image:
     - docker buildx create --use
     - docker buildx build --push -f ci/Dockerfile.stable -t $MAIN_IMAGE --platform "$PLATFORM" --cache-from $MAIN_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 $GIT_CLONE_PATH
   only:
-    - ci
+    - main
