@@ -1,0 +1,31 @@
+FROM ros:noetic-ros-core
+
+# Parameters to be overided by `docker run --env <key>=<value>` command
+ENV ROS_IP 127.0.0.1
+ENV ROS_MASTER_URI http://127.0.0.1:11311
+
+# Change default shell used by Docker to bash
+SHELL ["/bin/bash", "-c"]
+
+# Install common dependencies and prepare the environment.
+RUN apt-get update \
+  && apt-get -y install ssh python3-pip python3-rosdep build-essential python3-catkin-tools python3-osrf-pycommon \
+  && rosdep init \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
+
+# Copy the workspace and install additional dependencies.
+WORKDIR /rover-soft
+COPY src ./src
+RUN apt-get update \
+  && rosdep update \
+  && rosdep install --from-paths src -iy
+
+# Build the project.
+RUN source /opt/ros/$ROS_DISTRO/setup.bash \
+  && catkin build --cmake-args \
+  && echo "source $PWD/devel/setup.bash" >> ~/.bashrc
+
+# Configure root user (set password and allow ssh login)
+RUN echo 'root:skar' | chpasswd
+RUN sed -i 's/#*PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
