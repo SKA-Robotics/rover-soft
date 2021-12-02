@@ -1,0 +1,9 @@
+<launch>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <arg name="port" value="8081"/>
+    </include>
+    <node type="web_video_server" name="web_video_server" pkg="web_video_server" required="true">
+        <param name="port" value="8082" />
+    </node>
+    <node name="server" pkg="interface" type="start_http_server.bash"/>
+</launch>
