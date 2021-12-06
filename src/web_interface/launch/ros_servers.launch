@@ -5,5 +5,4 @@
     <node type="web_video_server" name="web_video_server" pkg="web_video_server" required="true">
         <param name="port" value="8082" />
     </node>
-    <node name="server" pkg="web_interface" type="start_http_server.bash"/>
 </launch>

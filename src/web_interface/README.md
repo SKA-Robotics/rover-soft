@@ -1,0 +1,68 @@
+# web_interface
+User interface for Sirius II rover. Package provides:
+- Launch files for servers
+- Source code for website
+
+## Usage
+### Build
+- Building the code requires Node.js and npm. You can install those using:
+  ```
+  sudo apt install nodejs
+  ```
+  ```
+  sudo apt install npm
+  ```
+  Note that you may have to install additional npm packages.
+
+- To build code:
+  ```
+  cd rover-soft/src/web_interface/website
+  npm run build
+  ```
+### Launch files
+- When the website code is built, you can start all servers using `servers.launch`
+  ```
+  roslaunch web_interface servers.launch
+  ```
+- Alternatively, you may start only the ROSBridge and Web Video Server using `ros_servers.launch`
+  ```
+  roslaunch web_interface ros_servers.launch
+  ```
+  Used ports:
+  - `8080` - Website hosting server
+  - `8081` - ROSBridge server
+  - `8082` - Web Video Server
+
+### Developing website
+- In order for the changes to be immediately visible on the webpage it's better to start server using npm, as it will automatically recompile the source code when changes are made.
+  ```
+  cd rover-soft/src/web_interface/website
+  npm run serve
+  ```
+- You will need to either start ROSBridge and Web Video Server manually:
+  ```
+  roslaunch rosbridge_server rosbridge_websocket.launch  port:=8081
+    
+  rosrun web_video_server web_video_server _port:=8082 _image_transport:=compressed
+  ```
+  or with `ros_servers.launch` launchfile
+  ```
+  roslaunch web_interface ros_servers.launch
+  ```
+
+### System structure
+
+```mermaid
+  graph TD
+ROSBridge ------|ROS topic data| Website
+WebVideoServer ------|Video stream| Website
+HTTPServer ------ Website
+  subgraph "PC"
+  Website
+  end
+  subgraph "Sirius"
+  ROS --- ROSBridge(ROSBridge Server)
+  ROS --- WebVideoServer(Web Video Server)
+  HTTPServer(HTTP Server)
+  end
+```
