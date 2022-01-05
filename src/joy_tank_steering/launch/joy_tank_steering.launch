@@ -1,0 +1,4 @@
+<launch>
+	<node name="joy_node" pkg="joy" type="joy_node" output="screen"/>
+	<node name="tank_steering_node" pkg="joy_tank_steering" type="joy_tank_steering.py" output="screen"/>
+</launch>
