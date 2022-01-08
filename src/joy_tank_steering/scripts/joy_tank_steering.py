@@ -1,18 +1,25 @@
-#!/usr/bin python3
+#!/usr/bin/env python
+
 import rospy
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
 
 left_right_axis_ind = 2
 front_back_axis_ind = 3
-max_linear_weels_velocity = 1 # to add
-max_angular_weels_velocity = 1 # to add
-linear_velocity = 0
-angular_velocity = 0
+max_linear_weels_velocity = 1.0 # to set
+max_angular_weels_velocity = 1.0 # to set
+linear_velocity = 0.0
+angular_velocity = 0.0
 
-def callback(data):
-    linear_velocity = max_linear_weels_velocity * data.axes[front_back_axis_ind]
-    angular_velocity = max_angular_weels_velocity * data.axes[left_right_axis_ind]
+def callback(data: Joy):
+    global linear_velocity
+    global angular_velocity
+    if data:
+        linear_velocity = max_linear_weels_velocity * data.axes[front_back_axis_ind]
+        angular_velocity = max_angular_weels_velocity * data.axes[left_right_axis_ind]
+    else:
+        linear_velocity = 0.0
+        angular_velocity = 0.0
 
 def talker():
     rospy.init_node("tank_steering_node")
