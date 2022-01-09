@@ -6,8 +6,8 @@ from geometry_msgs.msg import Twist
 
 left_right_axis_ind = 2
 front_back_axis_ind = 3
-max_linear_weels_velocity = 1.0 # to set
-max_angular_weels_velocity = 1.0 # to set
+max_linear_weels_velocity = 1.0 # default
+max_angular_weels_velocity = 1.0 # default
 linear_velocity = 0.0
 angular_velocity = 0.0
 
@@ -23,6 +23,10 @@ def callback(data: Joy):
 
 def talker():
     rospy.init_node("tank_steering_node")
+    global max_linear_weels_velocity
+    global max_angular_weels_velocity
+    max_linear_weels_velocity = rospy.get_param("max_linear_vel", 1.0) # [m/s]
+    max_angular_weels_velocity = rospy.get_param("max_angular_vel", 1.0) # [rad/s]
     pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
     rate = rospy.Rate(50) # 50Hz
     while not rospy.is_shutdown():
