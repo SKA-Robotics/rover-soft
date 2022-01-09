@@ -5,6 +5,10 @@
 </template>
 
 <style>
+body {
+  margin: 0;
+}
+
 :root {
   --primary: #001c3b;
   --primary-medium: #102f53;
