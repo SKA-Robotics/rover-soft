@@ -1,14 +1,3 @@
-<template>
-  <div>
-    <label>
-      Keyboard control component.
-    </label>
-  </div>
-</template>
-<script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
-<script src="https://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
-<script src="https://static.robotwebtools.org/keyboardteleopjs/current/keyboardteleop.min.js"></script>
-<script>
 var twist;
 var cmdVel;
 var publishImmidiately = true;
@@ -59,15 +48,3 @@ window.onload = function () {
 predkosc();
 klawiatura();
 }
-    export default {
-      name: "KeyboardControl",
-      props: {
-          'ws_address': String,
-          'ros': Object,
-      },
-      mounted() {
-        console.log(this.ws_address);
-        console.log(this.ros);
-      },
-    };
-</script>
