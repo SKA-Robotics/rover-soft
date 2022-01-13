@@ -29,17 +29,22 @@ def talker():
     max_angular_weels_velocity = rospy.get_param("max_angular_vel", 1.0) # [rad/s]
     pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
     rate = rospy.Rate(50) # 50Hz
+    msg = Twist()
+    msg.linear.x = 0
+    msg.linear.y = 0
+    msg.linear.z = 0
+    msg.angular.x = 0
+    msg.angular.y = 0
+    msg.angular.z = 0
     while not rospy.is_shutdown():
         rospy.Subscriber("joy", Joy, callback)
-        msg = Twist()
         msg.linear.x = linear_velocity
-        msg.linear.y = 0
-        msg.linear.x = 0
-        msg.angular.x = 0
-        msg.angular.y = 0
         msg.angular.z = angular_velocity
         pub.publish(msg)
         rate.sleep()
+    msg.linear.x = 0
+    msg.angular.z = 0
+    pub.publish(msg)
 
 if __name__ == '__main__':
     try:
