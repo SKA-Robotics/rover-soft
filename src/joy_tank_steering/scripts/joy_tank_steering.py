@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
 
-left_right_axis_ind = 2
-front_back_axis_ind = 3
+left_right_axis_ind = 3
+front_back_axis_ind = 4
 max_linear_weels_velocity = 1.0 # default
 max_angular_weels_velocity = 1.0 # default
 linear_velocity = 0.0
@@ -38,7 +38,7 @@ def talker():
     msg.angular.z = 0
     while not rospy.is_shutdown():
         rospy.Subscriber("joy", Joy, callback)
-        msg.linear.x = linear_velocity
+        msg.linear.x = -linear_velocity
         msg.angular.z = angular_velocity
         pub.publish(msg)
         rate.sleep()
