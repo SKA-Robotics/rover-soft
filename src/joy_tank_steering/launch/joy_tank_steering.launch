@@ -1,11 +1,12 @@
 <launch>
 	<node name="joy_node" pkg="joy" type="joy_node">
 		<param name="dev" value="/dev/input/js0"/>
-		<param name="deadzone" value="0.1"/>
+		<param name="deadzone" value="0.15"/>
 		<param name="coalesce_interval" value="0.02"/>
+		<param name="autorepeat_rate" value="10"/>
 	</node>
 	<node name="tank_steering_node" pkg="joy_tank_steering" type="joy_tank_steering.py">
 		<param name="max_linear_vel" value="1.0"/>
-		<param name="max_angular_vel" value="1.0"/>
+		<param name="max_angular_vel" value="0.5"/>
 	</node>
 </launch>

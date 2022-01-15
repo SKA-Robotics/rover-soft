@@ -38,7 +38,7 @@ def talker():
     msg.angular.z = 0
     while not rospy.is_shutdown():
         rospy.Subscriber("joy", Joy, callback)
-        msg.linear.x = -linear_velocity
+        msg.linear.x = linear_velocity
         msg.angular.z = angular_velocity
         pub.publish(msg)
         rate.sleep()
