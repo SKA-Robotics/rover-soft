@@ -1,0 +1,3 @@
+<launch>
+  <node name="led_control_node" pkg="led_control" type="talker" output="screen"/>
+</launch>
