@@ -1,20 +1,22 @@
 import rospy
 import serial
 from std_msgs.msg import Int32
-
-def callback(data):
-     A=serial.Serial("/dev/ttyUSB1", 9600)
-     A.write(data.encode())
+class SerialDevice:
+    def __init__(self, parameter, name):
+        self.parameter = parameter
+        self.name = name
+    def set_parameter(self):
+       self.name=serial.Serial(self.parameter, 9600)
+    def callback(self, data):
+        self.name.write(data.encode())
 def main():
     rospy.init_node("light_control") 
-    #A=serial.Serial("/dev/ttyUSB1", 9600)   #parametr powinien byc wczytywany
-    rospy.Subscriber("status_light", Int32, callback)
+    device = SerialDevice("/dev/ttyUSB1", "A")
+    device.set_parameter()
+    rospy.Subscriber("status_light", Int32, device.callback)
     rospy.spin()
 if __name__ == "__main__":
     try:
         main()
     except rospy.ROSInterruptException:
         pass 
-#przerobic na obiektowe
-#serial rozpisac  by miec dostep wszedzie
-#nie inicjowac urzadzenia szeregowego za kazda utrzymana informacje
