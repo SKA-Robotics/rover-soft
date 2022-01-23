@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "mobile-device-detect": "^0.4.3",
     "vue-cookies": "^1.7.4"
   }
 }
