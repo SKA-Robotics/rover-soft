@@ -12,7 +12,11 @@ class SerialDevice:
 def main():
     rospy.init_node("light_control") 
     device = SerialDevice("/dev/ttyUSB1", "A")
-    device.set_parameter()
+    try:
+        device.set_parameter()
+    except KeyError:
+        print("Parameter is not set")
+        pass
     rospy.Subscriber("status_light", Int32, device.callback)
     rospy.spin()
 if __name__ == "__main__":
