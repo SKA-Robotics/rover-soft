@@ -1,6 +1,19 @@
 import rospy
 import serial
 from std_msgs.msg import Int32
+class DeviceWithoutParameter:
+    def __init__(self, name):
+        self.name = name
+    def getting_parameter(self):
+        param_name = rospy.search_param('arduino') #parameter to change 
+        light_parameter = rospy.get_param (param_name)
+        self.name = serial.Serial(light_parameter, 9600)    
+    def light_on(self):
+        try:
+            self.name.write(ord("1"))
+        except KeyError:
+            print("Error occured")
+            pass
 class SerialDevice:
     def __init__(self, parameter, name):
         self.parameter = parameter
