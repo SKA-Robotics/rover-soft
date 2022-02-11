@@ -34,7 +34,6 @@ run-code-checks:
     - rosdep install --from-paths src -iy
     # Invoke linters:
     - catkin_lint -W2 --output=explain --color=always src/
-    - if ! [ -z "$(catkin list --depends-on roslint -u )" ]; then catkin_make roslint; fi
     # Automatically format code
     - curl https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py | python3 - -r src --clang-format-executable clang-format-11
     - if [[ -n $(find ./src/ -type f -name "*.py") ]] ; then yapf3 --diff --recursive ./src/ ; fi
