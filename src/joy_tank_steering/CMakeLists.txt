@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES joy_tank_steering
-#  CATKIN_DEPENDS geometry_msgs rospy sensor_msgs std_msgs
+  CATKIN_DEPENDS geometry_msgs rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
