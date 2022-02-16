@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sirius_2">
+  <xacro:property name="package" value="sirius_description" />
+  <xacro:property name="params" value="${xacro.load_yaml('sirius_2.yaml')}" /> 
+  <xacro:property name="collisions" value="${xacro.load_yaml('sirius_2/sirius_2_collisions.yaml')}" /> 
+  <xacro:property name="inertial" value="${xacro.load_yaml('sirius_2/sirius_2_inertial.yaml')}" /> 
+
+  <xacro:include filename="materials.urdf.xacro" />
+  <xacro:include filename="sirius_2/indicator_light.urdf.xacro" />
+  <xacro:include filename="sirius_2/platform.urdf.xacro" />
+
+  <xacro:macro name="drive_system" params="reflect:=false prefix:='' params:=^ direction:=1">
+    <xacro:include filename="sirius_2/suspension.urdf.xacro" />
+    <xacro:include filename="sirius_2/wheel.urdf.xacro" />
+    <xacro:include filename="sirius_2/drive_train.urdf.xacro" />
+    
+    <xacro:suspension prefix="${prefix}" material="bronze">
+      <xacro:bronze/>
+    </xacro:suspension>
+    <xacro:drive_train prefix="${prefix}" material="gray">
+      <xacro:gray/>
+    </xacro:drive_train>
+    <xacro:wheel prefix="${prefix}" material="gold">
+      <xacro:gold/>
+    </xacro:wheel>
+
+    <joint name="${prefix}_suspension_to_${prefix}_drive_train" type="fixed">
+      <parent link="${prefix}_suspension"/>
+      <child link="${prefix}_drive_train"/>
+      <origin xyz="${params['suspension_separation_x']/2 - params['wheel_base']/2} ${-reflect*params['suspension_thickness']} ${-params['suspension_height']}" rpy="0 0 ${reflect*pi}"/>
+      <axis xyz="0 0 1"/>
+    </joint>  
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="${prefix}_drive_train"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="0 ${params['track']/2 - params['suspension_thickness']/2 - params['suspension_separation_y']/2} 0"/>
+      <axis xyz="0 ${-(1-2*reflect) * direction} 0"/>
+      <limit effort="18.0" velocity="8.0"/>
+    </joint>    
+    <transmission name="${prefix}_wheel_transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_wheel_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:indicator_light prefix="yellow" material="yellow_t">
+    <xacro:yellow_t/>
+  </xacro:indicator_light>
+  <xacro:indicator_light prefix="blue" material="blue_t">
+    <xacro:blue_t/>
+  </xacro:indicator_light>
+
+  <xacro:drive_system prefix="right_front" />
+  <xacro:drive_system reflect="true" prefix="right_back" direction="-1"/>
+  <xacro:drive_system reflect="true" prefix="left_front" />
+  <xacro:drive_system prefix="left_back" direction="-1"/>
+  
+  <link name="base_link" />
+  <xacro:platform prefix="main" material="gray">
+    <xacro:gray/>
+  </xacro:platform>
+
+  <joint name="base_link_to_main_platform" type="fixed">
+    <parent link="base_link"/>
+    <child link="main_platform"/>
+    <origin xyz="0 0 ${params['wheel_radius'] + params['suspension_height'] - params['suspension_z']}" rpy="0 0 ${pi}"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="base_right_front_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="right_front_suspension"/>
+    <origin xyz="${-params['suspension_separation_x']/2} ${params['suspension_separation_y']/2 + params['suspension_thickness']/2} ${params['suspension_z']}" rpy="0 0 0"/>
+  </joint>
+  <joint name="base_right_back_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="right_back_suspension"/>
+    <origin xyz="${params['suspension_separation_x']/2} ${params['suspension_separation_y']/2 - params['suspension_thickness']/2} ${params['suspension_z']}" rpy="0 0 ${pi}"/>
+  </joint>
+  <joint name="base_left_front_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="left_front_suspension"/>
+    <origin xyz="${-params['suspension_separation_x']/2} ${-params['suspension_separation_y']/2 + params['suspension_thickness']/2} ${params['suspension_z']}"/>
+  </joint>
+  <joint name="base_left_back_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="left_back_suspension"/>
+    <origin xyz="${params['suspension_separation_x']/2} ${-params['suspension_separation_y']/2 - params['suspension_thickness']/2} ${params['suspension_z']}" rpy="0 0 ${pi}"/>
+  </joint>
+  
+  <joint name="base_to_yellow_indicator_light" type="fixed">
+    <parent link="main_platform"/>
+    <child link="yellow_indicator_light"/>
+    <origin xyz="${params['yellow_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
+  </joint>
+  <joint name="base_to_blue_indicator_light" type="fixed">
+    <parent link="main_platform"/>
+    <child link="blue_indicator_light"/>
+    <origin xyz="${params['blue_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
+  </joint>
+  <gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+    <robotNamespace>/</robotNamespace>
+  </plugin>
+  </gazebo>
+</robot>

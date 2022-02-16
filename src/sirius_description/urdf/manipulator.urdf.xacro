@@ -9,11 +9,11 @@
   <xacro:property name="arm3_length" value="0.129" />
   <xacro:property name="tool_length" value="0.011" />
   <xacro:property name="base_size_x" value="0.2" />
-  <link name="base">
+  <link name="base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/base.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="yellow">
         <color rgba=".5 .5 0 1" />
@@ -31,7 +31,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/cyl.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/cyl.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="grey">
         <color rgba=".5 .5 .5 1" />
@@ -45,7 +45,7 @@
     </collision>
   </link>
   <joint name="base_cyl" type="continuous">
-    <parent link="base"/>
+    <parent link="base_link"/>
     <child link="cylinder"/>
     <origin xyz="0 0 ${base_length}"/>
     <axis xyz="0 0 1"/>
@@ -55,7 +55,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/arm1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/arm1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="green">
         <color rgba="0 1 0 1" />
@@ -84,7 +84,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/arm2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/arm2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="blue">
         <color rgba="0 0 1 1" />
@@ -113,7 +113,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/arm3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/arm3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="red">
         <color rgba="1 0 0 1" />
@@ -142,7 +142,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/tool.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/tool.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="grey">
       </material>

@@ -1,0 +1,24 @@
+drive_train_radius: 0.061
+drive_train_width: 0.223
+indicator_light_height: 0.042
+indicator_light_radius: 0.037
+platform_angle: 0.67
+platform_box_length: 0.41
+platform_box_x: 0.165
+platform_height: 0.16
+platform_mast_2g_xyz: 0.446 0.074 0.955
+platform_mast_2g_radius: 0.035
+platform_mast_2g_length: 0.78
+platform_mast_5g_xyz: 0.43 -0.04 0.74
+platform_mast_5g_radius: 0.02
+platform_mast_5g_length: 0.35
+platform_mast_height: 0.65
+platform_mast_radius: 0.006
+platform_mast_routers_height: 0.29
+platform_mast_x: 0.384
+platform_mast_y: 0.081
+platform_profile_size: 0.02
+suspension_angle: 0.59
+suspension_length: 0.31
+suspension_width: 0.091
+suspension_x_shift: 0.015

@@ -1,14 +1,14 @@
 robot_hardware:
-  - wheels_left
-  - wheels_right
+  - wheels_left_joint
+  - wheels_right_joint
 wheels_left:
   type: roboclaw/RoboclawHWInterface
-  motor1: left_front_wheel
-  motor2: left_back_wheel
+  motor1: left_front_wheel_joint
+  motor2: left_back_wheel_joint
 wheels_right:
   type: roboclaw/RoboclawHWInterface
-  motor1: right_front_wheel
-  motor2: right_back_wheel
+  motor1: right_front_wheel_joint
+  motor2: right_back_wheel_joint
 
 roboclaw_wheels_left: 
   device: '/dev/ttyACM0'
