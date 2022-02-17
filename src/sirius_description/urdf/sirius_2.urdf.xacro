@@ -4,10 +4,14 @@
   <xacro:property name="params" value="${xacro.load_yaml('sirius_2.yaml')}" /> 
   <xacro:property name="collisions" value="${xacro.load_yaml('sirius_2/sirius_2_collisions.yaml')}" /> 
   <xacro:property name="inertial" value="${xacro.load_yaml('sirius_2/sirius_2_inertial.yaml')}" /> 
+  <xacro:property name="cameras" value="${xacro.load_yaml('cameras/cameras.yaml')}" />  
+  <xacro:property name="cameras_inertial" value="${xacro.load_yaml('cameras/cameras_inertial.yaml')}" /> 
 
   <xacro:include filename="materials.urdf.xacro" />
   <xacro:include filename="sirius_2/indicator_light.urdf.xacro" />
   <xacro:include filename="sirius_2/platform.urdf.xacro" />
+
+  <xacro:include filename="cameras/hp_4310.urdf.xacro" />
 
   <xacro:macro name="drive_system" params="reflect:=false prefix:='' params:=^ direction:=1">
     <xacro:include filename="sirius_2/suspension.urdf.xacro" />
@@ -55,6 +59,13 @@
     <xacro:blue_t/>
   </xacro:indicator_light>
 
+  <xacro:hp_4310 prefix="left_side" material="black">
+    <xacro:black/>
+  </xacro:hp_4310>
+  <xacro:hp_4310 prefix="right_side" material="black">
+    <xacro:black/>
+  </xacro:hp_4310>
+
   <xacro:drive_system prefix="right_front" />
   <xacro:drive_system reflect="true" prefix="right_back" direction="-1"/>
   <xacro:drive_system reflect="true" prefix="left_front" />
@@ -68,7 +79,7 @@
   <joint name="base_link_to_main_platform" type="fixed">
     <parent link="base_link"/>
     <child link="main_platform"/>
-    <origin xyz="0 0 ${params['wheel_radius'] + params['suspension_height'] - params['suspension_z']}" rpy="0 0 ${pi}"/>
+    <origin xyz="0 0 ${params['wheel_radius'] + params['suspension_height'] - params['suspension_z']}" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
 
@@ -103,9 +114,21 @@
     <child link="blue_indicator_light"/>
     <origin xyz="${params['blue_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
   </joint>
+
+  <joint name="base_to_left_side_camera" type="fixed">
+    <parent link="main_platform"/>
+    <child link="left_side_camera"/>
+    <origin xyz="${params['left_side_camera_xyz']}" rpy="${params['left_side_camera_rpy']}"/>
+  </joint>
+  <joint name="base_to_right_side_camera" type="fixed">
+    <parent link="main_platform"/>
+    <child link="right_side_camera"/>
+    <origin xyz="${params['right_side_camera_xyz']}" rpy="${params['right_side_camera_rpy']}"/>
+  </joint>
+
   <gazebo>
-  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-    <robotNamespace>/</robotNamespace>
-  </plugin>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
   </gazebo>
 </robot>

@@ -6,7 +6,11 @@
     <arg name="headless" default="false"/>
     <arg name="debug" default="false"/>
     <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
+
+    <arg name="rviz" default="true"/>
+
     <remap from="/sirius/controller/wheels/cmd_vel" to="/cmd_vel" />
+    <remap from="/sirius/controller/wheels/odom" to="/odom" />
 
 
     <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
@@ -34,6 +38,6 @@
             /sirius/controller/wheels_left_state
             /sirius/controller/wheels_right_state
             /sirius/controller/wheels
-            --shutdown-timeout 2
     "/>
+    <node if="$(arg rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find sirius_description)/rviz/sirius_gazebo.rviz" />
 </launch>

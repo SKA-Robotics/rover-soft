@@ -36,12 +36,34 @@ Description of the Sirius hardware. Package provides:
     - `/wheels_right/roboclaw/motor2/set_joint_state`
 
     Look into `diff_drive_controller` and `roboclaw_driver` packages for detailed description of each topic.
+- `sirius_gazebo.launch`
+  ```bash
+  $ roslaunch sirius_description sirius_gazebo.launch
+  ```
+  Runs gazebo with `sirius_2.urdf.xacro` model and `marsyad.world` map from `leo_gazebo`  package. It also launches all neccessery ros control nodes. Parameters for `diff_drive_controller` should be changed in `controllers.yaml`.  
+  Important topics:
+  - `/cmd_vel`
+  - `/odom`
+  - `/left_side_camera/*` 
+  - `/right_side_camera/*` 
+
+  Look into `diff_drive_controller` packages for detailed description of each topic.
 
 ## URDF
-- `manipulator.urdf.xacro`
-    Model of the manipulator. In order to generate urdf file run:
+- `manipulator.urdf.xacro`  
+    Manipulator model  
+    In order to generate urdf file run:
     ```bash
     $ roscd sirius_description/urdf/
     $ xacro manipulator.urdf.xacro -o manipulator.urdf
     ```
     ![manipulator.urdf.xacro](docs/manipulator.png)
+- `sirius_2.urdf.xacro`  
+    Sirius 2 model  
+    In order to generate urdf file run:
+    ```bash
+    $ roscd sirius_description/urdf/
+    $ xacro sirius_2.urdf.xacro -o sirius_2.urdf
+    ```
+    ![sirius_2.urdf.xacro](docs/sirius_2.png)
+
