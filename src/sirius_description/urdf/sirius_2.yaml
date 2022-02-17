@@ -1,5 +1,9 @@
 blue_indicator_light_xyz: 0.4430 -0.1141 0.6540
 yellow_indicator_light_xyz: 0.4371 0.1522 0.6540
+left_side_camera_xyz: 0.03 -0.17 0.05
+left_side_camera_rpy: 0 0.5235987756 -1.570796327
+right_side_camera_xyz: 0.03 0.17 0.05
+right_side_camera_rpy: 0 0.5235987756 1.570796327
 suspension_height: 0.24875
 suspension_separation_x: 0.229
 suspension_separation_y: 0.312
