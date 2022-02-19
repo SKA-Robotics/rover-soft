@@ -54,10 +54,6 @@
   <depend>rospy</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
-  <build_export_depend>geometry_msgs</build_export_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <build_export_depend>sensor_msgs</build_export_depend>
-  <build_export_depend>std_msgs</build_export_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
