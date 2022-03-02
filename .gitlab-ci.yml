@@ -36,7 +36,7 @@ run-code-checks:
     - catkin_lint -W2 --output=explain --color=always src/
     # Automatically format code
     - curl https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py | python3 - -r src --clang-format-executable clang-format-11
-    - if [[ -n $(find ./src/ -type f -name "*.py") ]] ; then yapf3 --diff --recursive ./src/ ; fi
+    - if [[ -n $(find ./src/ -type f -name "*.py") ]] ; then yapf3 --diff --recursive --style ./.yapf-format ./src/ ; fi
     # Try to build the project and save cache on success
     - catkin build --cmake-args -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CC_COMPILER_LAUNCHER=ccache
     - ccache -s

@@ -1,0 +1,5 @@
+<launch>
+    <rosparam file="$(find ral_sirius_1)/config/manip_control.yaml" command="load"/>
+
+    <node pkg="ral_sirius_1" type="manip_control.py" name="manip_control" required="true" output="screen"/>
+</launch>

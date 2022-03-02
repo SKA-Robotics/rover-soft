@@ -11,7 +11,7 @@ wheels_right:
   motor2: right_back_wheel_joint
 
 roboclaw_wheels_left: 
-  device: '/dev/ttyACM0'
+  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.3.2:1.0'
   baudrate: 115200
   address: 128
   communication_timeout: 0.3
@@ -26,7 +26,7 @@ roboclaw_wheels_left:
     absolute_encoder: false
     reverse_motor: true
     reverse_encoder: false
-    max_current: 5
+    max_current: 25
     position_pid:
       MaxPos: 75000
       MinPos: -75000
@@ -42,7 +42,7 @@ roboclaw_wheels_left:
     absolute_encoder: false
     reverse_motor: true
     reverse_encoder: false
-    max_current: 5
+    max_current: 25
     position_pid:
       MaxPos: 75000
       MinPos: -75000
@@ -53,7 +53,7 @@ roboclaw_wheels_left:
       QPPS: 2.794556255809525
 
 roboclaw_wheels_right: 
-  device: '/dev/ttyACM1'
+  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.3.3:1.0'
   baudrate: 115200
   address: 129
   communication_timeout: 0.3
@@ -68,7 +68,7 @@ roboclaw_wheels_right:
     absolute_encoder: false
     reverse_motor: true
     reverse_encoder: true
-    max_current: 5
+    max_current: 25
     position_pid:
       MaxPos: 75000
       MinPos: -75000
@@ -84,7 +84,7 @@ roboclaw_wheels_right:
     absolute_encoder: false
     reverse_motor: true
     reverse_encoder: true
-    max_current: 5
+    max_current: 25
     position_pid:
       MaxPos: 75000
       MinPos: -75000
