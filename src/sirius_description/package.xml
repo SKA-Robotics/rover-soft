@@ -55,10 +55,13 @@
   <exec_depend>diff_drive_controller</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>gazebo_ros_control</exec_depend>
-  <exec_depend>leo_gazebo</exec_depend>
+  <exec_depend>gazebo_plugins</exec_depend>
+  <exec_depend>hector_gazebo_plugins</exec_depend>
+  <exec_depend>leo_gazebo_worlds</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rviz</exec_depend>
   <exec_depend>xacro</exec_depend>
+  <exec_depend>compressed_image_transport</exec_depend>
   <exec_depend>sirius_control_loop</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>roboclaw_driver</exec_depend>

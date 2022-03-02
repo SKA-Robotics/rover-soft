@@ -14,6 +14,9 @@
   <material name="gray">
     <color rgba=".796 .824 .937 1" />
   </material>
+  <material name="light_gray">
+        <color rgba="0.25 0.25 0.25 1"/>
+  </material>
   <material name="black">
     <color rgba="0 0 0 1" />
   </material>
@@ -54,6 +57,14 @@
       <ambient>0 0 1 0.5</ambient>  
       <diffuse>0 0 1 0.5</diffuse>  
       <specular>0 0 1 0.5</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+  <xacro:macro name="light_gray">
+    <material>  
+      <ambient>0.25 0.25 0.25 1</ambient>  
+      <diffuse>0.25 0.25 0.25 1</diffuse>  
+      <specular>0.5 0.5 0.5 1</specular>  
       <emissive>0.0 0.0 0.0 0.0</emissive>  
     </material>  
   </xacro:macro>

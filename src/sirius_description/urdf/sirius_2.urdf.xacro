@@ -12,7 +12,12 @@
   <xacro:include filename="sirius_2/platform.urdf.xacro" />
 
   <xacro:include filename="cameras/hp_4310.urdf.xacro" />
+  <xacro:include filename="cameras/zed2i.urdf.xacro" />
+  <xacro:include filename="cameras/oak-d-w.urdf.xacro" />
 
+  <xacro:property name="link_prefix" value=""/>
+  <xacro:property name="robot_ns" value=""/>
+  <xacro:property name="joint_prefix" value=""/>
   <xacro:macro name="drive_system" params="reflect:=false prefix:='' params:=^ direction:=1">
     <xacro:include filename="sirius_2/suspension.urdf.xacro" />
     <xacro:include filename="sirius_2/wheel.urdf.xacro" />
@@ -59,12 +64,15 @@
     <xacro:blue_t/>
   </xacro:indicator_light>
 
-  <xacro:hp_4310 prefix="left_side" material="black">
+  <xacro:hp_4310 prefix="front_mast" material="black">
     <xacro:black/>
   </xacro:hp_4310>
-  <xacro:hp_4310 prefix="right_side" material="black">
+  <xacro:hp_4310 prefix="back_mast" material="black">
     <xacro:black/>
   </xacro:hp_4310>
+  <xacro:zed2i prefix="front"/>
+  <xacro:oak-d-w prefix="back"/>
+
 
   <xacro:drive_system prefix="right_front" />
   <xacro:drive_system reflect="true" prefix="right_back" direction="-1"/>
@@ -79,7 +87,7 @@
   <joint name="base_link_to_main_platform" type="fixed">
     <parent link="base_link"/>
     <child link="main_platform"/>
-    <origin xyz="0 0 ${params['wheel_radius'] + params['suspension_height'] - params['suspension_z']}" rpy="0 0 0"/>
+    <origin xyz="0 0 ${params['wheel_radius'] + params['suspension_height'] - params['suspension_z']}" rpy="0 0 ${pi}"/>
     <axis xyz="0 0 1"/>
   </joint>
 
@@ -115,15 +123,25 @@
     <origin xyz="${params['blue_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
   </joint>
 
-  <joint name="base_to_left_side_camera" type="fixed">
+  <joint name="base_to_front_mast_camera" type="fixed">
     <parent link="main_platform"/>
-    <child link="left_side_camera"/>
-    <origin xyz="${params['left_side_camera_xyz']}" rpy="${params['left_side_camera_rpy']}"/>
+    <child link="front_mast_camera"/>
+    <origin xyz="${params['front_mast_camera_xyz']}" rpy="${params['front_mast_camera_rpy']}"/>
   </joint>
-  <joint name="base_to_right_side_camera" type="fixed">
+  <joint name="base_to_back_mast_camera" type="fixed">
     <parent link="main_platform"/>
-    <child link="right_side_camera"/>
-    <origin xyz="${params['right_side_camera_xyz']}" rpy="${params['right_side_camera_rpy']}"/>
+    <child link="back_mast_camera"/>
+    <origin xyz="${params['back_mast_camera_xyz']}" rpy="${params['back_mast_camera_rpy']}"/>
+  </joint>
+  <joint name="base_to_front_camera" type="fixed">
+    <parent link="main_platform"/>
+    <child link="front_camera_center"/>
+    <origin xyz="${params['front_camera_xyz']}" rpy="${params['front_camera_rpy']}"/>
+  </joint>
+  <joint name="base_to_back_camera" type="fixed">
+    <parent link="main_platform"/>
+    <child link="back_camera_center"/>
+    <origin xyz="${params['back_camera_xyz']}" rpy="${params['back_camera_rpy']}"/>
   </joint>
 
   <gazebo>
