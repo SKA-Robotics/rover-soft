@@ -34,14 +34,14 @@ sirius:
         publish_rate: 20               # default: 50
         pose_covariance_diagonal : [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
         twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
-        wheel_separation : 0.6
+        wheel_separation : 0.69
         wheel_radius : 0.1
         linear:
           x:
             has_velocity_limits: true
-            max_velocity: 0.5
+            max_velocity: 0.25
             has_acceleration_limits: true
-            max_acceleration: 1.5
+            max_acceleration: 1.25
         angular:
           z:
             has_velocity_limits: true
