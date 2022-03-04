@@ -11,16 +11,16 @@ wheels_right:
   motor2: right_back_wheel_joint
 
 roboclaw_wheels_left: 
-  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.3.2:1.0'
+  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.4.2:1.0'
   baudrate: 115200
   address: 128
-  communication_timeout: 0.3
+  communication_timeout: 0.2
   multiunit_mode: false
   relay_mode: false
-  swap_encoders: true
+  swap_encoders: false
   swap_buttons: false
   motor1:
-    command_timeout: 500
+    command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
     absolute_encoder: false
@@ -36,7 +36,7 @@ roboclaw_wheels_left:
       D: 0.0
       QPPS: 2.794556255809525
   motor2:
-    command_timeout: 500
+    command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
     absolute_encoder: false
@@ -53,20 +53,20 @@ roboclaw_wheels_left:
       QPPS: 2.794556255809525
 
 roboclaw_wheels_right: 
-  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.3.3:1.0'
+  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.4.3:1.0'
   baudrate: 115200
   address: 129
-  communication_timeout: 0.3
+  communication_timeout: 0.2
   multiunit_mode: false
   relay_mode: false
-  swap_encoders: false
+  swap_encoders: true
   swap_buttons: false
   motor1:
-    command_timeout: 500
+    command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
     absolute_encoder: false
-    reverse_motor: true
+    reverse_motor: false
     reverse_encoder: true
     max_current: 25
     position_pid:
@@ -78,7 +78,7 @@ roboclaw_wheels_right:
       D: 0.0
       QPPS: 3.6507133142070134
   motor2:
-    command_timeout: 500
+    command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
     absolute_encoder: false
