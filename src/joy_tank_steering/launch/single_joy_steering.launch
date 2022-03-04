@@ -1,0 +1,16 @@
+<launch>
+	<arg name="messsage_rate" default="50"/> <!-- in Hz -->
+		
+	<node name="joy_node" pkg="joy" type="joy_node" output="screen">
+		<param name="dev" value="/dev/input/js1"/>
+		<param name="deadzone" value="0.15"/>
+		<param name="coalesce_interval" value="$(eval 1.0 / arg('messsage_rate'))"/> <!-- in sec -->
+		<param name="autorepeat_rate" value="$(arg messsage_rate)"/>
+	</node>
+	<node name="joystick_steering_node" pkg="joy_tank_steering" type="multi_joy_steering.py" output="screen">
+		<param name="joy_message_topic_name" value="joy"/>
+		<param name="start_steering_mode" value="0"/> <!-- 'ROVER_STEERING' = 0 or 'MANIPULATOR_STEERING' = 1 -->
+		<param name="tank_steering_mode" value="False"/>
+		<param name="ID" value="0"/>
+	</node>
+</launch>

@@ -1,11 +1,11 @@
 robot_hardware:
   - wheels_left_joint
   - wheels_right_joint
-wheels_left:
+wheels_left_joint:
   type: roboclaw/RoboclawHWInterface
   motor1: left_front_wheel_joint
   motor2: left_back_wheel_joint
-wheels_right:
+wheels_right_joint:
   type: roboclaw/RoboclawHWInterface
   motor1: right_front_wheel_joint
   motor2: right_back_wheel_joint
