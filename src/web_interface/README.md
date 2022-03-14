@@ -46,6 +46,9 @@ In order to host server on port `80`, `authbind` is required.
   - `8081` - ROSBridge server
   - `8082` - Web Video Server
 
+### ROS Params
+Maximum velocities are read from `/web_interface/control/linear/x/max_velocity` and `/web_interface/control/angular/z/max_velocity`. These are remapped to `/sirius/controller/wheels/linear/x/max_velocity` and `/sirius/controller/wheels/angular/z/max_velocity` respectively in `ros_servers.launch`.
+
 ### Developing website
 - In order for the changes to be immediately visible on the webpage it's better to start server using npm, as it will automatically recompile the source code when changes are made.
   ```
