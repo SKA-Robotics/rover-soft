@@ -11,7 +11,7 @@
             <button @click="this.goToControl">
                 Control
             </button>
-            <button @click="this.goToCameras">
+            <button @click="this.goToScience">
                 Science
             </button>
             <button @click="this.goToVisualization">
@@ -42,7 +42,7 @@
             },
             goToScience () {
                 this.$router.push({
-                name: 'Cameras',
+                name: 'Science',
                 params: {
                     'ws_address': this.ws_address,
                     'ros': this.ros,
