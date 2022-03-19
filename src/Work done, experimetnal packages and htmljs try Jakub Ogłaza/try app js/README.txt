@@ -1,1 +1,0 @@
-w ramach proby zeobiony program do zainstalowania na robota w javie, powinien dzialac jako aplikacja webowa, zrobiony gdy pojawily sie problemy z pythonem 
