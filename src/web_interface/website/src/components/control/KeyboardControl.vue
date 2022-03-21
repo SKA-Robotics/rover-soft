@@ -17,12 +17,12 @@
         </div>
         <div class="keyboardControl">
             <p class="keyboardControl">
-                <button class="keyboardControl" @press="goForward">W</button>
+                <button class="keyboardControl" :class="{ pressed: pressed_W }">W</button>
             </p>
             <p class="keyboardControl">
-                <button class="keyboardControl" @press="turnLeft">A</button>
-                <button class="keyboardControl" @press="goBackward">S</button>
-                <button class="keyboardControl" @press="turnRight">D</button>
+                <button class="keyboardControl" :class="{ pressed: pressed_A }">A</button>
+                <button class="keyboardControl" :class="{ pressed: pressed_S }">S</button>
+                <button class="keyboardControl" :class="{ pressed: pressed_D }">D</button>
             </p>
         </div>
     </div>
@@ -43,6 +43,7 @@
                 linear_speed_percentage: 25,
                 angular_speed_percentage: 25,
                 timer: null,
+                message_rate: 100, // [ms]
                 pressed_W: false,
                 pressed_A: false,
                 pressed_S: false,
@@ -50,14 +51,6 @@
             }
         },
         methods: {
-            goForward() {this.pressed_W = true;},
-            goBackward() {this.pressed_S = true;},
-            turnLeft() {this.pressed_A = true;},
-            turnRight() {this.pressed_D = true;},
-            stopForward() {this.pressed_W = false;},
-            stopBackward() {this.pressed_S = false;},
-            stopLeft() {this.pressed_A = false;},
-            stopRight() {this.pressed_D = false;},
             startPublishing() {
                 this.timer = setInterval(() => {
                     var message = new window.ROSLIB.Message({
@@ -73,25 +66,21 @@
                         }
                     });
                     this.topic.publish(message);
-                    this.stopForward();
-                    this.stopBackward();
-                    this.stopLeft();
-                    this.stopRight();
-                }, 20) // message rate: 20 ms
+                }, this.message_rate)
             },
-            keyListener(e) {
+            keyListener(e, isPressed) {
                 switch (e.key) {
-                    case 'w':
-                        this.goForward();
+                    case 'W':
+                        this.pressed_W = isPressed;
                         break;
-                    case 's':
-                        this.goBack();
+                    case 'S':
+                        this.pressed_S = isPressed;
                         break;
-                    case 'a':
-                        this.turnLeft();
+                    case 'A':
+                        this.pressed_A = isPressed;
                         break;
-                    case 'd':
-                        this.turnRight();
+                    case 'D':
+                        this.pressed_D = isPressed;
                         break;
                     default:
                         break;
@@ -104,22 +93,28 @@
                 name : '/cmd_vel',
                 messageType : 'geometry_msgs/Twist'
             });
-            window.addEventListener('keypress', this.keyListener);
+            window.addEventListener('keydown', this.keyListener($event, true));
+            window.addEventListener('keyup', this.keyListener($event, false));
+            startPublishing();
         },
         beforeDestroy() {
             clearInterval(this.timer);
-            window.removeEventListener('keypress', this.keyListener);
+            window.removeEventListener('keydown', this.keyListener($event, true));
+            window.removeEventListener('keyup', this.keyListener($event, false));
         }
     };
 </script>
 
 <style>
-    button.keyboardControl {            
+    button.keyboardControl {
         margin: 5px;
         width: 50px;
         height: 50px;
         font-size: large;
         background-color: #ddd;
+    }
+    button.keyboardControl.pressed {
+        background-color: #999;
     }
     div.keyboardControl {
         padding: 10px;
