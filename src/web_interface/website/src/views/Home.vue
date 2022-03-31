@@ -46,12 +46,15 @@ export default {
     return {
       connected: false,
       ros: null,
-      ws_address: 'ws://0.0.0.0:9090',
+      ws_address: 'ws://192.21.37.115:9090',
       connection_error: false,
       address_error: false,
     };
   },
   mounted() {
+    if(this.$cookies.isKey('previous-ws-address')) {
+      this.connect(this.$cookies.get('previous-ws-address'));
+    }
   },
   methods: {
     connect(address) {
@@ -75,6 +78,7 @@ export default {
       this.ros.on('connection', () => {
         this.connected = true;
         console.log('Connected!');
+        this.$cookies.set('previous-ws-address', address);
       });
       this.ros.on('error', (error) => {
         console.log('Error connecting to websocket server.', error);
@@ -90,6 +94,7 @@ export default {
       this.ros.close();
       this.ros = null;
       console.log("Disconnecting...");
+      this.$cookies.remove('previous-ws-address');
     },
   },
 }

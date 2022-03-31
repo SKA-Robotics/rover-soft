@@ -34,10 +34,9 @@ run-code-checks:
     - rosdep install --from-paths src -iy
     # Invoke linters:
     - catkin_lint -W2 --output=explain --color=always src/
-    - if ! [ -z "$(catkin list --depends-on roslint -u )" ]; then catkin_make roslint; fi
     # Automatically format code
     - curl https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py | python3 - -r src --clang-format-executable clang-format-11
-    - if [[ -n $(find ./src/ -type f -name "*.py") ]] ; then yapf3 --diff --recursive ./src/ ; fi
+    - if [[ -n $(find ./src/ -type f -name "*.py") ]] ; then yapf3 --diff --recursive --style ./.yapf-format ./src/ ; fi
     # Try to build the project and save cache on success
     - catkin build --cmake-args -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CC_COMPILER_LAUNCHER=ccache
     - ccache -s
@@ -84,5 +83,16 @@ deploy-main-image:
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
     - docker buildx build --push -f ci/Dockerfile.stable -t $MAIN_IMAGE --platform "$PLATFORM" --cache-from $MAIN_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 $GIT_CLONE_PATH
+  only:
+    - main
+
+# This job triggers pipeline in ska_robotics.gitlab.io repo, so documentation is up to date
+update-documentation:
+  inherit:
+    variables: false
+  stage: .post
+  trigger:
+    project: ska_robotics/ska_robotics.gitlab.io
+    branch: main
   only:
     - main
