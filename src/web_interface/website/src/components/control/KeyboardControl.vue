@@ -1,19 +1,12 @@
 <template>
     <div>
-        <div>
-            <h2>
-                Keyboard Rover Steering
-            </h2>
+        <div class="slidecontainer">
+            <input type="range" min="1" max="100" class="slider" id="linear_speed" v-model="linear_speed_percentage" v-on:input="sliderInputCallback">
+            <label class="sliderLabel">Linear velocity: {{ this.linear_speed_percentage }}%</label>
         </div>
-        <div>
-            <div class="slidecontainer">
-                <input type="range" min="1" max="100" class="slider" id="linear_speed" v-model="linear_speed_percentage">
-                <label class="sliderLabel">Linear velocity: {{ this.linear_speed_percentage }}%</label>
-            </div>
-            <div class="slidecontainer">
-                <input type="range" min="1" max="100" class="slider" id="angular_speed" v-model="angular_speed_percentage">
-                <label class="sliderLabel">Angular velocity: {{ this.angular_speed_percentage }}%</label>
-            </div>
+        <div class="slidecontainer">
+            <input type="range" min="1" max="100" class="slider" id="angular_speed" v-model="angular_speed_percentage" v-on:input="sliderInputCallback">
+            <label class="sliderLabel">Angular velocity: {{ this.angular_speed_percentage }}%</label>
         </div>
         <div class="keyboardControl">
             <p class="keyboardControl">
@@ -95,6 +88,10 @@ import { capitalize } from '@vue/shared';
                     default:
                         break;
                 }
+            },
+            sliderInputCallback() {
+                this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
+                this.$cookies.set('angular-speed-percentage', this.angular_speed_percentage);
             }
         },
         mounted() {
@@ -109,7 +106,38 @@ import { capitalize } from '@vue/shared';
             window.addEventListener('keyup', event => {
                 this.keyListener(event, false);
             });
+
+            // Read previous percentage settings
+            if (this.$cookies.isKey('linear-speed-percentage')) {
+                this.linear_speed_percentage = this.$cookies.get('linear-speed-percentage');
+            }
+            if (this.$cookies.isKey('angular-speed-percentage')) {
+                this.angular_speed_percentage = this.$cookies.get('angular-speed-percentage');
+            }
+
+            // Read maximum speed from ros params
+            var base = "/web_interface/control"
+            var maxLinearSpeedParam = new window.ROSLIB.Param({
+                ros : this.ros,
+                name :  base + '/linear/x/max_velocity'
+            });
+            maxLinearSpeedParam.get((value) => {
+                if (value != null) {
+                    this.max_linear_speed = value;
+                }
+            });
+            var maxAngularSpeedParam = new window.ROSLIB.Param({
+                ros : this.ros,
+                name :  base + '/angular/z/max_velocity'
+            });
+            maxAngularSpeedParam.get((value) => {
+                if (value != null) {
+                    this.max_angular_speed = value;
+                }
+            });
             this.startPublishing();
+
+            // Set focus on first slider
             document.getElementById(this.elements[this.focus_index]).focus();
         },
         beforeDestroy() {
@@ -137,6 +165,7 @@ import { capitalize } from '@vue/shared';
         margin: 50px;
         display: inline-block;
         align-items: center;
+        border-radius: 15px;
     }
     p.keyboardControl {
         margin: 0;
