@@ -157,7 +157,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/move_base_relay.py
+  scripts/simple_goal_relay.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
