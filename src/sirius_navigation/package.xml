@@ -6,17 +6,18 @@
   <maintainer email="gabrysbrzezinski@gmail.com">Gabriel Brzeziński</maintainer>
   <license>MIT</license>
 
-  <depend>mbf_msgs</depend>
-  <depend>nav_msgs</depend>
   <buildtool_depend>catkin</buildtool_depend>
   <exec_depend>base_local_planner</exec_depend>
   <exec_depend>clear_costmap_recovery</exec_depend>
   <exec_depend>global_planner</exec_depend>
   <exec_depend>mbf_costmap_nav</exec_depend>
+  <exec_depend>mbf_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>move_base_flex</exec_depend>
   <exec_depend>nav_core</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>rotate_recovery</exec_depend>
   <exec_depend>sirius_description</exec_depend>
+  <exec_depend>tf</exec_depend>
 </package>
