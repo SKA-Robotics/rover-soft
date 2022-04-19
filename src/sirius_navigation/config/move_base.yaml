@@ -27,5 +27,5 @@ robot_frame: 'base_link'
 dist_tolerance: 0.2
 angle_tolerance: 0.8
 
-GlobalPlanner:
+global_planner:
   lethal_cost: 200
