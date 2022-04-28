@@ -54,7 +54,7 @@
       <child link="${prefix}_right_camera_optical_frame"/>
     </joint>
     <joint name="${prefix}_imu_frame_joint" type="fixed">
-      <!-- IMU frame offset copied from an actual ZED2 camera -->
+      <!-- IMU frame offset copied from ZED2 camera -->
       <origin xyz="-0.002 -0.023 -0.002" rpy="0.0014025 -0.0000012 -0.0016915"/>
       <parent link="${prefix}_left_camera_frame"/>
       <child link="${prefix}_imu_frame"/>
@@ -84,7 +84,7 @@
             <stddev>0.007</stddev>
           </noise>
           <distortion>
-            <!-- Values copied from an actual ZED2 camera -->
+            <!-- Values copied from ZED2 camera -->
             <k1>-0.043693598</k1>
             <k2>0.0146164996</k2>
             <p1>-0.006573319</p1>
@@ -237,7 +237,7 @@
 
     <!-- IMU -->
     <gazebo reference="${prefix}_imu_frame">
-      <sensor type="imu" name="zed2_imu_sensor">
+      <sensor type="imu" name="imu_sensor">
         <update_rate>100</update_rate>
         <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
           <topicName>/${prefix}_camera/imu/data</topicName>
@@ -247,6 +247,18 @@
           <initialOrientationAsReference>false</initialOrientationAsReference>
           <xyzOffset>0 0.0 0.0</xyzOffset>
           <rpyOffset>0.0 0.0 0.0</rpyOffset>
+        </plugin>
+      </sensor>
+    </gazebo>
+    <!-- MAGNETOMETER -->
+    <gazebo reference="${prefix}_imu_frame">
+      <sensor type="magnetometer" name="magnetometer_sensor">
+        <always_on>true</always_on>
+        <update_rate>50</update_rate>
+        <plugin filename="libgazebo_ros_magnetometer_sensor.so" name="magnetometer_plugin">
+          <topicName>/${prefix}_camera/imu/mag</topicName>
+          <frameName>${prefix}_imu_frame</frameName>
+          <updateRateHZ>50.0</updateRateHZ>
         </plugin>
       </sensor>
     </gazebo>

@@ -236,7 +236,7 @@
 
     <!-- IMU -->
     <gazebo reference="${prefix}_imu_frame">
-      <sensor type="imu" name="zed2_imu_sensor">
+      <sensor type="imu" name="imu_sensor">
         <update_rate>100</update_rate>
         <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
           <topicName>/${prefix}_camera/imu/data</topicName>
@@ -246,6 +246,18 @@
           <initialOrientationAsReference>false</initialOrientationAsReference>
           <xyzOffset>0 0.0 0.0</xyzOffset>
           <rpyOffset>0.0 0.0 0.0</rpyOffset>
+        </plugin>
+      </sensor>
+    </gazebo>
+    <!-- MAGNETOMETER -->
+    <gazebo reference="${prefix}_imu_frame">
+      <sensor type="magnetometer" name="magnetometer_sensor">
+        <always_on>true</always_on>
+        <update_rate>50</update_rate>
+        <plugin filename="libgazebo_ros_magnetometer_sensor.so" name="magnetometer_plugin">
+          <topicName>/${prefix}_camera/imu/mag</topicName>
+          <frameName>${prefix}_imu_frame</frameName>
+          <updateRateHZ>50.0</updateRateHZ>
         </plugin>
       </sensor>
     </gazebo>
