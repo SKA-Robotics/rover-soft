@@ -1,3 +1,6 @@
 [submodule "src/external/gazebo_ros_magnetometer_sensor"]
 	path = src/external/gazebo_ros_magnetometer_sensor
 	url = https://github.com/Darkproduct/gazebo_ros_magnetometer_sensor.git
+[submodule "src/external/open_vins"]
+	path = src/external/open_vins
+	url = https://github.com/rpng/open_vins/
