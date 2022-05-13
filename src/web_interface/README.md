@@ -12,12 +12,25 @@ User interface for Sirius II rover. Package provides:
   ```
   sudo apt install npm
   ```
-  Note that you may have to install additional npm packages.
 
 - To build code:
   ```
   cd rover-soft/src/web_interface/website
+  npm install
   npm run build
+  ```
+### Installing and configuring authbind
+In order to host server on port `80`, `authbind` is required.
+- Installation
+  ```
+  sudo apt install authbind
+  ```
+- Configuration
+  ```
+  sudo touch /etc/authbind/byport/80
+  sudo touch /etc/authbind/byport/443
+  sudo chmod 777 /etc/authbind/byport/80
+  sudo chmod 777 /etc/authbind/byport/443
   ```
 ### Launch files
 - When the website code is built, you can start all servers using `servers.launch`
@@ -29,9 +42,12 @@ User interface for Sirius II rover. Package provides:
   roslaunch web_interface ros_servers.launch
   ```
   Used ports:
-  - `8080` - Website hosting server
+  - `80` - Website hosting server
   - `8081` - ROSBridge server
   - `8082` - Web Video Server
+
+### ROS Params
+Maximum velocities are read from `/web_interface/control/linear/x/max_velocity` and `/web_interface/control/angular/z/max_velocity`. These are remapped to `/sirius/controller/wheels/linear/x/max_velocity` and `/sirius/controller/wheels/angular/z/max_velocity` respectively in `ros_servers.launch`.
 
 ### Developing website
 - In order for the changes to be immediately visible on the webpage it's better to start server using npm, as it will automatically recompile the source code when changes are made.
