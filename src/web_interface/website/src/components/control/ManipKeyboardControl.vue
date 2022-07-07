@@ -1,7 +1,7 @@
 <template>
     <div>
         <table width="100%" height="100%">
-            <tr class="slidecontainer" height="60" v-for="i in this.elements_names.length">
+            <tr class="slidecontainer" height="50" v-for="i in this.elements_names.length">
                 <td align="right" width="60%">
                     <input type="range" min="1" max="100" class="slider" :class="{ focused: focus_index == i - 1 }"
                     :id="elements_names[i - 1]" v-model="this.elements_effort_percentage[i - 1]" v-on:input="sliderInputCallback"
@@ -27,11 +27,11 @@
                 <button class="manipKeyboardControl" :class="{ pressed: pressed_D }">D</button>
             </p>
         </div>
-        <p>Use 'Space' to switch between sliders or 'Arrow Keys' to change each effort value.</p>
+        <p class="manipKeyboardControl ">Use 'Space' to switch between sliders or 'Arrow Keys' to change each effort value.</p>
         <p>Steering will be automaticly switched between the arm or the claw by changing the choosen slider. Use keys:</p>
-        <li>'A' and 'D' to rotation</li>
-        <li>'W' and 'S' to lift</li>
-        <li>'Q' and 'E' to tilt the arm or clamp the claw</li>
+        <li class="manipKeyboardControl "><b>'A'</b> and <b>'D'</b> to rotate the arm or the claw</li>
+        <li class="manipKeyboardControl "><b>'W'</b> and <b>'S'</b> to lift the arm or the claw</li>
+        <li class="manipKeyboardControl "><b>'Q'</b> and <b>'E'</b> to tilt the arm or clamp the claw</li>
     </div>
 </template>
 
@@ -183,13 +183,18 @@ import { capitalize } from '@vue/shared';
         padding: 10px;
         text-align: center;
         background: #eee;
-        margin: 50px;
+        margin: 30px;
         display: inline-block;
         align-items: center;
         border-radius: 15px;
     }
     p.manipKeyboardControl {
         margin: 0;
+    }
+    li.manipKeyboardControl {
+        margin-left: 40%;
+        padding: 4px;
+        text-align: left;
     }
     .slider.focused {
         background: var(--secondary-light);
