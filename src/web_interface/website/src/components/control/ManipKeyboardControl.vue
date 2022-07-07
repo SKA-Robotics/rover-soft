@@ -120,8 +120,9 @@ import { capitalize } from '@vue/shared';
                 }
             },
             sliderInputCallback() {
-                this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
-                this.$cookies.set('angular-speed-percentage', this.angular_speed_percentage);
+                for(i in this.elements_names.length) {
+                    this.$cookies.set(this.cookies_names[i - 1], this.elements_effort_percentage[i - 1]);
+                }
             }
         },
         mounted() {
@@ -138,11 +139,10 @@ import { capitalize } from '@vue/shared';
             });
 
             // Read previous percentage settings
-            if (this.$cookies.isKey('linear-speed-percentage')) {
-                this.linear_speed_percentage = this.$cookies.get('linear-speed-percentage');
-            }
-            if (this.$cookies.isKey('angular-speed-percentage')) {
-                this.angular_speed_percentage = this.$cookies.get('angular-speed-percentage');
+            for(i in this.elements_names.length) {
+                if (this.$cookies.isKey(this.cookies_names[i - 1])) {
+                    this.elements_effort_percentage[i - 1] = this.$cookies.get(this.cookies_names[i - 1]);
+                }
             }
 
             // Read maximum effort from ros params
