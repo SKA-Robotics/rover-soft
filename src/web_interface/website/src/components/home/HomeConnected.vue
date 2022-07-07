@@ -20,6 +20,9 @@
             <button @click="this.goToCameras">
                 Cameras
             </button>
+            <button @click="this.goToBattery">
+                Battery
+            </button>
         </div>
     </div>
 </template>
@@ -61,6 +64,15 @@
             goToCameras () {
                 this.$router.push({
                 name: 'Cameras',
+                params: {
+                    'ws_address': this.ws_address,
+                    'ros': this.ros,
+                    },
+                });
+            },
+            goToBattery () {
+                this.$router.push({
+                name: 'Battery Indicator',
                 params: {
                     'ws_address': this.ws_address,
                     'ros': this.ros,

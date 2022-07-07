@@ -5,6 +5,7 @@ import Visualization from '../views/Visualization.vue'
 import Control from '../views/Control.vue'
 import Science from '../views/Science.vue'
 import Cameras from '../views/Cameras.vue'
+import Battery from '../views/Battery.vue'
 
 Vue.use(VueRouter)
 
@@ -42,6 +43,13 @@ const routes = [
     component: Cameras,
     props: true,
     meta: {title: "Cameras",},
+  },
+  {
+    path: '/battery',
+    name: 'Battery Indicator',
+    component: Battery,
+    props: true,
+    meta: {title: "Battery Indicator",},
   },
 ]
 
