@@ -8,7 +8,7 @@
                     @click="focus_index = i - 1">
                 </td>
                 <td align="left" width="10%">
-                    <label class="sliderLabel">{{ elements_text[i - 1] }}:</label>
+                    <label class="sliderLabel">{{ this.elements_text[i - 1] }}:</label>
                 </td>
                 <td align="left" width="20%">
                     <label class="sliderLabel">{{ this.elements_effort_percentage[i - 1] }}%</label>
@@ -65,18 +65,27 @@ import { capitalize } from '@vue/shared';
         methods: {
             startPublishing() {
                 this.timer = setInterval(() => {
+                    var current_time = new Date();
                     var message = new window.ROSLIB.Message({
-                        linear : {
-                        x : ( this.pressed_W - this.pressed_S ) * this.max_linear_speed * 0.01 * this.linear_speed_percentage,
-                        y : 0,
-                        z : 0
+                        header : {
+                            stamp : {
+                                secs : Math.floor(current_time.getTime()/1000),
+                                nsecs : Math.round(1000000000 * (current_time.getTime()/1000 - Math.floor(current_time.getTime()/1000)))
+                            }
                         },
-                        angular : {
-                        x : 0,
-                        y : 0,
-                        z : ( this.pressed_A - this.pressed_D ) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
-                        }
+                        name : this.elements,
+                        effort : [ 0, 0, 0, 0, 0, 0 ]
                     });
+                    if( this.focus_index >= 0 && this.focus_index <= 2 ){
+                        message.effort[0] = ( this.pressed_A - this.pressed_D ) * this.max_effort * 0.01 * elements_effort_percentage[0];
+                        message.effort[1] = ( this.pressed_W - this.pressed_S ) * this.max_effort * 0.01 * elements_effort_percentage[1];
+                        message.effort[2] = ( this.pressed_Q - this.pressed_E ) * this.max_effort * 0.01 * elements_effort_percentage[2];
+                    }
+                    else if( this.focus_index >= 3 && this.focus_index <= 5 ){
+                        message.effort[3] = ( this.pressed_A - this.pressed_D ) * this.max_effort * 0.01 * elements_effort_percentage[3];
+                        message.effort[4] = ( this.pressed_W - this.pressed_S ) * this.max_effort * 0.01 * elements_effort_percentage[4];
+                        message.effort[5] = ( this.pressed_Q - this.pressed_E ) * this.max_effort * 0.01 * elements_effort_percentage[5];
+                    }
                     this.topic.publish(message);
                 }, this.message_rate)
             },
@@ -103,8 +112,8 @@ import { capitalize } from '@vue/shared';
                         break;
                     case ' ':
                         if(isPressed)
-                            this.focus_index = (this.focus_index + 1) % this.elements.length;
-                        document.getElementById(this.elements[this.focus_index]).focus();
+                            this.focus_index = (this.focus_index + 1) % this.elements_names.length;
+                        document.getElementById(this.elements_names[this.focus_index]).focus();
                         break;
                     default:
                         break;
@@ -118,8 +127,8 @@ import { capitalize } from '@vue/shared';
         mounted() {
             this.topic = new window.ROSLIB.Topic({
                 ros : this.ros,
-                name : '/cmd_vel',
-                messageType : 'geometry_msgs/Twist'
+                name : '/manip_vel',
+                messageType : 'sensor_msgs/JointState'
             });
             window.addEventListener('keydown', event => {
                 this.keyListener(event, true);
@@ -136,30 +145,21 @@ import { capitalize } from '@vue/shared';
                 this.angular_speed_percentage = this.$cookies.get('angular-speed-percentage');
             }
 
-            // Read maximum speed from ros params
+            // Read maximum effort from ros params
             var base = "/web_interface/control"
-            var maxLinearSpeedParam = new window.ROSLIB.Param({
+            var maxEffortParam = new window.ROSLIB.Param({
                 ros : this.ros,
-                name :  base + '/linear/x/max_velocity'
+                name :  base + '/max_effort' // do spradzenia czy istnieje ???
             });
-            maxLinearSpeedParam.get((value) => {
+            maxEffortParam.get((value) => {
                 if (value != null) {
-                    this.max_linear_speed = value;
-                }
-            });
-            var maxAngularSpeedParam = new window.ROSLIB.Param({
-                ros : this.ros,
-                name :  base + '/angular/z/max_velocity'
-            });
-            maxAngularSpeedParam.get((value) => {
-                if (value != null) {
-                    this.max_angular_speed = value;
+                    this.max_effort = value;
                 }
             });
             this.startPublishing();
 
             // Set focus on first slider
-            document.getElementById(this.elements[this.focus_index]).focus();
+            document.getElementById(this.elements_names[this.focus_index]).focus();
         },
         beforeDestroy() {
             clearInterval(this.timer);
