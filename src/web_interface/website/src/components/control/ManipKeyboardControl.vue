@@ -10,7 +10,9 @@
         </div>
         <div class="manipKeyboardControl">
             <p class="manipKeyboardControl">
+                <button class="manipKeyboardControl" :class="{ pressed: pressed_Q }">Q</button>
                 <button class="manipKeyboardControl" :class="{ pressed: pressed_W }">W</button>
+                <button class="manipKeyboardControl" :class="{ pressed: pressed_E }">E</button>
             </p>
             <p class="manipKeyboardControl">
                 <button class="manipKeyboardControl" :class="{ pressed: pressed_A }">A</button>
@@ -18,7 +20,11 @@
                 <button class="manipKeyboardControl" :class="{ pressed: pressed_D }">D</button>
             </p>
         </div>
-        <p>Use 'Space' to switch between sliders or 'Arrow Keys' to change each speed value.</p> 
+        <p>Use 'Space' to switch between sliders or 'Arrow Keys' to change each effort value.</p>
+        <p>Steering will be automaticly switched between the arm or the claw by changing the choosen slider. Use keys:</p>
+        <li>'A' and 'D' to rotation</li>
+        <li>'W' and 'S' to lift</li>
+        <li>'Q' and 'E' to tilt the arm or clamp the claw</li>
     </div>
 </template>
 
@@ -39,6 +45,8 @@ import { capitalize } from '@vue/shared';
                 angular_speed_percentage: 25,
                 timer: null,
                 message_rate: 100, // [ms]
+                pressed_Q: false,
+                pressed_E: false,
                 pressed_W: false,
                 pressed_A: false,
                 pressed_S: false,
@@ -68,6 +76,12 @@ import { capitalize } from '@vue/shared';
             keyListener(e, isPressed) {
                 var key = capitalize(e.key);
                 switch (key) {
+                    case 'Q':
+                        this.pressed_Q = isPressed;
+                        break;
+                    case 'E':
+                        this.pressed_E = isPressed;
+                        break;
                     case 'W':
                         this.pressed_W = isPressed;
                         break;
