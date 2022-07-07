@@ -1,13 +1,20 @@
 <template>
     <div>
-        <div class="slidecontainer">
-            <input type="range" min="1" max="100" class="slider" id="linear_speed" v-model="linear_speed_percentage" v-on:input="sliderInputCallback">
-            <label class="sliderLabel">Linear velocity: {{ this.linear_speed_percentage }}%</label>
-        </div>
-        <div class="slidecontainer">
-            <input type="range" min="1" max="100" class="slider" id="angular_speed" v-model="angular_speed_percentage" v-on:input="sliderInputCallback">
-            <label class="sliderLabel">Angular velocity: {{ this.angular_speed_percentage }}%</label>
-        </div>
+        <table width="100%" height="100%">
+            <tr class="slidecontainer" height="60" v-for="i in this.elements_names.length">
+                <td align="right" width="60%">
+                    <input type="range" min="1" max="100" class="slider" :class="{ focused: focus_index == i - 1 }"
+                    :id="elements_names[i - 1]" v-model="this.elements_effort_percentage[i - 1]" v-on:input="sliderInputCallback"
+                    @click="focus_index = i - 1">
+                </td>
+                <td align="left" width="10%">
+                    <label class="sliderLabel">{{ elements_text[i - 1] }}:</label>
+                </td>
+                <td align="left" width="20%">
+                    <label class="sliderLabel">{{ this.elements_effort_percentage[i - 1] }}%</label>
+                </td>
+            </tr>
+        </table>
         <div class="manipKeyboardControl">
             <p class="manipKeyboardControl">
                 <button class="manipKeyboardControl" :class="{ pressed: pressed_Q }">Q</button>
@@ -39,11 +46,8 @@ import { capitalize } from '@vue/shared';
         data() {
             return {
                 topic: null,
-                max_linear_speed: 1,
-                max_angular_speed: 1.57,
-                linear_speed_percentage: 25,
-                angular_speed_percentage: 25,
                 timer: null,
+                max_effort: 1.0,
                 message_rate: 100, // [ms]
                 pressed_Q: false,
                 pressed_E: false,
@@ -51,7 +55,10 @@ import { capitalize } from '@vue/shared';
                 pressed_A: false,
                 pressed_S: false,
                 pressed_D: false,
-                elements: ["linear_speed", "angular_speed"],
+                elements_effort_percentage: [25, 25, 25, 25, 25, 25],
+                elements_text: ["Arm rotate effort", "Arm lift effort", "Arm tilt effort", "Claw rotate effort", "Claw lift effort", "Claw clamp effort"],
+                elements_names: ["arm_rotate", "arm_lift", "arm_tilt", "claw_rotate", "claw_lift", "claw_clamp"],
+                cookies_names: ["arm-rotate", "arm-lift", "arm-tilt", "claw-rotate", "claw-lift", "claw-clamp"],
                 focus_index: 0
             }
         },
@@ -183,5 +190,9 @@ import { capitalize } from '@vue/shared';
     }
     p.manipKeyboardControl {
         margin: 0;
+    }
+    .slider.focused {
+        background: var(--secondary-light);
+        height: 12px;
     }
 </style>
