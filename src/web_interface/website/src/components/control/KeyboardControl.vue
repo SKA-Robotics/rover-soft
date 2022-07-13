@@ -1,21 +1,38 @@
 <template>
-    <div>
+    <div class="keyboardControl">
         <div class="slidecontainer">
-            <input type="range" min="1" max="100" class="slider" id="linear_speed" v-model="linear_speed_percentage" v-on:input="sliderInputCallback">
-            <label class="sliderLabel">Linear velocity: {{ this.linear_speed_percentage }}%</label>
+            <td class="col1">
+                <input type="range" min="1" max="100" class="slider" id="linear_speed" v-model="linear_speed_percentage"
+                v-on:input="sliderInputCallback" @click="focus_index = 0">
+            </td>
+            <td class="col2">
+                <label class="sliderLabel">Linear velocity:</label>
+            </td>
+            <td class="col3">
+                <label class="sliderLabel">{{ this.linear_speed_percentage }}%</label>
+            </td>
         </div>
         <div class="slidecontainer">
-            <input type="range" min="1" max="100" class="slider" id="angular_speed" v-model="angular_speed_percentage" v-on:input="sliderInputCallback">
-            <label class="sliderLabel">Angular velocity: {{ this.angular_speed_percentage }}%</label>
+            <td class="col1">
+                <input type="range" min="1" max="100" class="slider" id="angular_speed" v-model="angular_speed_percentage"
+                v-on:input="sliderInputCallback" @click="focus_index = 1">
+            </td>
+            <td class="col2">
+                <label class="sliderLabel">Angular velocity:</label>
+            </td>
+            <td class="col3">
+                <label class="sliderLabel">{{ this.angular_speed_percentage }}%</label>
+            </td>
         </div>
-        <div class="keyboardControl">
-            <p class="keyboardControl">
-                <button class="keyboardControl" :class="{ pressed: pressed_W }">W</button>
+
+        <div class="keyboardBox">
+            <p>
+                <button :class="{ pressed: pressed_W }">W</button>
             </p>
-            <p class="keyboardControl">
-                <button class="keyboardControl" :class="{ pressed: pressed_A }">A</button>
-                <button class="keyboardControl" :class="{ pressed: pressed_S }">S</button>
-                <button class="keyboardControl" :class="{ pressed: pressed_D }">D</button>
+            <p>
+                <button :class="{ pressed: pressed_A }">A</button>
+                <button :class="{ pressed: pressed_S }">S</button>
+                <button :class="{ pressed: pressed_D }">D</button>
             </p>
         </div>
         <p>Use 'Space' to switch between sliders or 'Arrow Keys' to change each speed value.</p> 
@@ -149,25 +166,53 @@ import { capitalize } from '@vue/shared';
 </script>
 
 <style>
-    button.keyboardControl {
+    div.keyboardControl {
+        margin: 10px 5px;
+    }
+    div.keyboardControl div.slidecontainer {
+        height: 40px;
+        width: 80%;
+        display: inline-table;
+        padding: 5px;
+    }
+    div.keyboardControl div.slidecontainer td.col1 {
+        width: auto;
+        text-align: right;
+        vertical-align: middle;
+    }
+    div.keyboardControl div.slidecontainer td.col2 {
+        width: 8.5em;
+        text-align: left;
+        vertical-align: middle;
+    }
+    div.keyboardControl div.slidecontainer td.col3 {
+        width: 3em;
+        text-align: right;
+        vertical-align: middle;
+    }
+    div.keyboardControl div.slidecontainer .slider {
+        width: 90%;
+    }
+
+    div.keyboardBox {
+        padding: 10px;
+        text-align: center;
+        background: #eee;
+        margin: 15px;
+        display: inline-block;
+        align-items: center;
+        border-radius: 15px;
+    }
+    div.keyboardBox p {
+        margin: 0;
+    }
+    div.keyboardBox p button{
         margin: 8px;
         width: 80px;
         height: 80px;
         font-size: 40px;
     }
-    button.keyboardControl.pressed {
+    div.keyboardBox p button.pressed {
         background-color: var(--secondary-light);
-    }
-    div.keyboardControl {
-        padding: 10px;
-        text-align: center;
-        background: #eee;
-        margin: 50px;
-        display: inline-block;
-        align-items: center;
-        border-radius: 15px;
-    }
-    p.keyboardControl {
-        margin: 0;
     }
 </style>

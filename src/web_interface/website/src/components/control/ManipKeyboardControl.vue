@@ -2,9 +2,8 @@
     <div class="manipKeyboardControl">
         <div v-for:="(element, i) in this.elements" class="slidecontainer">
             <td class="col1">
-                <input type="range" min="1" max="100" class="slider" :class="{ focused: focus_index == i }"
-                :id="element.name" v-model="element.effort_percentage" v-on:input="sliderInputCallback"
-                @click="focus_index = i">
+                <input type="range" min="1" max="100" class="slider" :class="{ focused: focus_index == i }" :id="element.name"
+                v-model="element.effort_percentage" v-on:input="sliderInputCallback" @click="focus_index = i">
             </td>
             <td class="col2">
                 <label class="sliderLabel">{{ element.text }}:</label>
@@ -184,6 +183,21 @@ import { capitalize } from '@vue/shared';
         display: inline-table;
         padding: 5px;
     }
+    div.manipKeyboardControl div.slidecontainer td.col1 {
+        width: auto;
+        text-align: right;
+        vertical-align: middle;
+    }
+    div.manipKeyboardControl div.slidecontainer td.col2 {
+        width: 8.5em;
+        text-align: left;
+        vertical-align: middle;
+    }
+    div.manipKeyboardControl div.slidecontainer td.col3 {
+        width: 3em;
+        text-align: right;
+        vertical-align: middle;
+    }
     div.manipKeyboardControl div.slidecontainer .slider {
         width: 90%;
     }
@@ -220,20 +234,5 @@ import { capitalize } from '@vue/shared';
         margin-left: 2em;
         padding: 0.25em;
         text-align: left;
-    }
-    div.manipKeyboardControl div.slidecontainer td.col1 {
-        width: auto;
-        text-align: right;
-        vertical-align: middle;
-    }
-    div.manipKeyboardControl div.slidecontainer td.col2 {
-        width: 8.5em;
-        text-align: left;
-        vertical-align: middle;
-    }
-    div.manipKeyboardControl div.slidecontainer td.col3 {
-        width: 3em;
-        text-align: right;
-        vertical-align: middle;
     }
 </style>
