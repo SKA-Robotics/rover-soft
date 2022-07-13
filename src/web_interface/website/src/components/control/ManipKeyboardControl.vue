@@ -1,37 +1,38 @@
 <template>
-    <div>
-        <table width="100%" height="100%">
-            <tr class="slidecontainer" height="50" v-for="i in this.elements_names.length">
-                <td align="right" width="60%">
-                    <input type="range" min="1" max="100" class="slider" :class="{ focused: focus_index == i - 1 }"
-                    :id="elements_names[i - 1]" v-model="this.elements_effort_percentage[i - 1]" v-on:input="sliderInputCallback"
-                    @click="focus_index = i - 1">
-                </td>
-                <td align="left" width="10%">
-                    <label class="sliderLabel">{{ this.elements_text[i - 1] }}:</label>
-                </td>
-                <td align="left" width="20%">
-                    <label class="sliderLabel">{{ this.elements_effort_percentage[i - 1] }}%</label>
-                </td>
-            </tr>
-        </table>
-        <div class="manipKeyboardControl">
-            <p class="manipKeyboardControl">
-                <button class="manipKeyboardControl" :class="{ pressed: pressed_Q }">Q</button>
-                <button class="manipKeyboardControl" :class="{ pressed: pressed_W }">W</button>
-                <button class="manipKeyboardControl" :class="{ pressed: pressed_E }">E</button>
+    <div class="manipKeyboardControl">
+        <div v-for:="i in this.elements_names.length" class="slidecontainer">
+            <td class="col1">
+                <input type="range" min="1" max="100" class="slider" :class="{ focused: focus_index == i - 1 }"
+                :id="elements_names[i - 1]" v-model="this.elements_effort_percentage[i - 1]" v-on:input="sliderInputCallback"
+                @click="focus_index = i - 1">
+            </td>
+            <td class="col2">
+                <label class="sliderLabel">{{ this.elements_text[i - 1] }}:</label>
+            </td>
+            <td class="col3">
+                <label class="sliderLabel">{{ this.elements_effort_percentage[i - 1] }}%</label>
+            </td>
+        </div>
+        <div class="keyboardBox">
+            <p>
+                <button :class="{ pressed: pressed_Q }">Q</button>
+                <button :class="{ pressed: pressed_W }">W</button>
+                <button :class="{ pressed: pressed_E }">E</button>
             </p>
-            <p class="manipKeyboardControl">
-                <button class="manipKeyboardControl" :class="{ pressed: pressed_A }">A</button>
-                <button class="manipKeyboardControl" :class="{ pressed: pressed_S }">S</button>
-                <button class="manipKeyboardControl" :class="{ pressed: pressed_D }">D</button>
+            <p>
+                <button :class="{ pressed: pressed_A }">A</button>
+                <button :class="{ pressed: pressed_S }">S</button>
+                <button :class="{ pressed: pressed_D }">D</button>
             </p>
         </div>
-        <p class="manipKeyboardControl ">Use 'Space' to switch between sliders or 'Arrow Keys' to change each effort value.</p>
+        
+        <p>Use 'Space' to switch between sliders or 'Arrow Keys' to change each effort value.</p>
         <p>Steering will be automaticly switched between the arm or the claw by changing the choosen slider. Use keys:</p>
-        <li class="manipKeyboardControl "><b>'A'</b> and <b>'D'</b> to rotate the arm or the claw</li>
-        <li class="manipKeyboardControl "><b>'W'</b> and <b>'S'</b> to lift the arm or the claw</li>
-        <li class="manipKeyboardControl "><b>'Q'</b> and <b>'E'</b> to tilt the arm or clamp the claw</li>
+        <div class="keyboardBox">
+            <li><b>'A'</b> and <b>'D'</b> to rotate the arm or the claw</li>
+            <li><b>'W'</b> and <b>'S'</b> to lift the arm or the claw</li>
+            <li><b>'Q'</b> and <b>'E'</b> to tilt the arm or clamp the claw</li>
+        </div>
     </div>
 </template>
 
@@ -170,34 +171,65 @@ import { capitalize } from '@vue/shared';
 </script>
 
 <style>
-    button.manipKeyboardControl {
+    div.manipKeyboardControl {
+        margin: 10px 5px;
+    }
+    div.manipKeyboardControl div.slidecontainer {
+        height: 40px;
+        width: 80%;
+        display: inline-table;
+        padding: 5px;
+    }
+    div.manipKeyboardControl div.slidecontainer .slider {
+        width: 90%;
+    }
+    div.manipKeyboardControl div.slidecontainer .slider.focused {
+        background: var(--secondary-light);
+        height: 12px;
+    }
+    div.keyboardBox {
+        padding: 10px;
+        text-align: center;
+        background: #eee;
+        margin: 15px;
+        display: inline-block;
+        align-items: center;
+        border-radius: 15px;
+    }
+    div.keyboardBox p {
+        margin: 0;
+    }
+    div.keyboardBox p button{
         margin: 8px;
         width: 80px;
         height: 80px;
         font-size: 40px;
     }
-    button.manipKeyboardControl.pressed {
+    div.keyboardBox p button.pressed {
         background-color: var(--secondary-light);
     }
-    div.manipKeyboardControl {
-        padding: 10px;
-        text-align: center;
-        background: #eee;
-        margin: 30px;
+    div.manipKeyboardControl div.description {
+        width: 22em;
         display: inline-block;
-        align-items: center;
-        border-radius: 15px;
     }
-    p.manipKeyboardControl {
-        margin: 0;
-    }
-    li.manipKeyboardControl {
-        margin-left: 40%;
-        padding: 4px;
+    div.manipKeyboardControl div.description li {
+        margin-left: 2em;
+        padding: 0.25em;
         text-align: left;
     }
-    .slider.focused {
-        background: var(--secondary-light);
-        height: 12px;
+    div.manipKeyboardControl div.slidecontainer td.col1 {
+        width: auto;
+        text-align: right;
+        vertical-align: middle;
+    }
+    div.manipKeyboardControl div.slidecontainer td.col2 {
+        width: 8.5em;
+        text-align: left;
+        vertical-align: middle;
+    }
+    div.manipKeyboardControl div.slidecontainer td.col3 {
+        width: 3em;
+        text-align: right;
+        vertical-align: middle;
     }
 </style>
