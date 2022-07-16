@@ -40,7 +40,7 @@
           this.message.angular.z = -parseFloat(stickData.x) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
         },
 
-        sliderInputCallback(value) {
+        sliderInputCallback() {
           this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
           this.$cookies.set('angular-speed-percentage', this.angular_speed_percentage);
         }
