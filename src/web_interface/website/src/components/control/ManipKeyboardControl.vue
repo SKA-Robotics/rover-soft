@@ -70,6 +70,10 @@ import { capitalize } from '@vue/shared';
             startPublishing() {
                 this.timer = setInterval(() => {
                     var current_time = new Date();
+                    var names = [];
+                    this.elements.forEach((element) => {
+                        names.push(element.name);
+                    });
                     var message = new window.ROSLIB.Message({
                         header : {
                             stamp : {
@@ -77,7 +81,7 @@ import { capitalize } from '@vue/shared';
                                 nsecs : Math.round(1000000000 * (current_time.getTime()/1000 - Math.floor(current_time.getTime()/1000)))
                             }
                         },
-                        name : this.elements,
+                        name : names,
                         effort : [ 0, 0, 0, 0, 0, 0 ]
                     });
                     if( this.focus_index >= 0 && this.focus_index <= 2 ){
