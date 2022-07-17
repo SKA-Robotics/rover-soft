@@ -39,13 +39,13 @@ sirius:
         linear:
           x:
             has_velocity_limits: true
-            max_velocity: 0.25
+            max_velocity: 0.2
             has_acceleration_limits: true
             max_acceleration: 1.25
         angular:
           z:
             has_velocity_limits: true
-            max_velocity: 1.047
+            max_velocity: 0.5
             has_acceleration_limits: true
             max_acceleration: 3.14
 

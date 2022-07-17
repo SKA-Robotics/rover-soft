@@ -78,10 +78,10 @@ class JoystickController:
 
         elif self.steering_mode == self.SteeringMode.MANIPULATOR_STEERING:
             self.manipulator_limbs_vel['arm_rotate'] = -data.axes[LEFT_STICK_HORIZONTAL]
-            self.manipulator_limbs_vel['arm_lift'] = data.axes[LEFT_STICK_VERTICAL]
+            self.manipulator_limbs_vel['arm_lift'] = -data.axes[LEFT_STICK_VERTICAL]
             self.manipulator_limbs_vel['claw_rotate'] = data.axes[RIGHT_STICK_HORIZONTAL]
             self.manipulator_limbs_vel['claw_lift'] = -data.axes[RIGHT_STICK_VERTICAL]
-            self.manipulator_limbs_vel['arm_tilt'] = (data.axes[LEFT_TRIGGER] - data.axes[RIGHT_TRIGGER]) / 2
+            self.manipulator_limbs_vel['arm_tilt'] = -(data.axes[LEFT_TRIGGER] - data.axes[RIGHT_TRIGGER]) / 2
             self.manipulator_limbs_vel['claw_clamp'] = data.buttons[LEFT_BUMPER] - data.buttons[RIGHT_BUMPER]
             manipulator_msg = JointState()
             manipulator_msg.header.stamp = rospy.get_rostime()

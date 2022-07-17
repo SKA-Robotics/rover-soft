@@ -11,31 +11,36 @@ wheels_right:
   motor2: right_back_wheel_joint
 
 roboclaw_wheels_left: 
-  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.4.2:1.0'
+  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.2.3:1.0'
   baudrate: 115200
-  address: 128
+  address: 129
   communication_timeout: 0.2
   multiunit_mode: false
   relay_mode: false
   swap_encoders: false
   swap_buttons: false
-  motor1:
+  motor2:
     command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
     absolute_encoder: false
-    reverse_motor: true
+    reverse_motor: false
     reverse_encoder: false
     max_current: 25
     position_pid:
       MaxPos: 75000
       MinPos: -75000
     velocity_pid:
-      P: 0.5509796142578125
-      I: 0.033905029296875
+      P: 0.1009796142578125
+      I: 0.013905029296875
       D: 0.0
       QPPS: 2.794556255809525
-  motor2:
+    # velocity_pid:
+    #   P: 0.3891754150390625
+    #   I: 0.0250396728515625
+    #   D: 0.0
+    #   QPPS: 3.6507133142070134
+  motor1:
     command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
@@ -53,15 +58,15 @@ roboclaw_wheels_left:
       QPPS: 2.794556255809525
 
 roboclaw_wheels_right: 
-  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.4.3:1.0'
+  device: '/dev/serial/by-path/platform-70090000.xusb-usb-0:2.2.2:1.0'
   baudrate: 115200
-  address: 129
+  address: 128
   communication_timeout: 0.2
   multiunit_mode: false
   relay_mode: false
-  swap_encoders: true
+  swap_encoders: false
   swap_buttons: false
-  motor1:
+  motor2:
     command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
@@ -73,11 +78,11 @@ roboclaw_wheels_right:
       MaxPos: 75000
       MinPos: -75000
     velocity_pid:
-      P: 0.3891754150390625
-      I: 0.0250396728515625
+      P: 0.5509796142578125
+      I: 0.033905029296875
       D: 0.0
-      QPPS: 3.6507133142070134
-  motor2:
+      QPPS: 2.794556255809525
+  motor1:
     command_timeout: 300
     ticks_per_revolution: 172000
     torque_constant: 1.2986
