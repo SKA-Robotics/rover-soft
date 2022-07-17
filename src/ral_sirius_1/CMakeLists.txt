@@ -160,6 +160,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   scripts/manip_control.py
+  scripts/moisture_sensor.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

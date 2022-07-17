@@ -1,0 +1,3 @@
+moisture_sensor:
+  baudrate: 9600
+  device: /dev/ttyACM0
