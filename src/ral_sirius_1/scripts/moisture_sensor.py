@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 import rospy
 import serial
 from std_msgs.msg import Int16
@@ -15,7 +15,7 @@ class MoistureSensor:
         rospy.init_node('moisture_sensor', log_level=rospy.DEBUG)
         self.moisture_pub = rospy.Publisher(MOISTURE_TOPIC, Int16, queue_size=10)
 
-        self.port_name = rospy.get_param('~device', default='/dev/ttyACM0')
+        self.port_name = rospy.get_param('~device', default='/dev/ttyACM2')
         self.baudrate = rospy.get_param('~baudrate', default=9600)
         try:
             self.serial_port = serial.Serial(self.port_name, self.baudrate)
