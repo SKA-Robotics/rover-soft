@@ -38,7 +38,6 @@ class MoistureSensor:
                 moisture_str += data[i]
                 i += 1
             self.moisture_pub.publish(int(moisture_str))
-            
 
 
 if __name__ == '__main__':
