@@ -7,43 +7,187 @@
             height: stream.height + 'px',
             'background-color': 'black',
             position: 'absolute',
+            display: 'flex',
+            'align-items': 'center',
+            'justify-content': 'center',
         }"
     >
-        <canvas ref="viewer" />
+        <video
+            preload="none"
+            ref="viewer"
+            :style="{
+                width: dimensions.width + 'px',
+                height: dimensions.height + 'px',
+                'object-fit': 'cover',
+            }"
+        />
     </div>
 </template>
 <script>
 export default {
     props: {
-        ros: Object, // should be a global
         host: String, // should be a global
         stream: Object,
+        peer: String,
     },
     data() {
         return {
-            videoPort: 8082,
-            refreshRate: 10,
-            image: null,
-            drawIntervalHandle: null,
+            wsConn: null,
+            peerConnection: null,
+            dataChannel: null,
+            videoDim: {
+                width: null,
+                height: null,
+            },
         }
     },
-    mounted() {
-        // Read video server port
-        // Create a Param object for the port
-        let portParam = new window.ROSLIB.Param({
-            ros: this.ros,
-            name: '/web_video_server/port',
-        })
+    methods: {
+        connect() {
+            console.log('Connecting to server ' + this.host)
+            this.wsConn = new WebSocket(this.host)
+            this.wsConn.addEventListener('open', this.connectPeer)
+            this.wsConn.addEventListener('error', this.serverError)
+            this.wsConn.addEventListener('message', this.serverMessage)
+            this.wsConn.addEventListener('close', this.serverClose)
+        },
+        connectPeer() {
+            console.log('Connecting ' + this.peer_id)
 
-        // Get the number of the port
-        portParam.get(this.initViewer)
+            this.wsConn.send(
+                JSON.stringify({
+                    type: 'startSession',
+                    peerId: this.peer,
+                })
+            )
+        },
+        createCall(msg) {
+            console.log('Creating RTCPeerConnection')
+
+            this.peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    {
+                        urls: 'turn:turn.homeneural.net:3478?transport=udp',
+                        credential: '1qaz2wsx',
+                        username: 'test',
+                    },
+                ],
+            })
+            this.peerConnection.ontrack = this.remoteStreamAdded
+
+            console.log('Created peer connection for call, waiting for SDP')
+        },
+        incomingICE(ice) {
+            this.peerConnection.addIceCandidate(new RTCIceCandidate(ice))
+        },
+        incomingSDP(sdp) {
+            this.peerConnection
+                .setRemoteDescription(sdp)
+                .then(this.remoteDescriptionSet)
+        },
+        remoteDescriptionSet() {
+            console.log('Got SDP offer')
+            this.peerConnection.createAnswer().then(this.localDescription)
+        },
+        localDescription(desc) {
+            console.log('Got local description: ' + JSON.stringify(desc))
+            this.peerConnection.setLocalDescription(desc).then(() => {
+                console.log('Sending SDP answer')
+                this.wsConn.send(
+                    JSON.stringify({
+                        type: 'peer',
+                        sessionId: this.id,
+                        sdp: this.peerConnection.localDescription.toJSON(),
+                    })
+                )
+            })
+        },
+        remoteStreamAdded(event) {
+            console.log(event)
+            let videoTracks = event.streams[0].getVideoTracks()
+            let audioTracks = event.streams[0].getAudioTracks()
+
+            console.log(videoTracks)
+
+            if (videoTracks.length > 0) {
+                console.log(
+                    'Incoming stream: ' +
+                        videoTracks.length +
+                        ' video tracks and ' +
+                        audioTracks.length +
+                        ' audio tracks'
+                )
+                this.$refs.viewer.srcObject = event.streams[0]
+                this.$refs.viewer.play()
+                setTimeout(() => {
+                    console.error(this.$refs.viewer.videoHeight)
+                    this.videoDim.width =
+                        this.$refs.viewer && this.$refs.viewer.videoHeight
+                    this.videoDim.height =
+                        this.$refs.viewer && this.$refs.viewer.videoWidth
+                }, 500)
+            } else {
+                console.log('Stream with unknown tracks added, resetting')
+                this.endSession()
+            }
+        },
+        serverMessage(event) {
+            console.log('Received ' + event.data)
+            const msg = JSON.parse(event.data)
+
+            if (msg.type == 'registered') {
+                console.log('Registered with server')
+                this.connectPeer()
+            } else if (msg.type == 'sessionStarted') {
+                console.log('Session started')
+                this.id = msg.sessionId
+            } else if (msg.type == 'error') {
+                this.endSession()
+            } else if (msg.type == 'endSession') {
+                this.endSession()
+            } else if (msg.type == 'peer') {
+                // Incoming peer message signals the beginning of a call
+                if (!this.peerConnection) this.createCall(msg)
+
+                if (msg.sdp != null) {
+                    this.incomingSDP(msg.sdp)
+                } else if (msg.ice != null) {
+                    this.incomingICE(msg.ice)
+                }
+            }
+        },
+        serverClose(event) {
+            console.log('Server closed', event)
+            this.endSession()
+        },
+        serverError(event) {
+            console.log('Server error', event)
+            this.endSession()
+        },
+        endSession(retry = true) {
+            this.wsConn.removeEventListener('open', this.connectPeer)
+            this.wsConn.removeEventListener('error', this.serverError)
+            this.wsConn.removeEventListener('message', this.serverMessage)
+            this.wsConn.removeEventListener('close', this.serverClose)
+            this.wsConn.close()
+            this.wsConn = null
+            this.peerConnection = null
+            this.dataChannel = null
+
+            if (retry) setTimeout(1000, () => this.connect())
+        },
+    },
+    mounted() {
+        this.connect()
     },
     beforeDestroy() {
-        this.cleanViewer()
+        this.endSession(false)
     },
     computed: {
         dimensions() {
-            const aspectRatio = 640 / 480
+            console.log(this.videoDim)
+
+            const aspectRatio = this.videoDim.width / this.videoDim.height
             let { width, height } = this.stream
 
             // room for the border
@@ -66,60 +210,6 @@ export default {
             } else {
                 return maxWidth
             }
-        },
-    },
-    methods: {
-        initViewer(port) {
-            let drawInterval = (1 / this.refreshRate) * 1000
-
-            this.image = new Image()
-            let src = `http://${this.host}:${port}/stream?topic=${this.stream.data.topic}&type=ros_compressed&width=640&height=480`
-            this.image.src = src
-
-            this.drawIntervalHandle = setInterval(this.draw, drawInterval)
-        },
-        cleanViewer() {
-            this.image.src = ''
-            clearInterval(this.drawIntervalHandle)
-        },
-        draw() {
-            let canvas = this.$refs.viewer
-            canvas.width = this.stream.width
-            canvas.height = this.stream.height
-            let context = canvas.getContext('2d')
-            // clear the canvas
-            context.clearRect(0, 0, canvas.width, canvas.height)
-
-            // check if we have a valid image
-            if (this.image.width * this.image.height > 0) {
-                // draw the image
-                context.drawImage(
-                    this.image,
-                    (this.stream.width - this.dimensions.width) / 2 - 5,
-                    (this.stream.height - this.dimensions.height) / 2 - 5,
-                    this.dimensions.width,
-                    this.dimensions.height
-                )
-            } else {
-                // show a diconnected warning
-                context.textAlign = 'center'
-                context.font = '30px monospace'
-                context.fillStyle = 'red'
-                context.fillText(
-                    'Disconnected',
-                    this.stream.width / 2 - 5,
-                    this.stream.height / 2 - 5
-                )
-            }
-
-            // display the video label in the corner
-            context.textAlign = 'left'
-            context.font = '20px monospace'
-            context.fillStyle = 'white'
-            context.strokeStyle = 'black'
-            context.lineWidth = 5
-            context.strokeText(this.stream.data.label, 20, 40)
-            context.fillText(this.stream.data.label, 20, 40)
         },
     },
 }
