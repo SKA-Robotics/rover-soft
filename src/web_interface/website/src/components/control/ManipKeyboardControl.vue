@@ -85,14 +85,14 @@ import { capitalize } from '@vue/shared';
                         effort : [ 0, 0, 0, 0, 0, 0 ]
                     });
                     if( this.focus_index >= 0 && this.focus_index <= 2 ){
-                        message.effort[0] = ( this.pressed_A - this.pressed_D ) * this.max_effort * 0.01 * elements[0].effort_percentage;
-                        message.effort[1] = ( this.pressed_W - this.pressed_S ) * this.max_effort * 0.01 * elements[1].effort_percentage;
-                        message.effort[2] = ( this.pressed_Q - this.pressed_E ) * this.max_effort * 0.01 * elements[2].effort_percentage;
+                        message.effort[0] = ( this.pressed_A - this.pressed_D ) * this.max_effort * 0.01 * this.elements[0].effort_percentage;
+                        message.effort[1] = ( this.pressed_W - this.pressed_S ) * this.max_effort * 0.01 * this.elements[1].effort_percentage;
+                        message.effort[2] = ( this.pressed_Q - this.pressed_E ) * this.max_effort * 0.01 * this.elements[2].effort_percentage;
                     }
                     else if( this.focus_index >= 3 && this.focus_index <= 5 ){
-                        message.effort[3] = ( this.pressed_A - this.pressed_D ) * this.max_effort * 0.01 * elements[3].effort_percentage;
-                        message.effort[4] = ( this.pressed_W - this.pressed_S ) * this.max_effort * 0.01 * elements[4].effort_percentage;
-                        message.effort[5] = ( this.pressed_Q - this.pressed_E ) * this.max_effort * 0.01 * elements[5].effort_percentage;
+                        message.effort[3] = ( this.pressed_A - this.pressed_D ) * this.max_effort * 0.01 * this.elements[3].effort_percentage;
+                        message.effort[4] = ( this.pressed_W - this.pressed_S ) * this.max_effort * 0.01 * this.elements[4].effort_percentage;
+                        message.effort[5] = ( this.pressed_Q - this.pressed_E ) * this.max_effort * 0.01 * this.elements[5].effort_percentage;
                     }
                     this.topic.publish(message);
                 }, this.message_rate)
