@@ -27,4 +27,6 @@
         <remap from="/roboclaw_wheels_right/motor2/set_joint_state" to="/wheels_right/roboclaw/motor2/set_joint_state"/>
         <remap from="/roboclaw_wheels_right/loop_rate" to="/sirius/controller/wheels/publish_rate"/>
     </node>
+
+    <include file="$(find ral_sirius_1)/launch/manip_control.launch" />
 </launch>

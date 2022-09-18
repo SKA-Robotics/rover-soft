@@ -10,12 +10,12 @@ CMD_MANIP_TOPIC = '/cmd_manip'
 DEFAULT_SPEED = 60
 
 LIMB_IDS = {
-    'arm_rotate': 0,
-    'claw_clamp': 1,
-    'claw_rotate': 2,
-    'claw_lift': 3,
+    'arm_rotate': 1,
+    'claw_clamp': 5,
+    'claw_rotate': 0,
+    'claw_lift': 2,
     'arm_tilt': 4,
-    'arm_lift': 5,
+    'arm_lift': 3,
 }
 
 
