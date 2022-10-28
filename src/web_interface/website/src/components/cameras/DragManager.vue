@@ -5,7 +5,12 @@
             :rect="rect"
             :dragState="dragState"
         />
-        <VideoDisplay :ros="ros" :host="host" :layout="layout" :rect="rect" />
+        <VideoDisplay
+            :host="host"
+            :peers="peers"
+            :layout="layout"
+            :rect="rect"
+        />
     </div>
 </template>
 <script>
@@ -18,9 +23,9 @@ import {
 export default {
     components: { OutlineDisplay, VideoDisplay },
     props: {
-        ros: Object, // should be a global
         host: String, // should be a global
         layout: Object,
+        peers: Object,
     },
 
     data() {

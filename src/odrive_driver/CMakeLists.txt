@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(roboclaw_driver)
+project(odrive_driver)
 
 find_package(catkin REQUIRED COMPONENTS
   combined_robot_hw
@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   sirius_msgs
 )
 
-catkin_python_setup()
+# catkin_python_setup()
 
 catkin_package(
   CATKIN_DEPENDS 
@@ -27,15 +27,14 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(roboclaw_hardware_interfaces src/control.cpp)
-target_link_libraries(roboclaw_hardware_interfaces
+add_library(odrive_hardware_interfaces src/control.cpp)
+target_link_libraries(odrive_hardware_interfaces
   ${catkin_LIBRARIES}
 )
 
-catkin_install_python(PROGRAMS
-  scripts/driver.py
-  scripts/all.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(FILES roboclaw_hw_plugin.xml
+# catkin_install_python(PROGRAMS
+#   scripts/driver.py
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+install(FILES odrive_hw_plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
