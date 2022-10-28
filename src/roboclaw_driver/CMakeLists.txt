@@ -34,6 +34,7 @@ target_link_libraries(roboclaw_hardware_interfaces
 
 catkin_install_python(PROGRAMS
   scripts/driver.py
+  scripts/all.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 install(FILES roboclaw_hw_plugin.xml

@@ -13,13 +13,13 @@ sirius:
     controller:
       wheels_left_state:
         type: joint_state_controller/JointStateController
-        publish_rate: 20
+        publish_rate: 5
         joints:
           - left_front_wheel_joint
           - left_back_wheel_joint
       wheels_right_state:
         type: joint_state_controller/JointStateController
-        publish_rate: 20
+        publish_rate: 5
         joints:
           - right_front_wheel_joint
           - right_back_wheel_joint
@@ -31,11 +31,12 @@ sirius:
         right_wheel : 
           - 'right_front_wheel_joint'
           - 'right_back_wheel_joint'
-        publish_rate: 20               # default: 50
+        publish_rate: 5               # default: 50
         pose_covariance_diagonal : [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
         twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
         wheel_separation : 0.69
         wheel_radius : 0.1
+        cmd_vel_timeout: 1.0
         linear:
           x:
             has_velocity_limits: true

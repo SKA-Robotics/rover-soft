@@ -28,18 +28,12 @@
     </div>
 </template>
 <script>
-import getImageTopics from '@/components/cameras/getImageTopics'
 import DragItem from '@/components/cameras/DragItem'
 export default {
     components: { DragItem },
     props: {
-        ros: Object, // should be a global
         layout: Object,
-    },
-    data() {
-        return {
-            topics: [],
-        }
+        topics: Array,
     },
     methods: {
         exportConfig() {
@@ -69,9 +63,6 @@ export default {
             }
             func()
         },
-    },
-    mounted() {
-        getImageTopics(this.ros).then((newTopics) => (this.topics = newTopics))
     },
 }
 </script>

@@ -1,0 +1,39 @@
+roboclaw_driver:
+  baudrate: 38400
+  communication_timeout: 0.2
+  multiunit_mode: false
+  relay_mode: false
+  swap_encoders: false
+  swap_buttons: false
+  motor2:
+    command_timeout: 300
+    ticks_per_revolution: 172000
+    torque_constant: 1.2986
+    absolute_encoder: false
+    reverse_motor: false
+    reverse_encoder: true
+    max_current: 25
+    position_pid:
+      MaxPos: 75000
+      MinPos: -75000
+    velocity_pid:
+      P: 0.5509796142578125
+      I: 0.033905029296875
+      D: 0.0
+      QPPS: 2.794556255809525
+  motor1:
+    command_timeout: 300
+    ticks_per_revolution: 172000
+    torque_constant: 1.2986
+    absolute_encoder: false
+    reverse_motor: true
+    reverse_encoder: true
+    max_current: 25
+    position_pid:
+      MaxPos: 75000
+      MinPos: -75000
+    velocity_pid:
+      P: 0.3891754150390625
+      I: 0.0250396728515625
+      D: 0.0
+      QPPS: 3.6507133142070134
