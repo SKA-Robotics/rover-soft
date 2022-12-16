@@ -66,6 +66,7 @@
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>roboclaw_driver</exec_depend>
   <exec_depend>sirius_control_loop</exec_depend>
+  <exec_depend>rosmon</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
