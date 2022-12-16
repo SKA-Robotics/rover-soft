@@ -2,6 +2,7 @@ variables:
   GIT_CLONE_PATH: $CI_BUILDS_DIR/rover-soft
   DEVELOP_IMAGE: $CI_REGISTRY_IMAGE/rover-soft:develop
   MAIN_IMAGE: $CI_REGISTRY_IMAGE/rover-soft:stable
+  JETSON_IMAGE: $CI_REGISTRY_IMAGE/rover-soft:jetson
 
 # This job is used to check the code.
 # It invokes c++ and python linters checking for abidance to our coding guidelines.
@@ -76,15 +77,16 @@ deploy-main-image:
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
-    PLATFORM: linux/amd64,linux/arm64
   stage: deploy
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
-    - docker buildx build --push -f ci/Dockerfile.stable -t $MAIN_IMAGE --platform "$PLATFORM" --cache-from $MAIN_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 $GIT_CLONE_PATH
+    - docker buildx build --push -f ci/Dockerfile.stable -t $MAIN_IMAGE --platform "linux/amd64" --cache-from $MAIN_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 $GIT_CLONE_PATH
+    - docker buildx build --push -f ci/Dockerfile.jetson -t $JETSON_IMAGE --platform "linux/arm64" --cache-from $MAIN_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 BASE_IMAGE="dustynv/ros:noetic-ros-base-l4t-r32.7.1" $GIT_CLONE_PATH
   only:
     - main
+    - 21-aktualizacja-dockera
 
 # This job triggers pipeline in ska_robotics.gitlab.io repo, so documentation is up to date
 update-documentation:

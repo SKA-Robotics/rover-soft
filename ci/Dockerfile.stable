@@ -1,3 +1,4 @@
+ARG  BASE_IMAGE=ros:noetic-ros-core
 FROM ros:noetic-ros-core
 
 # Parameters to be overided by `docker run --env <key>=<value>` command
