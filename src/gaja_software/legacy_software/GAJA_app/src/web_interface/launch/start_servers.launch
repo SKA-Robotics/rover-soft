@@ -1,0 +1,9 @@
+<launch>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <arg name="port" value="8061"/>
+    </include>
+    
+    <node name="server" pkg="web_interface" type="http_server.sh"/> <!-- port: 8060-->
+    
+    <node pkg="gaja_driver" type="gaja_driver_node" name="gaja_driver" output="screen"/>
+</launch>

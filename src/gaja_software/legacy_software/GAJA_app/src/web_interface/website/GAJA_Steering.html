@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="libs/eventemitter2.min.js"></script>
+	<script src="libs/roslib.js"></script>
+	<link href="styles.css" rel="stylesheet" type="text/css">
+	<title>GAJA steering</title> 
+</head>
+
+<body>
+	<div id="gajaControl">
+		<img src="img/gaja.jpg" alt="Gaja image" id="gajaIMG">
+		<div id="gajaHeading">
+			<h1>GAJA steering</h1>
+			<div id="statusIndicator">
+				<p style="color:#FF0;"><b>Server status:</b></p>
+				<p id="connecting">
+				  Connecting to rosbridge...
+				</p>
+				<p id="connected" style="color:#00D600; display:none">
+				  Connected
+				</p>
+				<p id="error" style="color:#FF0000; display:none">
+				  Error in the backend!
+				</p>
+				<p id="closed" style="color:#FFF; display:none">
+				  Connection closed.
+				</p>
+		  	</div> 
+	  	</div>
+		<p id="instruction">Use mouse or keyboard (WSAD or arrows, Space for STOP) to control the robot.</p>
+		
+		<div class="content-sidebar">
+			<div id="steering">
+				STEERING
+				<table>
+				  <tr>
+					<td></td>
+					<td><button id="btnUp" class="btn">UP</button></td>
+					<td></td>
+				  </tr>
+				  <tr>
+					<td><button id="btnLeft" class="btn">LEFT</button></td>
+					<td><button id="btnDown" class="btn">DOWN</button></td>
+					<td><button id="btnRight" class="btn">RIGHT</button></td>
+				  </tr>
+				  <tr>
+					<td></td>
+					<td><button id="btnStop" class="btn">STOP</button></td>
+					<td></td>
+				  </tr>
+				</table>
+				
+			</div>
+			<div id="pwm">
+				PWM
+				<div class="pwmContainer">
+					<div id="pwmNumber">40</div>
+					<input id="slider" type="range" min="0" max="100" value="40">
+				</div>
+			</div>
+			<div id="logs">
+				LOGS:
+				<textarea name="log_display" readonly>Logs...
+	   			</textarea>
+
+			</div>
+		</div>
+	</div>
+	<div id="cameraView">
+		<p id="cameraTitle">Camera streaming:</p>
+		<iframe name="cameraStream" src="iframe_cam.html"></iframe>
+		
+		<button id="btn_320_240" class="btn">320x240</button>
+		<button id="btn_640_480" class="btn">640x480</button>
+		<button id="btn_1280_720" class="btn">1280x720</button>
+		<div id="customRes">
+			<input type="text" id="customResTxt" name="resolution" required minlength="7" maxlength="9" size="10" placeholder="WxH">
+			<span class="validity"></span>
+			<button id="btnCustom" class="btn">Custom</button>
+		</div>
+	</div>
+	<script src="js/script.js" type="text/javascript"></script>
+</body>
+</html>
