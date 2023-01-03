@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="gaja_software" type="gaja_driver.py" name="gaja_driver" required="true" output="screen">
+        <param name="l_x" value="0.13"/>
+        <param name="l_y" value="0.08"/>
+        <param name="r" value="0.045"/>
+        <param name="command_timeout" value="0.5"/>
+    </node>
+</launch>
