@@ -17,6 +17,13 @@ steering_modes:
       angular:
         scale_coefficient: 0.8 # in rad, used only in 'gamer' mode
         shape_coefficient: 1.0
+    holonomic:
+      linear:
+        scale_coefficient: 0.08
+        shape_coefficient: 3.0
+      angular:
+        scale_coefficient: 0.11
+        shape_coefficient: 3.0
   manip:
     normal:
       arm_rotate:

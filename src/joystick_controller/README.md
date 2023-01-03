@@ -142,11 +142,18 @@ In the gamer mode:
 - Left trigger - go back
 - Right stick left/right - turn wheels (like in car kinematics)
 
+In the holonomic mode:
+
+- Left stick up/down - go forward/back
+- Left stick left/right - go left/right
+- Right stick left/right - turn left/right
+
 This mode can be changed dynamically using the buttons on the right:
 
 - Button 'A' - normal mode
 - Button 'B' - tank mode
 - Button 'X' - gamer mode
+- Button 'Y' - holonomic mode
 
 Configuration parameters of all these modes are included in `./config/steering_modes.yaml`.
 

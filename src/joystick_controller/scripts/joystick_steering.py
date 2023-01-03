@@ -49,7 +49,8 @@ class JoystickController:
         if self.child_mode:
             i1 = min(1.0, max(rospy.get_param("~child_mode_inertia_i1", 0.4444), 0.0))
             i2 = min(1.0, max(rospy.get_param("~child_mode_inertia_i2", 0.0066), 0.0))
-            self.lin_inertia = self.InertiaModel(i1, i2)
+            self.linx_inertia = self.InertiaModel(i1, i2)
+            self.liny_inertia = self.InertiaModel(i1, i2)
             self.ang_inertia = self.InertiaModel(i1, i2)
             rospy.loginfo("Child mode enabled")
             self.prev_rover_message = Twist()
@@ -89,37 +90,51 @@ class JoystickController:
     def steer_rover(self, values):
         rover_message = Twist()
         PARAMS = self.MODES_DATA['rover'][self.rover_steering_mode.name]
-        lin_cmd = 0
+        linx_cmd = 0
+        liny_cmd = 0
         ang_cmd = 0
 
         if self.rover_steering_mode == self.RoverSteeringMode.normal:
-            lin_cmd = values['right_stick_vertical']
+            linx_cmd = values['right_stick_vertical']
             ang_cmd = values['right_stick_horizontal']
-            lin_cmd *= PARAMS['linear']['scale_coefficient'] * abs(lin_cmd)**(PARAMS['linear']['shape_coefficient'] -
+            linx_cmd *= PARAMS['linear']['scale_coefficient'] * abs(linx_cmd)**(PARAMS['linear']['shape_coefficient'] -
                                                                               1.0)
             ang_cmd *= PARAMS['angular']['scale_coefficient'] * abs(ang_cmd)**(PARAMS['angular']['shape_coefficient'] -
                                                                                1.0)
 
         elif self.rover_steering_mode == self.RoverSteeringMode.tank:
-            lin_cmd = (values['left_stick_vertical'] + values['right_stick_vertical']) / 2
+            linx_cmd = (values['left_stick_vertical'] + values['right_stick_vertical']) / 2
             ang_cmd = (values['right_stick_vertical'] - values['left_stick_vertical']) / 2
-            lin_cmd *= PARAMS['scale_coefficient'] * abs(lin_cmd)**(PARAMS['shape_coefficient'] - 1.0)
+            linx_cmd *= PARAMS['scale_coefficient'] * abs(linx_cmd)**(PARAMS['shape_coefficient'] - 1.0)
             ang_cmd *= PARAMS['scale_coefficient'] * abs(ang_cmd)**(PARAMS['shape_coefficient'] - 1.0)
 
         elif self.rover_steering_mode == self.RoverSteeringMode.gamer:
-            lin_cmd = (values['right_trigger'] - values['left_trigger']) / 2
+            linx_cmd = (values['right_trigger'] - values['left_trigger']) / 2
             turning_angle = values['right_stick_horizontal']  # value of angle is relative (0,1), NOT in rad
-            lin_cmd *= PARAMS['linear']['scale_coefficient'] * abs(lin_cmd)**(PARAMS['linear']['shape_coefficient'] -
+            linx_cmd *= PARAMS['linear']['scale_coefficient'] * abs(linx_cmd)**(PARAMS['linear']['shape_coefficient'] -
                                                                               1.0)
             turning_angle *= PARAMS['angular']['scale_coefficient'] * abs(turning_angle)**(
                 PARAMS['angular']['shape_coefficient'] - 1.0)
-            ang_cmd = lin_cmd * tan(turning_angle)
+            ang_cmd = linx_cmd * tan(turning_angle)
+        
+        elif self.rover_steering_mode == self.RoverSteeringMode.holonomic:
+            linx_cmd = values['left_stick_vertical']
+            liny_cmd = values['left_stick_horizontal']
+            ang_cmd = values['right_stick_horizontal']
+            linx_cmd *= PARAMS['linear']['scale_coefficient'] * abs(linx_cmd)**(PARAMS['linear']['shape_coefficient'] -
+                                                                              1.0)
+            liny_cmd *= PARAMS['linear']['scale_coefficient'] * abs(liny_cmd)**(PARAMS['linear']['shape_coefficient'] -
+                                                                              1.0)
+            ang_cmd *= PARAMS['angular']['scale_coefficient'] * abs(ang_cmd)**(PARAMS['angular']['shape_coefficient'] -
+                                                                               1.0)
 
         if (self.child_mode):
-            rover_message.linear.x = self.lin_inertia.step(lin_cmd)
+            rover_message.linear.x = self.linx_inertia.step(linx_cmd)
+            rover_message.linear.y = self.liny_inertia.step(liny_cmd)
             rover_message.angular.z = self.ang_inertia.step(ang_cmd)
         else:
-            rover_message.linear.x = lin_cmd
+            rover_message.linear.x = linx_cmd
+            rover_message.linear.y = liny_cmd
             rover_message.angular.z = ang_cmd
         self.rover_publisher.publish(rover_message)
 
@@ -186,6 +201,10 @@ class JoystickController:
                 self.stop_object()
                 self.rover_steering_mode = self.RoverSteeringMode.gamer
                 return True
+            if buttons_values['Y_button']:
+                self.stop_object()
+                self.rover_steering_mode = self.RoverSteeringMode.holonomic
+                return True
         if self.steered_object == self.SteeredObject.manip:
             if buttons_values['A_button']:
                 self.stop_object()
@@ -220,6 +239,7 @@ class JoystickController:
         normal = 0
         tank = 1
         gamer = 2
+        holonomic = 3
 
     class ManipSteeringMode(Enum):
         normal = 0
