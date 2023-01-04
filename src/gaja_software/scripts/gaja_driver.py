@@ -82,7 +82,9 @@ def clamp(value, min_value, max_value):
 
 if __name__ == '__main__':
     try:
-        driver = GajaDriver('/dev/ttyUSB0', 9600)
+        driver = GajaDriver(
+            rospy.get_param("~port_name", "/dev/ttyUSB0"),
+            rospy.get_param("~baudrate", 9600))
         driver.run()
     except rospy.ROSInterruptException:
         pass

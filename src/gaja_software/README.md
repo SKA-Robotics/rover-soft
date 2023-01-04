@@ -24,6 +24,18 @@ This package contains software for controlling the systems of Gaja rover, as wel
 
   Parameters:
 
+    - `~port_name`
+        - Type:         `string`
+        - Default:      `/dev/ttyUSB0`
+    
+    Name of port on which motor driver is connected.
+
+    - `~baudrate`
+        - Type:         `int`
+        - Default:      `9600`
+    
+    Baudrate of serial communication with motor driver.
+
     - `~command_timeout`
         - Type:         `float`
         - Default:      `0.5`
