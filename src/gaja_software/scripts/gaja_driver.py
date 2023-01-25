@@ -23,12 +23,10 @@ class GajaDriver:
         self.r = rospy.get_param('~r', 0.045)
 
     def run(self):
-        rate = rospy.Rate(1)
+        rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             wheel_cmd = self.calculate_command()
             self.send_command(wheel_cmd)
-            # while self.serial.inWaiting() > 0:
-            #     rospy.loginfo(str(self.serial.readline())[2:-5])
             rate.sleep()
     
     def cmd_vel_callback(self, msg):
@@ -56,16 +54,10 @@ class GajaDriver:
 
         v_l = (l_x + l_y) * v_theta
 
-        calibrate_1 = 0.64
-        calibrate_2 = 1.0
-        calibrate_3 = 0.95
-        calibrate_4 = 0.92
-        downscale = 0.3
-
-        front_left = downscale * calibrate_4 * (v_x - v_y - v_l) / r
-        front_right = downscale * calibrate_3 * (v_x + v_y + v_l) / r
-        rear_left = downscale * calibrate_2 * (v_x + v_y - v_l) / r
-        rear_right = downscale * calibrate_1 * (v_x - v_y + v_l) / r
+        front_left = (v_x - v_y - v_l) / r
+        front_right = (v_x + v_y + v_l) / r
+        rear_left = (v_x + v_y - v_l) / r
+        rear_right = (v_x - v_y + v_l) / r
 
         cmd = {
             'front_left': clamp(int(127 * front_left), -127, 127) + 127,
@@ -76,11 +68,10 @@ class GajaDriver:
         return cmd
 
     def send_command(self, msg):
-        # msg = " 128 0 %d 192 \n 128 1 %d 192 \n 128 2 %d 192 \n 128 3 %d 192\n" \
-        #     % (msg['front_left'], msg['front_right'], msg['rear_left'], msg['rear_right'])
-        print("Sending:", msg["front_left"])
+        rospy.logdebug("Sending:", msg["front_left"])
         for index, value in enumerate(msg.values()):
             self.serial.write([128, index, value, 192])
+            # break
 
     def __del__(self):
         self.serial.close()
