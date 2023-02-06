@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="manipulator">
   <xacro:property name="package" value="sirius_description" />
-  <xacro:property name="inertial" value="${xacro.load_yaml('manipulator_inertial.yaml')}" />
-
   <xacro:property name="base_length" value="0.006" />
   <xacro:property name="cyl_length" value="0.0655" />
   <xacro:property name="arm1_length" value="0.43498" />
@@ -21,10 +19,6 @@
         <color rgba=".5 .5 0 1" />
       </material>
     </visual>
-    <inertial>
-      <mass value="${inertial['base_mass']}"/>
-        <inertia ixx="${inertial['base_inertia']['ixx']}" ixy="${inertial['base_inertia']['ixy']}" ixz="${inertial['base_inertia']['ixz']}" iyy="${inertial['base_inertia']['iyy']}" iyz="${inertial['base_inertia']['iyz']}" izz="${inertial['base_inertia']['izz']}"/>
-    </inertial>
     <collision>
       <origin xyz="0 0 ${base_length / 2}" rpy="0 0 0" />
       <geometry>
@@ -43,10 +37,6 @@
         <color rgba=".5 .5 .5 1" />
       </material>
     </visual>
-    <inertial>
-      <mass value="${inertial['cyl_mass']}"/>
-        <inertia ixx="${inertial['cyl_inertia']['ixx']}" ixy="${inertial['cyl_inertia']['ixy']}" ixz="${inertial['cyl_inertia']['ixz']}" iyy="${inertial['cyl_inertia']['iyy']}" iyz="${inertial['cyl_inertia']['iyz']}" izz="${inertial['cyl_inertia']['izz']}"/>
-    </inertial>
     <collision>
       <origin xyz="0 0 ${cyl_length/2}" rpy="0 0 0" />
       <geometry>
@@ -71,10 +61,6 @@
         <color rgba="0 1 0 1" />
       </material>
     </visual>
-    <inertial>
-        <mass value="${inertial['arm1_mass']}"/>
-        <inertia ixx="${inertial['arm1_inertia']['ixx']}" ixy="${inertial['arm1_inertia']['ixy']}" ixz="${inertial['arm1_inertia']['ixz']}" iyy="${inertial['arm1_inertia']['iyy']}" iyz="${inertial['arm1_inertia']['iyz']}" izz="${inertial['arm1_inertia']['izz']}"/>
-    </inertial>
     <collision>
       <origin xyz="0 0 ${arm1_length/2}" rpy="0 0 0" />
       <geometry>
@@ -104,10 +90,6 @@
         <color rgba="0 0 1 1" />
       </material>
     </visual>
-    <inertial>
-        <mass value="${inertial['arm2_mass']}"/>
-        <inertia ixx="${inertial['arm2_inertia']['ixx']}" ixy="${inertial['arm2_inertia']['ixy']}" ixz="${inertial['arm2_inertia']['ixz']}" iyy="${inertial['arm2_inertia']['iyy']}" iyz="${inertial['arm2_inertia']['iyz']}" izz="${inertial['arm2_inertia']['izz']}"/>
-    </inertial>
     <collision>
       <origin xyz="0 0 ${arm2_length/2 - arm2_lever}" rpy="0 0 0" />
       <geometry>
@@ -137,10 +119,6 @@
         <color rgba="1 0 0 1" />
       </material>
     </visual>
-    <inertial>
-        <mass value="${inertial['arm3_mass']}"/>
-        <inertia ixx="${inertial['arm3_inertia']['ixx']}" ixy="${inertial['arm3_inertia']['ixy']}" ixz="${inertial['arm3_inertia']['ixz']}" iyy="${inertial['arm3_inertia']['iyy']}" iyz="${inertial['arm3_inertia']['iyz']}" izz="${inertial['arm3_inertia']['izz']}"/>
-    </inertial>
     <collision>
       <origin xyz="0 0 ${arm3_length/2}" rpy="0 0 0" />
       <geometry>
@@ -169,10 +147,6 @@
       <material name="grey">
       </material>
     </visual>
-    <inertial>
-        <mass value="${inertial['tool_mass']}"/>
-        <inertia ixx="${inertial['tool_inertia']['ixx']}" ixy="${inertial['tool_inertia']['ixy']}" ixz="${inertial['tool_inertia']['ixz']}" iyy="${inertial['tool_inertia']['iyy']}" iyz="${inertial['tool_inertia']['iyz']}" izz="${inertial['tool_inertia']['izz']}"/>
-    </inertial>
     <collision>
       <origin xyz="0 0 ${tool_length/2}" rpy="0 0 0" />
       <geometry>
@@ -187,18 +161,33 @@
     <axis xyz="0 0 1"/>
   </joint>
 
+  <!--Chwytak jest do poprawy bo aktualnie jest jako jedna czesc przez co nie da sie go otwierac-->
   <link name="fake">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://${package}/meshes/manipulator/Sirius2_chwytak_model.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gold">
+        <color rgba=".910 .443 .031 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${tool_length/2}" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="${tool_length*3}" radius="0.03" />
+      </geometry>
+    </collision>
   </link>
-  <joint name="tool_fake" type="continuous">
+  <joint name="tool_fake" type="revolute">
     <parent link="tool"/>
     <child link="fake"/>
     <origin xyz="0 0 ${tool_length}"/>
-    <axis xyz="1 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit
+      lower="-1.45"
+      upper="0.79"
+      effort="0"
+      velocity="0" />
   </joint>
-
-  <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/</robotNamespace>
-    </plugin>
-  </gazebo>
 </robot>
