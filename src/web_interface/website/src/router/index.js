@@ -1,54 +1,55 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import Visualization from '../views/Visualization.vue'
-import Control from '../views/Control.vue'
-import Science from '../views/Science.vue'
-import Cameras from '../views/Cameras.vue'
+
+//import HomeView from '@/views/HomeView.vue'
+import PanelView from '@/views/PanelView.vue'
+
+import panelViewConfig from '@/assets/panelViewConfig.json'
+
+const variants = panelViewConfig.map((value) => value.name)
 
 Vue.use(VueRouter)
 
 const routes = [
     {
         path: '/',
-        name: 'Home',
-        component: Home,
-        props: true,
+        name: 'home',
+        //component: HomeView,
+        redirect: () => ({
+            name: 'panel',
+            params: { screen: '1', variant: 'overview' },
+        }),
     },
     {
-        path: '/visualization',
-        name: 'Visualization',
-        component: Visualization,
-        props: true,
-        meta: { title: 'Visualization' },
+        path: '/panel/:screen/:variant',
+        name: 'panel',
+        component: PanelView,
     },
     {
-        path: '/control',
-        name: 'Control',
-        component: Control,
-        props: true,
-        meta: { title: 'Control' },
-    },
-    {
-        path: '/science',
-        name: 'Science',
-        component: Science,
-        props: true,
-        meta: { title: 'Science' },
-    },
-    {
-        path: '/cameras',
-        name: 'Cameras',
-        component: Cameras,
-        props: true,
-        meta: { title: 'Cameras' },
+        path: '*',
+        name: '404',
+        redirect: () => ({ name: 'home' }),
     },
 ]
 
 const router = new VueRouter({
-    mode: 'hash',
+    mode: 'history',
     base: process.env.BASE_URL,
     routes,
+})
+
+router.beforeEach((to, from, next) => {
+    const screen = parseInt(to.params.screen)
+    const variant = to.params.variant
+    if (
+        to.name === 'panel' &&
+        (isNaN(screen) ||
+            screen < 1 ||
+            3 < screen ||
+            !variants.includes(variant))
+    )
+        next({ name: '404' })
+    else next()
 })
 
 export default router
