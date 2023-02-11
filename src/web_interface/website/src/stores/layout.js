@@ -14,7 +14,7 @@ export const useLayoutStore = defineStore('layout', () => {
                 ],
                 windows: {
                     aaa: {
-                        type: 'testWindowA',
+                        type: 'mapWindow',
                         name: 'AAA',
                         extraConfig: { test: '123' },
                     },

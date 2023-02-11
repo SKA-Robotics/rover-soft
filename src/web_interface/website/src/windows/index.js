@@ -1,5 +1,6 @@
 import TestWindow from './TestWindow.vue'
 import CameraWindow from './CameraWindow.vue'
+import MapWindow from './MapWindow.vue'
 import { useGstreamerStore } from '@/stores'
 
 export default {
@@ -54,5 +55,16 @@ export default {
             },
         },
         icon: 'mdi-camera',
+    },
+    mapWindow: {
+        typeName: 'Map Window',
+        component: MapWindow,
+        configOptions: {
+            ImageData: {
+                name: 'Image Data Path',
+                type: 'text',
+            },
+        },
+        icon: 'mdi-map',
     },
 }
