@@ -1,0 +1,23 @@
+pub_rate: 1.0
+base_path: 'Sirius II'
+analyzers:
+  platform:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Platform'
+    startswith: 'dummy'
+  manipulator:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Manipulator'
+    startswith: 'dummy'
+  power:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Power'
+    startswith: 'dummy'
+  science:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Science'
+    startswith: 'dummy'
+  communication:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Communication'
+    startswith: 'dummy'

@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="diagnostic_aggregator" name="diagnostic_aggregator" type="aggregator_node">
+        <rosparam file="$(find sirius_description)/config/diagnostic_aggregator.yaml" command="load"/>
+    </node>
+    <node pkg="ral_sirius_1" name="dummy_diagnostics" type="dummy_diagnostics.py"/>
+</launch>
