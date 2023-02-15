@@ -87,6 +87,15 @@ export default {
                     return topicsList.value
                 },
             },
+            messageProperty: {
+                name: 'Message Property',
+                type: 'text',
+            },
+            refreshingFrequency: {
+                name: 'Refreshing Frequency',
+                type: 'range',
+                range: () => ({ min: 1, max: 20, step: 1 }),
+            },
         },
     },
 }

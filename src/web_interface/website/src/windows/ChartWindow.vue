@@ -29,6 +29,9 @@ const rosStore = useRosStore()
 const config = ref(JSON.parse(JSON.stringify(props.extraConfig)))
 watch(props, () => {
     config.value = ref(JSON.parse(JSON.stringify(props.extraConfig)))
+    topicName.value = config.value.topicName
+    messageProperty.value = config.value.messageProperty
+
     const topicsClient = new Service({
         ros: rosStore.ws,
         name: '/rosapi/topics',
@@ -44,63 +47,53 @@ watch(props, () => {
         })
         setListener()
     })
+
+    if (refreshingTimer.value != null) clearInterval(refreshingTimer.value)
+    refreshingTimer.value = setInterval(() => {
+        rerenderChart()
+    }, 1000 / config.value.refreshingFrequency)
 })
-const topicName = computed(() => {
-    return config.value.topicName
-})
+const topicName = ref(null)
 const messageType = ref(null)
+const messageProperty = ref(null)
 const title = computed(() => {
     return `Topic name: ${topicName.value}, Message type: ${messageType.value}`
 })
+const refreshingTimer = ref(null)
 
 // updating chart with ROS topic data
 const startTime = ref(0)
 const listener = ref(null)
 function setListener() {
-    let callback = () => {
-        // defined conditionally below
-    }
     console.log(`Listner got message with type: ${messageType.value}`)
+    if (!messageProperty.value) messageProperty.value = 'linear/x'
+    messageProperty.value.trim()
+    const keys = messageProperty.value.split('/')
+    options.value.scales.y.title.text = messageProperty.value
+    delete data.value.datasets[0].data
+    data.value.datasets[0].data = []
+    // console.log(messageProperty.value)
 
-    switch (messageType.value) {
-        case 'geometry_msgs/Twist':
-            callback = (msg) => {
-                let point = {
-                    x: new Date().getTime() / 1000 - startTime.value,
-                    y: msg.linear.x,
-                }
-                // console.log(point)
-                data.value.datasets[0].data.push(point)
-                rerenderChart()
-            }
-            break
-        case 'sensor_msgs/JointState':
-            callback = (msg) => {
-                let point = {
-                    x:
-                        msg.header.stamp.secs +
-                        1e-9 * msg.header.stamp.nsecs -
-                        startTime.value,
-                    y: msg.effort[0],
-                }
-                // console.log(point)
-                data.value.datasets[0].data.push(point)
-                rerenderChart()
-            }
-            break
-        default:
-            console.log('Invalid message type!')
-            return
-    }
-
-    if (listener.value) listener.value.clear()
-    startTime.value = new Date().getTime() / 1000
+    if (listener.value) listener.value.unsubscribe()
+    const currentDate = new Date()
+    startTime.value = currentDate.getTime() / 1000
+    options.value.scales.x.title.text = `Time [s] starting at ${currentDate.getHours()}:${currentDate.getMinutes()}:${currentDate.getSeconds()}`
     listener.value = new Topic({
         ros: rosStore.ws,
         name: topicName,
         messageType: messageType,
     })
-    listener.value.subscribe(callback)
+    listener.value.subscribe((msg) => {
+        keys.forEach((key) => {
+            msg = msg[key]
+        })
+        let point = {
+            x: new Date().getTime() / 1000 - startTime.value,
+            y: parseFloat(msg),
+        }
+        // console.log(point)
+        if (!isNaN(point.y)) data.value.datasets[0].data.push(point)
+    })
 }
 
 // chart rerfreshing using key changing technique
@@ -157,6 +150,17 @@ onBeforeMount(() => {
                     top: 0,
                     bottom: 10,
                 },
+            },
+        },
+        elements: {
+            point: {
+                radius: 1,
+                borderColor: 'red',
+                backgroundColor: 'red',
+            },
+            line: {
+                borderColor: 'red',
+                backgroundColor: 'red',
             },
         },
     }
