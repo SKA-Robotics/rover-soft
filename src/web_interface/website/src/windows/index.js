@@ -79,9 +79,10 @@ export default {
                         const request = new ServiceRequest()
 
                         topicsClient.callService(request, (result) => {
+                            // console.log(result)
                             topicsList.value = result.topics
                         })
-                        console.log('test')
+                        // console.log('test')
                     }, 1000)
                     return topicsList.value
                 },
