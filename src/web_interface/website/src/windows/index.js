@@ -1,6 +1,11 @@
 import TestWindow from './TestWindow.vue'
 import CameraWindow from './CameraWindow.vue'
-import { useGstreamerStore } from '@/stores'
+import ChartWindow from './ChartWindow.vue'
+import { useGstreamerStore, useRosStore } from '@/stores'
+import { Service, ServiceRequest } from 'roslib'
+import { ref } from 'vue'
+
+const topicsList = ref([])
 
 export default {
     testWindow: {
@@ -54,5 +59,33 @@ export default {
             },
         },
         icon: 'mdi-camera',
+    },
+    chartWindow: {
+        typeName: 'Chart Window',
+        component: ChartWindow,
+        configOptions: {
+            topicName: {
+                name: 'Topic Name',
+                type: 'select',
+                possibleValues: () => {
+                    setTimeout(() => {
+                        const rosStore = useRosStore()
+                        const topicsClient = new Service({
+                            ros: rosStore.ws,
+                            name: '/rosapi/topics',
+                            serviceType: 'rosapi/Topics',
+                        })
+
+                        const request = new ServiceRequest()
+
+                        topicsClient.callService(request, (result) => {
+                            topicsList.value = result.topics
+                        })
+                        console.log('test')
+                    }, 1000)
+                    return topicsList.value
+                },
+            },
+        },
     },
 }
