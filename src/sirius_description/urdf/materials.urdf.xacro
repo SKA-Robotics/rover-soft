@@ -20,6 +20,9 @@
   <material name="black">
     <color rgba="0 0 0 1" />
   </material>
+  <material name="green">
+    <color rgba="0 1 0 1" />
+  </material>
   <xacro:macro name="gold">
     <material>  
       <ambient>1 .6 .2 1</ambient>  

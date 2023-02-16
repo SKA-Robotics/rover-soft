@@ -20,14 +20,35 @@
     </include>
    
     <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+    
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+    <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
 
     <!-- push robot_description to factory and spawn robot in gazebo -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
         args="-z 0 -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
 
-    <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+    <!-- convert joint states to TF transforms for rviz, etc -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        respawn="false" output="screen">
         <param name="publish_frequency" type="double" value="20.0" />
+        <!-- If you remap then joint_states_publisher_gui will stop working,
+        error: no transform from fake to base_link-->
+        <!--remap from="/joint_states" to="/manipulator/joint_states" /-->
     </node>
+
+    <!-- load the controllers -->
+    <!-- this part of code is not working properly
+    if you disable it then we have the same situation as before using actuators/motors-->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/manipulator" 
+        args="
+        joint1_position_controller
+        joint2_position_controller
+        joint3_position_controller
+        joint4_position_controller
+        joint5_position_controller
+        joint_state_controller
+    "/>
 
     <node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
     <node unless="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
