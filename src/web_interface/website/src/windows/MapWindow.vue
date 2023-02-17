@@ -84,8 +84,28 @@ const unitsToPx = computed(() => {
         y: imgDim.value.height / scale.value,
         x: imgDim.value.width / scale.value,
     }
-
+    console.log('unitspx' + change.x)
     return change
+})
+
+const windowStart = computed(() => {
+    let windowCenter = {
+        x: props.windowDimensions.width / 2,
+        y: props.windowDimensions.height / 2,
+    }
+
+    let imageCorner = {
+        x:
+            windowCenter.x -
+            Math.abs(0.5 * currentScale.value * unitsToPx.value.x),
+        y: windowCenter.y + Math.abs(currentScale.value * unitsToPx.value.y),
+    }
+
+    console.log('srodek' + windowCenter.x)
+    console.log('rogscale' + currentScale.value)
+    console.log('rog' + imageCorner.x)
+
+    return imageCorner
 })
 
 const view = computed(() => {
@@ -107,7 +127,7 @@ const draw = () => {
     drawMap()
     drawPosition()
     console.log('test dim' + dimensions.value.height)
-    console.log('test img' + imgDim.value.height)
+    console.log('test img' + imgDim.value.width)
 }
 
 const drawMap = () => {
@@ -115,7 +135,13 @@ const drawMap = () => {
         console.log('w' + view.value.width)
         console.log('h' + unitsToPx.value.height)
         let ctx = map.value.getContext('2d')
-        ctx.drawImage(image.value, 0, 0, view.value.width, view.value.height)
+        ctx.drawImage(
+            image.value,
+            windowStart.value.x,
+            windowStart.value.y,
+            view.value.width,
+            view.value.height
+        )
     } else {
         console.log('brak obrazka')
     }
