@@ -12,20 +12,51 @@ const imgDim = ref({
     height: null,
 })
 
-let currentPos = ref({
+const currentPos = ref({
     x: 100,
     y: 100,
 })
 
-let roverOnMapPos = ref({
-    x: null,
-    y: null,
+const centerPosition = ref({
+    x: 0,
+    y: 0,
 })
 
-let scale = ref({
-    x: null,
-    y: null,
+const scale = ref(6)
+const currentScale = ref(null)
+
+const roverOnMapPos = computed(() => {
+    let roverPos = {
+        x: currentPos.value.x /* scale.value.x*/, //TODO check if works corrdctly
+        y: currentPos.value.y /** scale.value.y*/,
+    }
+    return roverPos
 })
+
+onMounted(() => {
+    let img = new Image()
+    img.src = '/maps/mapa.jpg'
+
+    img.onload = () => {
+        image.value = img
+        imgDim.value.height = img.height
+        imgDim.value.width = img.width
+        currentScale.value = scale.value
+    }
+    interval.value = setInterval(draw, 100)
+})
+
+onBeforeUnmount(() => {
+    clearInterval(interval.value)
+})
+
+const zoom = () => {
+    if (event.deltaY > 0) {
+        return (currentScale.value *= 0.9)
+    } else if (event.deltaY < 0) {
+        return (currentScale.value *= 1.1)
+    }
+}
 
 const dimensions = computed(() => {
     const aspectRatio = imgDim.value.width / imgDim.value.height
@@ -48,54 +79,50 @@ const dimensions = computed(() => {
     }
 })
 
-const draw = () => {
-    clearInterval(interval)
-    drawMap()
-    drawPosition()
-}
-
-onMounted(() => {
-    let img = new Image()
-    img.src = '/maps/mapa.jpg'
-
-    img.onload = () => {
-        image.value = img
-
-        imgDim.value.height = img.height
-        imgDim.value.width = img.width
+const unitsToPx = computed(() => {
+    let change = {
+        y: imgDim.value.height / scale.value,
+        x: imgDim.value.width / scale.value,
     }
 
-    interval.value = setInterval(draw, 10)
+    return change
 })
 
-onBeforeUnmount(() => {
-    clearInterval(interval.value)
+const view = computed(() => {
+    console.log('units' + unitsToPx.value.x)
+    let window = {
+        x: centerPosition.value.x,
+        y: centerPosition.value.y,
+        height: unitsToPx.value.y * currentScale.value,
+        width: unitsToPx.value.x * currentScale.value,
+    }
+
+    return window
 })
 
-let drawMap = () => {
+//dac osobne computed na widok(skala, pozycja)
+//dac linie do drugiej przestrzeni(jakis uklad kartezjanski)
+
+const draw = () => {
+    drawMap()
+    drawPosition()
+    console.log('test dim' + dimensions.value.height)
+    console.log('test img' + imgDim.value.height)
+}
+
+const drawMap = () => {
     if (map.value && image.value) {
-        //console.log('w' + dimensions.value.width)
-        //console.log('h' + dimensions.value.height)
+        console.log('w' + view.value.width)
+        console.log('h' + unitsToPx.value.height)
         let ctx = map.value.getContext('2d')
-        ctx.drawImage(
-            image.value,
-            0,
-            0,
-            dimensions.value.width,
-            dimensions.value.height
-        )
-        scale.value.x = dimensions.value.height / imgDim.value.height
-        scale.value.y = dimensions.value.width / imgDim.value.width
+        ctx.drawImage(image.value, 0, 0, view.value.width, view.value.height)
     } else {
         console.log('brak obrazka')
     }
 }
 
-let drawPosition = () => {
+const drawPosition = () => {
     let ctx = map.value.getContext('2d')
-
-    roverOnMapPos.value.x = currentPos.value.x * scale.value.x //TODO: make a function
-    roverOnMapPos.value.y = currentPos.value.y * scale.value.y
 
     console.log('kropka x' + currentPos.value.x)
     console.log('kropka y' + currentPos.value.y)
@@ -110,6 +137,7 @@ let drawPosition = () => {
 </script>
 <template>
     <div
+        @wheel="zoom"
         :style="{
             display: 'flex',
             'align-items': 'center',
