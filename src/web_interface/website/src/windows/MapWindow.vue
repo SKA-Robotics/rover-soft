@@ -7,33 +7,37 @@ const map = ref(null)
 const image = ref(null)
 const interval = ref(null)
 
-const imgDim = ref({
+const imgDimPx = ref({
     width: null,
     height: null,
 })
 
-const currentPos = ref({
-    x: 100,
-    y: 100,
+const currentPosUnit = ref({
+    x: 1,
+    y: 1,
 })
 
-const centerPosition = ref({
+const centerUnit = ref({
     x: 0,
     y: 0,
 })
 
-const virtualImageCorner = ref({
+const imageCornerUnit = ref({
     x: -3,
     y: 3,
 })
 
-const virtualImagSize = ref(6)
+const imageSizeUnits = ref(6)
 const currentScale = ref(null)
 
 const roverOnMapPos = computed(() => {
     let roverPos = {
-        x: currentPos.value.x /* scale.value.x*/, //TODO check if works corrdctly
-        y: currentPos.value.y /** scale.value.y*/,
+        x:
+            (centerUnit.value.x + currentPosUnit.value.x) *
+            positionTranslation.value.x,
+        y:
+            (centerUnit.value.y + currentPosUnit.value.y) *
+            positionTranslation.value.y,
     }
     return roverPos
 })
@@ -44,9 +48,9 @@ onMounted(() => {
 
     img.onload = () => {
         image.value = img
-        imgDim.value.height = img.height
-        imgDim.value.width = img.width
-        currentScale.value = virtualImagSize.value
+        imgDimPx.value.height = img.height
+        imgDimPx.value.width = img.width
+        currentScale.value = imageSizeUnits.value
     }
     interval.value = setInterval(draw, 100)
 })
@@ -63,33 +67,11 @@ const zoom = () => {
     }
 }
 
-const dimensions = computed(() => {
-    const aspectRatio = imgDim.value.width / imgDim.value.height
-    let { width, height } = props.windowDimensions
-
-    let maxWidth = {
-        width,
-        height: width / aspectRatio,
-    }
-    let maxHeight = {
-        width: height * aspectRatio,
-        height,
-    }
-
-    // choose the one that will fit
-    if (height < maxWidth.height) {
-        return maxHeight
-    } else {
-        return maxWidth
-    }
-})
-
-const unitsToPx = computed(() => {
+const positionTranslation = computed(() => {
     let change = {
-        y: imgDim.value.height / currentScale.value,
-        x: imgDim.value.width / currentScale.value,
+        y: imgDimPx.value.height / currentScale.value,
+        x: imgDimPx.value.width / currentScale.value,
     }
-    console.log('unitspx' + change.x)
     return change
 })
 
@@ -102,47 +84,35 @@ const windowStart = computed(() => {
     let currentViewCorner = {
         x:
             windowCenter.x +
-            (centerPosition.value.x + virtualImageCorner.value.x) *
-                unitsToPx.value.x,
+            (centerUnit.value.x + imageCornerUnit.value.x) *
+                positionTranslation.value.x,
         y:
             windowCenter.y +
-            (centerPosition.value.y - virtualImageCorner.value.y) *
-                unitsToPx.value.y,
+            (centerUnit.value.y - imageCornerUnit.value.y) *
+                positionTranslation.value.y,
     }
-
-    console.log('srodek' + windowCenter.x)
-    console.log('rogscale' + currentScale.value)
-    console.log('rog' + currentViewCorner.x)
 
     return currentViewCorner
 })
 
 const view = computed(() => {
-    console.log('units' + unitsToPx.value.x)
     let window = {
-        x: centerPosition.value.x,
-        y: centerPosition.value.y,
-        height: unitsToPx.value.y * virtualImagSize.value,
-        width: unitsToPx.value.x * virtualImagSize.value,
+        x: centerUnit.value.x,
+        y: centerUnit.value.y,
+        height: positionTranslation.value.y * imageSizeUnits.value,
+        width: positionTranslation.value.x * imageSizeUnits.value,
     }
 
     return window
 })
 
-//dac osobne computed na widok(skala, pozycja)
-//dac linie do drugiej przestrzeni(jakis uklad kartezjanski)
-
 const draw = () => {
     drawMap()
     drawPosition()
-    console.log('test dim' + dimensions.value.height)
-    console.log('test img' + imgDim.value.width)
 }
 
 const drawMap = () => {
     if (map.value && image.value) {
-        console.log('w' + view.value.width)
-        console.log('h' + unitsToPx.value.height)
         let ctx = map.value.getContext('2d')
         ctx.drawImage(
             image.value,
@@ -159,8 +129,8 @@ const drawMap = () => {
 const drawPosition = () => {
     let ctx = map.value.getContext('2d')
 
-    console.log('kropka x' + currentPos.value.x)
-    console.log('kropka y' + currentPos.value.y)
+    console.log('kropka x' + currentPosUnit.value.x)
+    console.log('kropka y' + currentPosUnit.value.y)
     console.log('obliczone x' + roverOnMapPos.value.x)
     console.log('obliczone y' + roverOnMapPos.value.y)
     ctx.beginPath()
