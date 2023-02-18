@@ -32,12 +32,10 @@ const currentScale = ref(null)
 
 const roverOnMapPos = computed(() => {
     let roverPos = {
-        x:
-            (centerUnit.value.x + currentPosUnit.value.x) *
-            positionTranslation.value.x,
-        y:
-            (centerUnit.value.y + currentPosUnit.value.y) *
-            positionTranslation.value.y,
+        x: positionTranslation(currentPosUnit.value.x, currentPosUnit.value.y)
+            .x,
+        y: positionTranslation(currentPosUnit.value.x, currentPosUnit.value.y)
+            .y,
     }
     return roverPos
 })
@@ -67,29 +65,35 @@ const zoom = () => {
     }
 }
 
-const positionTranslation = computed(() => {
+const unitsToPx = computed(() => {
     let change = {
         y: imgDimPx.value.height / currentScale.value,
         x: imgDimPx.value.width / currentScale.value,
     }
+
     return change
 })
 
-const windowStart = computed(() => {
+const positionTranslation = (xUnit, yUnit) => {
     let windowCenter = {
         x: props.windowDimensions.width / 2,
         y: props.windowDimensions.height / 2,
     }
 
+    let translation = {
+        x: windowCenter.x + (centerUnit.value.x + xUnit) * unitsToPx.value.x,
+        y: windowCenter.y + (centerUnit.value.y - yUnit) * unitsToPx.value.y,
+    }
+
+    return translation
+}
+
+const windowStart = computed(() => {
     let currentViewCorner = {
-        x:
-            windowCenter.x +
-            (centerUnit.value.x + imageCornerUnit.value.x) *
-                positionTranslation.value.x,
-        y:
-            windowCenter.y +
-            (centerUnit.value.y - imageCornerUnit.value.y) *
-                positionTranslation.value.y,
+        x: positionTranslation(imageCornerUnit.value.x, imageCornerUnit.value.y)
+            .x,
+        y: positionTranslation(imageCornerUnit.value.x, imageCornerUnit.value.y)
+            .y,
     }
 
     return currentViewCorner
@@ -99,8 +103,8 @@ const view = computed(() => {
     let window = {
         x: centerUnit.value.x,
         y: centerUnit.value.y,
-        height: positionTranslation.value.y * imageSizeUnits.value,
-        width: positionTranslation.value.x * imageSizeUnits.value,
+        height: unitsToPx.value.y * imageSizeUnits.value,
+        width: unitsToPx.value.x * imageSizeUnits.value,
     }
 
     return window
