@@ -56,7 +56,7 @@ onMounted(() => {
         imgDimPx.value.width = img.width
         currentScale.value = imageSizeUnits.value
     }
-    interval.value = setInterval(draw, 100)
+    interval.value = setInterval(draw, 10)
 })
 
 onBeforeUnmount(() => {
