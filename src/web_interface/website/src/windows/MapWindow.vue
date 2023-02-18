@@ -6,6 +6,12 @@ const props = defineProps(['windowDimensions', 'extraConfig'])
 const map = ref(null)
 const image = ref(null)
 const interval = ref(null)
+const isMoving = ref(false)
+
+const offset = ref({
+    x: 0,
+    y: 0,
+})
 
 const imgDimPx = ref({
     width: null,
@@ -132,21 +138,36 @@ const drawMap = () => {
 
 const drawPosition = () => {
     let ctx = map.value.getContext('2d')
-
-    console.log('kropka x' + currentPosUnit.value.x)
-    console.log('kropka y' + currentPosUnit.value.y)
-    console.log('obliczone x' + roverOnMapPos.value.x)
-    console.log('obliczone y' + roverOnMapPos.value.y)
     ctx.beginPath()
     ctx.lineWidth = 3
     ctx.strokeStyle = 'red'
     ctx.arc(roverOnMapPos.value.x, roverOnMapPos.value.y, 1, 1, Math.PI * 2)
     ctx.stroke()
 }
+
+const move = () => {
+    if (isMoving) {
+        centerUnit.value.x = offset.value.x / unitsToPx.value.x
+        centerUnit.value.y = offset.value.y / unitsToPx.value.y
+    }
+}
+
+const mouseDown = (e) => {
+    offset.value.x = e.offsetX
+    offset.value.y = e.offsetY
+    isMoving.value = true
+}
+
+const mouseUp = () => {
+    isMoving.value = false
+}
 </script>
 <template>
     <div
         @wheel="zoom"
+        @mousemove="move"
+        @mousedown="mouseDown"
+        @mouseup="mouseUp"
         :style="{
             display: 'flex',
             'align-items': 'center',
