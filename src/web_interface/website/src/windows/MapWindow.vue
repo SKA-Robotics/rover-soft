@@ -145,10 +145,16 @@ const drawPosition = () => {
     ctx.stroke()
 }
 
-const move = () => {
-    if (isMoving) {
-        centerUnit.value.x = offset.value.x / unitsToPx.value.x
-        centerUnit.value.y = offset.value.y / unitsToPx.value.y
+const move = (e) => {
+    if (isMoving.value) {
+        let deltaX = e.offsetX - offset.value.x
+        let deltaY = e.offsetY - offset.value.y
+
+        centerUnit.value.x += deltaX / unitsToPx.value.x
+        centerUnit.value.y += deltaY / unitsToPx.value.y
+
+        offset.value.x = e.offsetX
+        offset.value.y = e.offsetY
     }
 }
 
