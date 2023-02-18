@@ -27,7 +27,7 @@ const virtualImageCorner = ref({
     y: 3,
 })
 
-const scale = ref(6)
+const virtualImagSize = ref(6)
 const currentScale = ref(null)
 
 const roverOnMapPos = computed(() => {
@@ -46,7 +46,7 @@ onMounted(() => {
         image.value = img
         imgDim.value.height = img.height
         imgDim.value.width = img.width
-        currentScale.value = scale.value
+        currentScale.value = virtualImagSize.value
     }
     interval.value = setInterval(draw, 100)
 })
@@ -57,9 +57,9 @@ onBeforeUnmount(() => {
 
 const zoom = () => {
     if (event.deltaY > 0) {
-        return (currentScale.value *= 0.9)
-    } else if (event.deltaY < 0) {
         return (currentScale.value *= 1.1)
+    } else if (event.deltaY < 0) {
+        return (currentScale.value *= 0.9)
     }
 }
 
@@ -86,8 +86,8 @@ const dimensions = computed(() => {
 
 const unitsToPx = computed(() => {
     let change = {
-        y: imgDim.value.height / scale.value,
-        x: imgDim.value.width / scale.value,
+        y: imgDim.value.height / currentScale.value,
+        x: imgDim.value.width / currentScale.value,
     }
     console.log('unitspx' + change.x)
     return change
@@ -122,8 +122,8 @@ const view = computed(() => {
     let window = {
         x: centerPosition.value.x,
         y: centerPosition.value.y,
-        height: unitsToPx.value.y * currentScale.value,
-        width: unitsToPx.value.x * currentScale.value,
+        height: unitsToPx.value.y * virtualImagSize.value,
+        width: unitsToPx.value.x * virtualImagSize.value,
     }
 
     return window
