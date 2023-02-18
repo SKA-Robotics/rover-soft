@@ -22,6 +22,11 @@ const centerPosition = ref({
     y: 0,
 })
 
+const virtualImageCorner = ref({
+    x: -3,
+    y: 3,
+})
+
 const scale = ref(6)
 const currentScale = ref(null)
 
@@ -94,18 +99,22 @@ const windowStart = computed(() => {
         y: props.windowDimensions.height / 2,
     }
 
-    let imageCorner = {
+    let currentViewCorner = {
         x:
-            windowCenter.x -
-            Math.abs(0.5 * currentScale.value * unitsToPx.value.x),
-        y: windowCenter.y + Math.abs(currentScale.value * unitsToPx.value.y),
+            windowCenter.x +
+            (centerPosition.value.x + virtualImageCorner.value.x) *
+                unitsToPx.value.x,
+        y:
+            windowCenter.y +
+            (centerPosition.value.y - virtualImageCorner.value.y) *
+                unitsToPx.value.y,
     }
 
     console.log('srodek' + windowCenter.x)
     console.log('rogscale' + currentScale.value)
-    console.log('rog' + imageCorner.x)
+    console.log('rog' + currentViewCorner.x)
 
-    return imageCorner
+    return currentViewCorner
 })
 
 const view = computed(() => {
