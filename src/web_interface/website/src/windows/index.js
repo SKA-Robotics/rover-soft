@@ -5,8 +5,6 @@ import { useGstreamerStore, useRosStore } from '@/stores'
 import { Service, ServiceRequest } from 'roslib'
 import { ref } from 'vue'
 
-const topicsList = ref([])
-
 export default {
     testWindow: {
         typeName: 'Test Window',
@@ -67,25 +65,32 @@ export default {
             topicName: {
                 name: 'Topic Name',
                 type: 'select',
-                possibleValues: () => {
-                    setTimeout(() => {
+                possibleValues: function () {
+                    if (this.onInit) {
                         const rosStore = useRosStore()
                         const topicsClient = new Service({
                             ros: rosStore.ws,
                             name: '/rosapi/topics',
                             serviceType: 'rosapi/Topics',
                         })
-
                         const request = new ServiceRequest()
-
                         topicsClient.callService(request, (result) => {
-                            // console.log(result)
-                            topicsList.value = result.topics
+                            this.topicsList.value = result.topics
                         })
-                        // console.log('test')
-                    }, 1000)
-                    return topicsList.value
+
+                        setInterval(() => {
+                            topicsClient.callService(request, (result) => {
+                                // console.log(`in:  ${new Date().getTime()}`)
+                                this.topicsList.value = result.topics
+                            })
+                        }, 5000)
+                        this.onInit = false
+                    }
+                    // console.log(`out: ${new Date().getTime()}`)
+                    return this.topicsList.value
                 },
+                topicsList: ref([]),
+                onInit: true,
             },
             messageProperty: {
                 name: 'Message Property',

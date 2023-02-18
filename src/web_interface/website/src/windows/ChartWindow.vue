@@ -25,7 +25,7 @@ const props = defineProps(['extraConfig'])
 
 const rosStore = useRosStore()
 
-// getting settings update
+// getting config update
 const config = ref(JSON.parse(JSON.stringify(props.extraConfig)))
 watch(props, () => {
     config.value = ref(JSON.parse(JSON.stringify(props.extraConfig)))
@@ -57,7 +57,7 @@ const topicName = ref(null)
 const messageType = ref(null)
 const messageProperty = ref(null)
 const title = computed(() => {
-    return `Topic name: ${topicName.value}, Message type: ${messageType.value}`
+    return `Topic name: ${topicName.value},  Message type: ${messageType.value}`
 })
 const refreshingTimer = ref(null)
 
@@ -65,7 +65,7 @@ const refreshingTimer = ref(null)
 const startTime = ref(0)
 const listener = ref(null)
 function setListener() {
-    console.log(`Listner got message with type: ${messageType.value}`)
+    // console.log(`Listner got message with type: ${messageType.value}`)
     if (!messageProperty.value) messageProperty.value = 'linear/x'
     messageProperty.value.trim()
     const keys = messageProperty.value.split('/')
@@ -77,7 +77,14 @@ function setListener() {
     if (listener.value) listener.value.unsubscribe()
     const currentDate = new Date()
     startTime.value = currentDate.getTime() / 1000
-    options.value.scales.x.title.text = `Time [s] starting at ${currentDate.getHours()}:${currentDate.getMinutes()}:${currentDate.getSeconds()}`
+    let hours = currentDate.getHours().toFixed(0)
+    if (hours.length < 2) hours = '0' + hours
+    let minutes = currentDate.getMinutes().toFixed(0)
+    if (minutes.length < 2) minutes = '0' + minutes
+    let seconds = currentDate.getSeconds().toFixed(0)
+    if (seconds.length < 2) seconds = '0' + seconds
+    options.value.scales.x.title.text = `Time [s] starting at ${hours}:${minutes}:${seconds}`
+
     listener.value = new Topic({
         ros: rosStore.ws,
         name: topicName,
@@ -85,7 +92,7 @@ function setListener() {
     })
     listener.value.subscribe((msg) => {
         keys.forEach((key) => {
-            msg = msg[key]
+            if (key != '') msg = msg[key]
         })
         let point = {
             x: new Date().getTime() / 1000 - startTime.value,
@@ -155,12 +162,12 @@ onBeforeMount(() => {
         elements: {
             point: {
                 radius: 1,
-                borderColor: 'red',
-                backgroundColor: 'red',
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000',
             },
             line: {
-                borderColor: 'red',
-                backgroundColor: 'red',
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000',
             },
         },
     }
