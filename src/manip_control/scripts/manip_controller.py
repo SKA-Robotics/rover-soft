@@ -2,8 +2,9 @@
 import rospy
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import PointStamped
+from sirius_msgs.msg import ManipPose
 
-from sirius_ik import IKSolver, IKTarget
+from sirius_ik import IKSolver
 
 class SiriusManip:
     def __init__(self):
@@ -27,12 +28,17 @@ class SiriusManip:
         msg.point = data.point
         self.point_publisher.publish(msg)
 
-        self.moveTo(point=data, pitch=0.0)
+        target = ManipPose()
+        target.x = msg.point.x
+        target.y = msg.point.y
+        target.z = msg.point.z
+        target.pitch = -3.14/6
 
-    def moveTo(self, point : PointStamped, pitch : float):
-        target = IKTarget(point.point.x, point.point.y, point.point.z, pitch)
+        self.moveTo(target)
+
+    def moveTo(self, pose : ManipPose):
         try:
-            jointstate = self.solver.getIKSolution(target)
+            jointstate = self.solver.getIKSolution(pose)
             jointstate.header.stamp = rospy.Time.now()
             jointstate.name = [ "base_cyl",
                                 "cyl_arm1",
@@ -44,6 +50,8 @@ class SiriusManip:
             #TODO add diagnostic information
             rospy.logwarn("Could not move to target point")
             rospy.logwarn(e)
+
+    # TODO add straight-line movement (target interpolation)
 
     def run(self):
         rospy.spin()

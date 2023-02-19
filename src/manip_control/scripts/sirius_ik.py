@@ -3,6 +3,7 @@ import math
 import graphics
 import time
 from sensor_msgs.msg import JointState
+from sirius_msgs.msg import ManipPose
 
 
 def checkBounds(value, bounds):
@@ -15,23 +16,13 @@ def list_to_jointstate(angles: list) -> JointState:
     return j
 
 
-# Represents target point with rotation along one axis
-class IKTarget:
-
-    def __init__(self, x, y, z, alpha):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.alpha = alpha
-
-
 class IKSolver:
 
     def __init__(self, linkLengths: list, limits: list):
         self.limits = limits
         self.lengths = linkLengths
 
-    def getIKSolution(self, target: IKTarget) -> JointState:
+    def getIKSolution(self, target: ManipPose) -> JointState:
         solution = JointState()
         solution.position = [0] * 4
         limits = self.limits
@@ -45,7 +36,7 @@ class IKSolver:
 
         d = math.sqrt(x * x + y * y)
         z = target.z - l[0]
-        alpha = target.alpha
+        alpha = target.pitch
 
         dp = d - l[3] * math.cos(alpha)
         zp = z + l[3] * math.sin(alpha)
