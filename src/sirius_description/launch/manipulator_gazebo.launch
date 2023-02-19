@@ -50,9 +50,9 @@
         joint_state_controller
     "/>
 
-    <node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+    <!--<node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
     <node unless="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    
+    -->
     <node if="$(arg rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find sirius_description)/rviz/manipulator.rviz" />
 
 </launch>

@@ -25,9 +25,9 @@ class IKTarget:
         self.alpha = alpha
 
 
-class Solver:
+class IKSolver:
 
-    def __init__(self, linkLengths: list, limits: list) -> None:
+    def __init__(self, linkLengths: list, limits: list):
         self.limits = limits
         self.lengths = linkLengths
 
@@ -132,7 +132,7 @@ class Visualization:
         self.mouse_y = -(event.y - 250) / 20
 
     def run(self):
-        solver = Solver([1, 3, 3, 1], [(-3, 3), (-3, 3), (-3, 3), (-3, 3)])
+        solver = IKSolver([1, 3, 3, 1], [(-3, 3), (-3, 3), (-3, 3), (-3, 3)])
         while True:
 
             key = self.window.checkKey()
