@@ -8,13 +8,16 @@ from sensor_msgs.msg import JointState
 def checkBounds(value, bounds):
     return value >= bounds[0] and value <= bounds[1]
 
-def list_to_jointstate(angles : list) -> JointState:
-        j = JointState()
-        j.position = [angle for angle in angles]
-        return j
+
+def list_to_jointstate(angles: list) -> JointState:
+    j = JointState()
+    j.position = [angle for angle in angles]
+    return j
+
 
 # Represents target point with rotation along one axis
 class IKTarget:
+
     def __init__(self, x, y, z, alpha):
         self.x = x
         self.y = y
@@ -23,11 +26,12 @@ class IKTarget:
 
 
 class Solver:
-    def __init__(self, linkLengths : list, limits : list) -> None:
+
+    def __init__(self, linkLengths: list, limits: list) -> None:
         self.limits = limits
         self.lengths = linkLengths
-        
-    def getIKSolution(self, target : IKTarget) -> JointState:
+
+    def getIKSolution(self, target: IKTarget) -> JointState:
         solution = JointState()
         solution.position = [0] * 4
         limits = self.limits
@@ -67,8 +71,10 @@ class Solver:
         solution.position[2] = beta + gamma
         solution.position[3] = alpha - gamma
 
-        if all(
-            [checkBounds(solution.position[i], limits[i]) for i in range(1, len(solution.position))]):
+        if all([
+                checkBounds(solution.position[i], limits[i])
+                for i in range(1, len(solution.position))
+        ]):
             return solution
 
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp -
@@ -91,8 +97,10 @@ class Solver:
         solution.position[2] = beta + gamma
         solution.position[3] = alpha - gamma
 
-        if all(
-            [checkBounds(solution.position[i], limits[i]) for i in range(1, len(solution.position))]):
+        if all([
+                checkBounds(solution.position[i], limits[i])
+                for i in range(1, len(solution.position))
+        ]):
             return solution
 
         raise Exception("No IK solution!")
@@ -116,20 +124,30 @@ class Visualization:
         self.links[1].localAngle = math.pi / 6
         self.links[2].localAngle = math.pi / 2
         self.links[3].localAngle = -math.pi / 4
-    
+
+        self.target_angle = 0
+
     def motion(self, event):
         self.mouse_x = (event.x - 250) / 20
         self.mouse_y = -(event.y - 250) / 20
 
     def run(self):
-        solver = Solver([1, 3, 3, 1], [(-3, 3),(-3, 3),(-3, 3),(-3, 3)])
+        solver = Solver([1, 3, 3, 1], [(-3, 3), (-3, 3), (-3, 3), (-3, 3)])
         while True:
+
+            key = self.window.checkKey()
+            if key == "a":
+                self.target_angle += 0.1
+            if key == "d":
+                self.target_angle -= 0.1
+
             for link in self.links:
                 pos = link.get_end_position()
                 self.window.plot(250 + pos[0] * 20, 250 - pos[1] * 20, "white")
             try:
                 solution = solver.getIKSolution(
-                    IKTarget(self.mouse_x, 0, self.mouse_y, -math.pi / 6))
+                    IKTarget(self.mouse_x, 0, self.mouse_y, self.target_angle)
+                )
                 for i in range(1, 4):
                     self.links[i].localAngle = solution.position[i]
                 print(solution)
