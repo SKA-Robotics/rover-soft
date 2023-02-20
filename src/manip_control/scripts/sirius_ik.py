@@ -1,46 +1,53 @@
 #!/usr/bin/python3
 import math
-import graphics
-import time
 from sensor_msgs.msg import JointState
 from sirius_msgs.msg import ManipPose
 
-
-def checkBounds(value, bounds):
-    return value >= bounds[0] and value <= bounds[1]
+JOINT_NAMES = ["base_cyl", "cyl_arm1", "arm1_arm2", "arm2_arm3"]
 
 
-def list_to_jointstate(angles: list) -> JointState:
-    j = JointState()
-    j.position = [angle for angle in angles]
-    return j
-
-
+# Class implementing kinematics of SiriusII manipulator
 class IKSolver:
 
     def __init__(self, linkLengths: list, limits: list):
         self.limits = limits
         self.lengths = linkLengths
 
-    def getIKSolution(self, target: ManipPose) -> JointState:
+    # Calculates angles of all joints given target position
+    def get_IK_solution(self, target: ManipPose) -> JointState:
+        # Initialize solution JointState object
         solution = JointState()
+        solution.name = JOINT_NAMES
         solution.position = [0] * 4
+
         limits = self.limits
         l = self.lengths
-
         x = target.x
         y = target.y
+
+        # Calculate solution using SiriusII-specific IK formula
+        # First joint angle can be easily obtained as it is
+        # the only joint allowing for movement along y-axis
         solution.position[0] = math.atan2(y, x)
         if not checkBounds(solution.position[0], limits[0]):
             raise Exception("No IK solution!")
 
+        # Project target position to manip plane
         d = math.sqrt(x * x + y * y)
+        # Translate, so link 0 length does not need to be considered 
+        # in formulas below
         z = target.z - l[0]
-        alpha = target.pitch
 
+        # Find 3rd link's start position given its absolute angle
+        # (target.alpha) and end position (target position)
+        alpha = target.pitch
         dp = d - l[3] * math.cos(alpha)
         zp = z + l[3] * math.sin(alpha)
 
+        # Find 2nd link's start position
+        # The geometry constraints lead to equation system with 
+        # two solutions. Due to physical constraints of the manipulator 
+        # only one of these solutions will be possible to reach
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp -
                (zp *
                 (dp * math.sqrt(
@@ -56,18 +63,21 @@ class IKSolver:
                (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 +
                                                      (zp * zp) * 2.0)
 
+        # Given the position, angles of the joints can be calculated
         beta = math.atan2(zpp, dpp)
         solution.position[1] = math.pi / 2 - beta
         gamma = math.atan2(zpp - zp, dp - dpp)
         solution.position[2] = beta + gamma
         solution.position[3] = alpha - gamma
 
+        # Check if the calculated angles are within manipulator's limits
         if all([
                 checkBounds(solution.position[i], limits[i])
                 for i in range(1, len(solution.position))
         ]):
             return solution
 
+        # If the previous solution did not pass the check, try the second solution
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp -
                (zp *
                 (-dp * math.sqrt(
@@ -87,96 +97,45 @@ class IKSolver:
         gamma = math.atan2(zpp - zp, dp - dpp)
         solution.position[2] = beta + gamma
         solution.position[3] = alpha - gamma
-
         if all([
                 checkBounds(solution.position[i], limits[i])
                 for i in range(1, len(solution.position))
         ]):
             return solution
 
+        # Both of the solutions are wrong. Exception is to be thrown
         raise Exception("No IK solution!")
 
+    # Calculates manipulator's tip pose given joint angles
+    def get_FK_solution(self, jointstate: JointState) -> ManipPose:
+        # Check if all necessary joint states are given
+        if not all(
+            [joint_name in jointstate.name for joint_name in JOINT_NAMES]):
+            raise Exception("Incorrect Jointstate names given.")
 
-# Code below was used for debugging during implementation of analytical IK solution. Won't be needed
-class Visualization:
+        # Extract needed angles from jointstate
+        angles = []
+        for joint_name in JOINT_NAMES:
+            angles.append(
+                jointstate.position[jointstate.name.index(joint_name)])
 
-    def __init__(self) -> None:
-        self.window = graphics.GraphWin("IK solver", 500, 500)
-        self.window.bind("<Motion>", self.motion)
-        self.window.setBackground("white")
-        self.mouse_x = 0
-        self.mouse_y = 0
+        l = self.lengths
+        solution = ManipPose()
 
-        self.links = [Link(1, None)]
-        self.links.append(Link(3, self.links[-1]))
-        self.links.append(Link(3, self.links[-1]))
-        self.links.append(Link(1, self.links[-1]))
-        self.links[0].localAngle = -math.pi / 2
-        self.links[1].localAngle = math.pi / 6
-        self.links[2].localAngle = math.pi / 2
-        self.links[3].localAngle = -math.pi / 4
+        # Calculate solution using SiriusII-specific FK formula
+        d = l[1] * math.sin(angles[1]) + l[2] * math.sin(
+            angles[1] + angles[2]) + l[3] * math.sin(angles[1] + angles[2] +
+                                                     angles[3])
+        z = l[1] * math.cos(angles[1]) + l[2] * math.cos(
+            angles[1] + angles[2]) + l[3] * math.cos(angles[1] + angles[2] +
+                                                     angles[3])
+        solution.z = z + l[0]
+        solution.x = d * math.cos(angles[0])
+        solution.y = d * math.sin(angles[0])
+        solution.pitch = 0.5 * math.pi - angles[1] - angles[2] - angles[3]
 
-        self.target_angle = 0
-
-    def motion(self, event):
-        self.mouse_x = (event.x - 250) / 20
-        self.mouse_y = -(event.y - 250) / 20
-
-    def run(self):
-        solver = IKSolver([1, 3, 3, 1], [(-3, 3), (-3, 3), (-3, 3), (-3, 3)])
-        while True:
-
-            key = self.window.checkKey()
-            if key == "a":
-                self.target_angle += 0.1
-            if key == "d":
-                self.target_angle -= 0.1
-
-            for link in self.links:
-                pos = link.get_end_position()
-                self.window.plot(250 + pos[0] * 20, 250 - pos[1] * 20, "white")
-            try:
-                solution = solver.getIKSolution(
-                    IKTarget(self.mouse_x, 0, self.mouse_y, self.target_angle)
-                )
-                for i in range(1, 4):
-                    self.links[i].localAngle = solution.position[i]
-                print(solution)
-            except Exception as e:
-                print(e)
-                print(e.__traceback__.tb_next.tb_lineno)
-
-            self.window.plot(250, 250)
-            for link in self.links:
-                pos = link.get_end_position()
-                self.window.plot(250 + pos[0] * 20, 250 - pos[1] * 20)
-            time.sleep(0.1)
+        return solution
 
 
-class Link:
-
-    def __init__(self, length, parent) -> None:
-        self.length = length
-        self.localAngle = 0
-        self.parent = parent
-
-    def get_global_angle(self):
-        if self.parent is None:
-            return self.localAngle
-        else:
-            return self.localAngle + self.parent.get_global_angle()
-
-    def get_end_position(self):
-        angle = self.get_global_angle()
-        dx = self.length * math.cos(-angle)
-        dy = self.length * math.sin(-angle)
-        if self.parent is None:
-            return (dx, dy)
-        else:
-            parentEndPos = self.parent.get_end_position()
-            return (parentEndPos[0] + dx, parentEndPos[1] + dy)
-
-
-if __name__ == "__main__":
-    v = Visualization()
-    v.run()
+def checkBounds(value, bounds):
+    return value >= bounds[0] and value <= bounds[1]

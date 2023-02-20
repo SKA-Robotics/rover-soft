@@ -6,7 +6,10 @@ from sirius_msgs.msg import ManipPose
 
 from sirius_ik import IKSolver
 
+
+# Class for controlling the manipulator
 class SiriusManip:
+
     def __init__(self):
         rospy.init_node("manip_controller")
 
@@ -15,41 +18,48 @@ class SiriusManip:
         limits = [(-3, 3), (-3, 3), (-3, 3), (-3, 3)]
         self.solver = IKSolver(linkLengths, limits)
 
-        rospy.Subscriber("/clicked_point", PointStamped, self.point_callback, queue_size=10)
-        self.point_publisher = rospy.Publisher("/received_point", PointStamped, queue_size=10)
-        self.jointstate_publisher = rospy.Publisher("/joint_states", JointState, queue_size=10)
+        rospy.Subscriber("/clicked_point",
+                         PointStamped,
+                         self.point_callback,
+                         queue_size=10)
+        self.point_publisher = rospy.Publisher("/received_point",
+                                               PointStamped,
+                                               queue_size=10)
+        self.jointstate_publisher = rospy.Publisher("/joint_states",
+                                                    JointState,
+                                                    queue_size=10)
         self.rate = rospy.Rate(10.0)
 
     def point_callback(self, data):
         rospy.loginfo("Received request:\n" + str(data.point))
-        msg = PointStamped()
-        msg.header.stamp = rospy.Time.now()
-        msg.header.frame_id = "base_link"
-        msg.point = data.point
-        self.point_publisher.publish(msg)
 
         target = ManipPose()
-        target.x = msg.point.x
-        target.y = msg.point.y
-        target.z = msg.point.z
-        target.pitch = -3.14/6
+        target.x = data.point.x
+        target.y = data.point.y
+        target.z = data.point.z
+        target.pitch = -3.14 / 6
 
         self.moveTo(target)
 
-    def moveTo(self, pose : ManipPose):
+    def moveTo(self, pose: ManipPose):
+        jointstate = JointState()
         try:
-            jointstate = self.solver.getIKSolution(pose)
+            jointstate = self.solver.get_IK_solution(pose)
             jointstate.header.stamp = rospy.Time.now()
-            jointstate.name = [ "base_cyl",
-                                "cyl_arm1",
-                                "arm1_arm2",
-                                "arm2_arm3"
-                              ]
             self.jointstate_publisher.publish(jointstate)
         except Exception as e:
             #TODO add diagnostic information
             rospy.logwarn("Could not move to target point")
             rospy.logwarn(e)
+
+        ik_fk = self.solver.get_FK_solution(jointstate)
+        msg = PointStamped()
+        msg.header.stamp = rospy.Time.now()
+        msg.header.frame_id = "root_link"
+        msg.point.x = ik_fk.x
+        msg.point.y = ik_fk.y
+        msg.point.z = ik_fk.z
+        self.point_publisher.publish(msg)
 
     # TODO add straight-line movement (target interpolation)
 
@@ -57,5 +67,5 @@ class SiriusManip:
         rospy.spin()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     SiriusManip().run()
