@@ -1,13 +1,6 @@
 <script setup>
 import { useRosStore } from '@/stores'
-import {
-    defineProps,
-    onBeforeMount,
-    watch,
-    ref,
-    computed,
-    shallowRef,
-} from 'vue'
+import { defineProps, watch, ref, computed, shallowRef } from 'vue'
 import { Service, ServiceRequest, Topic } from 'roslib'
 import { Scatter } from 'vue-chartjs'
 import {
@@ -26,11 +19,11 @@ const props = defineProps(['extraConfig'])
 const rosStore = useRosStore()
 
 // getting config update
-const config = ref(JSON.parse(JSON.stringify(props.extraConfig)))
+const config = ref(props.extraConfig)
 watch(props, () => {
-    config.value = ref(JSON.parse(JSON.stringify(props.extraConfig)))
-    topicName.value = config.value.topicName
-    messageProperty.value = config.value.messageProperty
+    config.value = props.extraConfig
+    topicName.value = props.extraConfig.topicName
+    messageProperty.value = props.extraConfig.messageProperty
 
     const topicsClient = new Service({
         ros: rosStore.ws,
@@ -66,7 +59,7 @@ const startTime = ref(0)
 const listener = ref(null)
 function setListener() {
     // console.log(`Listner got message with type: ${messageType.value}`)
-    if (!messageProperty.value) messageProperty.value = 'linear/x'
+    if (!messageProperty.value) messageProperty.value = ''
     messageProperty.value.trim()
     const keys = messageProperty.value.split('/')
     options.value.scales.y.title.text = messageProperty.value
@@ -91,9 +84,14 @@ function setListener() {
         messageType: messageType,
     })
     listener.value.subscribe((msg) => {
-        keys.forEach((key) => {
-            if (key != '') msg = msg[key]
-        })
+        try {
+            keys.forEach((key) => {
+                if (key != '') msg = msg[key]
+            })
+        } catch (error) {
+            console.log(`Message: ${msg} results an error occurance. ${error}`)
+            return
+        }
         let point = {
             x: new Date().getTime() / 1000 - startTime.value,
             y: parseFloat(msg),
@@ -110,67 +108,63 @@ function rerenderChart() {
 }
 
 // setting initial configuration
-const data = ref(null)
-const options = ref(null)
-onBeforeMount(() => {
-    data.value = {
-        datasets: [
-            {
-                label: 'ROS value [u]',
-                fill: false,
-                borderColor: '#f87979',
-                backgroundColor: '#f87979',
-                data: shallowRef([{ x: Number, y: Number }]),
-            },
-        ],
-    }
-    options.value = {
-        responsive: true,
-        maintainAspectRatio: false,
-        showLine: true,
-        animation: false,
-        scales: {
-            x: {
-                display: true,
-                title: {
-                    display: true,
-                    text: 'Time [s]',
-                },
-                beginAtZero: true,
-            },
-            y: {
-                display: true,
-                title: {
-                    display: true,
-                    text: 'ROS value [u]',
-                },
-            },
+const data = ref({
+    datasets: [
+        {
+            label: 'ROS value [u]',
+            fill: false,
+            borderColor: '#f87979',
+            backgroundColor: '#f87979',
+            data: shallowRef([{ x: Number, y: Number }]),
         },
-        plugins: {
-            legend: {
-                display: false,
-            },
+    ],
+})
+const options = ref({
+    responsive: true,
+    maintainAspectRatio: false,
+    showLine: true,
+    animation: false,
+    scales: {
+        x: {
+            display: true,
             title: {
                 display: true,
-                text: title,
-                padding: {
-                    top: 0,
-                    bottom: 10,
-                },
+                text: 'Time [s]',
+            },
+            beginAtZero: true,
+        },
+        y: {
+            display: true,
+            title: {
+                display: true,
+                text: 'ROS value [u]',
             },
         },
-        elements: {
-            point: {
-                radius: 1,
-                borderColor: '#ff0000',
-                backgroundColor: '#ff0000',
-            },
-            line: {
-                borderColor: '#ff0000',
-                backgroundColor: '#ff0000',
+    },
+    plugins: {
+        legend: {
+            display: false,
+        },
+        title: {
+            display: true,
+            text: title,
+            padding: {
+                top: 0,
+                bottom: 10,
             },
         },
-    }
+    },
+    elements: {
+        point: {
+            radius: 1,
+            borderColor: '#ff0000',
+            backgroundColor: '#ff0000',
+        },
+        line: {
+            borderColor: '#ff0000',
+            backgroundColor: '#ff0000',
+        },
+    },
 })
 </script>
 

@@ -2,8 +2,6 @@ import TestWindow from './TestWindow.vue'
 import CameraWindow from './CameraWindow.vue'
 import ChartWindow from './ChartWindow.vue'
 import { useGstreamerStore, useRosStore } from '@/stores'
-import { Service, ServiceRequest } from 'roslib'
-import { ref } from 'vue'
 
 export default {
     testWindow: {
@@ -66,31 +64,13 @@ export default {
                 name: 'Topic Name',
                 type: 'select',
                 possibleValues: function () {
-                    if (this.onInit) {
-                        const rosStore = useRosStore()
-                        const topicsClient = new Service({
-                            ros: rosStore.ws,
-                            name: '/rosapi/topics',
-                            serviceType: 'rosapi/Topics',
-                        })
-                        const request = new ServiceRequest()
-                        topicsClient.callService(request, (result) => {
-                            this.topicsList.value = result.topics
-                        })
-
-                        setInterval(() => {
-                            topicsClient.callService(request, (result) => {
-                                // console.log(`in:  ${new Date().getTime()}`)
-                                this.topicsList.value = result.topics
-                            })
-                        }, 5000)
-                        this.onInit = false
+                    if (!this.rosStore) {
+                        this.rosStore = useRosStore()
+                        this.rosStore.searchTopics()
                     }
-                    // console.log(`out: ${new Date().getTime()}`)
-                    return this.topicsList.value
+                    return this.rosStore.topicsList
                 },
-                topicsList: ref([]),
-                onInit: true,
+                rosStore: undefined,
             },
             messageProperty: {
                 name: 'Message Property',
