@@ -1,6 +1,7 @@
 <script setup>
 import { defineProps } from 'vue'
 import { useViewModeStore } from '@/stores'
+import { morelowy } from './../../assets/pwColors.json'
 
 const props = defineProps(['show'])
 
@@ -44,7 +45,13 @@ const { editMode, toggleDiagnostics } = viewModeStore
                 @click.stop="toggleDiagnostics()"
                 v-show="props.show"
             >
-                <v-icon>mdi-alert</v-icon>
+                <v-badge
+                    :color="morelowy"
+                    content="7"
+                >
+                    <!-- @TODO: Connect with backend-->
+                    <v-icon>mdi-alert</v-icon>
+                </v-badge>
             </v-btn>
         </v-fab-transition>
     </div>
