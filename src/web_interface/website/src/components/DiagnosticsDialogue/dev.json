@@ -1,0 +1,87 @@
+{
+  "categories": [
+    {
+      "name": "All",
+      "icon": "mdi-car",
+      "displayAll": true
+    },
+    {
+      "name": "Movement",
+      "icon": "mdi-tire"
+    },
+    {
+      "name": "Power",
+      "icon": "mdi-battery-high"
+    },
+    {
+      "name": "Steering",
+      "icon": "mdi-steering"
+    },
+    {
+      "name": "Vision",
+      "icon": "mdi-cctv"
+    },
+    {
+      "name": "Sensors",
+      "icon": "mdi-leak"
+    },
+    {
+      "name": "Other",
+      "icon": "mdi-package"
+    }
+  ],
+  "events": [
+    {
+      "timestamp": 1676978632247,
+      "level": "error",
+      "category": "power",
+      "name": "Low level",
+      "message": "Battery level is below 10%!",
+      "values": {
+        "level": "9%"
+      }
+    },
+    {
+      "timestamp": 1676977929247,
+      "level": "warning",
+      "category": "movement",
+      "name": "Slip detected",
+      "message": "Detected slip on the frontal right wheel"
+    },
+    {
+      "timestamp": 1676977680247,
+      "level": "warning",
+      "category": "movement",
+      "name": "Slip detected",
+      "message": "Detected slip on the frontal left wheel"
+    },
+    {
+      "timestamp": 1676979963247,
+      "level": "info",
+      "category": "steering",
+      "name": "Received controller move",
+      "message": "Successfully received message from controller"
+    },
+    {
+      "timestamp": 1676977426247,
+      "level": "error",
+      "category": "vision",
+      "name": "Camera disconnected",
+      "message": "Camera #1 was disconnected"
+    },
+    {
+      "timestamp": 1676979014247,
+      "level": "warning",
+      "category": "sensors",
+      "name": "Invalid data",
+      "message": "Received invalid value from the rain sensor"
+    },
+    {
+      "timestamp": 1676979312247,
+      "level": "stale",
+      "category": "other",
+      "name": "Ready",
+      "message": "The rover is ready to operate"
+    }
+  ]
+}

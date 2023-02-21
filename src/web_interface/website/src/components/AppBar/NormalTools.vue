@@ -5,7 +5,7 @@ import { useViewModeStore } from '@/stores'
 const props = defineProps(['show'])
 
 const viewModeStore = useViewModeStore()
-const { editMode } = viewModeStore
+const { editMode, toggleDiagnostics } = viewModeStore
 </script>
 <template>
     <div>
@@ -41,6 +41,7 @@ const { editMode } = viewModeStore
             <v-btn
                 icon
                 color="primary"
+                @click.stop="toggleDiagnostics()"
                 v-show="props.show"
             >
                 <v-icon>mdi-alert</v-icon>

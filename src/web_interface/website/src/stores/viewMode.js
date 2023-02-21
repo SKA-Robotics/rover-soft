@@ -22,6 +22,12 @@ export const useViewModeStore = defineStore('viewMode', () => {
         editDrawer.value = !editDrawer.value
     }
 
+    const diagnostics = ref(false)
+
+    function toggleDiagnostics() {
+        diagnostics.value = !diagnostics.value
+    }
+
     return {
         mode,
         editMode,
@@ -29,5 +35,8 @@ export const useViewModeStore = defineStore('viewMode', () => {
 
         editDrawer,
         toggleEditDrawer,
+
+        diagnostics,
+        toggleDiagnostics,
     }
 })

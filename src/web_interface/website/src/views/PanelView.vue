@@ -1,3 +1,4 @@
+<script src="../stores/ros.js"></script>
 <script setup>
 import { computed } from 'vue'
 import { GridLayout, GridItem } from 'vue-grid-layout'
@@ -9,6 +10,7 @@ import BatteryBar from '@/components/BatteryBar.vue'
 
 import { useViewModeStore, useLayoutStore } from '@/stores'
 import PanelWindow from '@/components/PanelWindow'
+import DiagnosticsDialogue from '@/components/DiagnosticsDialogue/DiagnosticsDialogue.vue'
 
 const viewModeStore = useViewModeStore()
 const layoutStore = useLayoutStore()
@@ -21,6 +23,7 @@ const isEditMode = computed(() => viewModeStore.mode === 'edit')
         <NavigationDrawer />
         <BatteryBar />
         <EditDrawer />
+        <DiagnosticsDialogue />
         <v-main>
             <div
                 class="grey lighten-4 content-wrapper"
