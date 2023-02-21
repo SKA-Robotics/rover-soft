@@ -3,21 +3,21 @@ import math
 from sensor_msgs.msg import JointState
 from sirius_msgs.msg import ManipPose
 
-JOINT_NAMES = ["base_cyl", "cyl_arm1", "arm1_arm2", "arm2_arm3"]
 
 
 # Class implementing kinematics of SiriusII manipulator
 class IKSolver:
 
-    def __init__(self, linkLengths: list, limits: list):
+    def __init__(self, names, lengths, limits):
+        self.joint_names = names
         self.limits = limits
-        self.lengths = linkLengths
+        self.lengths = lengths
 
     # Calculates angles of all joints given target position
     def get_IK_solution(self, target: ManipPose) -> JointState:
         # Initialize solution JointState object
         solution = JointState()
-        solution.name = JOINT_NAMES
+        solution.name = self.joint_names
         solution.position = [0] * 4
 
         limits = self.limits
@@ -110,12 +110,12 @@ class IKSolver:
     def get_FK_solution(self, jointstate: JointState) -> ManipPose:
         # Check if all necessary joint states are given
         if not all(
-            [joint_name in jointstate.name for joint_name in JOINT_NAMES]):
+            [joint_name in jointstate.name for joint_name in self.joint_names]):
             raise Exception("Incorrect Jointstate names given.")
 
         # Extract needed angles from jointstate
         angles = []
-        for joint_name in JOINT_NAMES:
+        for joint_name in self.joint_names:
             angles.append(
                 jointstate.position[jointstate.name.index(joint_name)])
 
