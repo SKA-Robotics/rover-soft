@@ -4,3 +4,9 @@ control_modes:
     acceleration: 0.07
     max_error: 0.001
     interpolation_rate: 10.0
+  jointspace:
+    max_velocity: 0.21
+    acceleration: 0.07
+    max_error: 0.001
+    interpolation_rate: 10.0
+
