@@ -75,6 +75,7 @@ export default {
             messageProperty: {
                 name: 'Message Property',
                 type: 'text',
+                hide: () => false,
             },
             refreshingFrequency: {
                 name: 'Refreshing Frequency',

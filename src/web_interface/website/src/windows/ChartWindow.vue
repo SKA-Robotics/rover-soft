@@ -1,7 +1,7 @@
 <script setup>
 import { useRosStore } from '@/stores'
 import { defineProps, watch, ref, computed, shallowRef } from 'vue'
-import { Service, ServiceRequest, Topic } from 'roslib'
+import { Topic } from 'roslib'
 import { Scatter } from 'vue-chartjs'
 import {
     LinearScale,
@@ -25,15 +25,7 @@ watch(props, () => {
     topicName.value = props.extraConfig.topicName
     messageProperty.value = props.extraConfig.messageProperty
 
-    const topicsClient = new Service({
-        ros: rosStore.ws,
-        name: '/rosapi/topics',
-        serviceType: 'rosapi/Topics',
-    })
-
-    const request = new ServiceRequest()
-
-    topicsClient.callService(request, (result) => {
+    rosStore.ws.getTopics((result) => {
         // console.log(result)
         result.topics.forEach((name, index) => {
             if (name == topicName.value) messageType.value = result.types[index]

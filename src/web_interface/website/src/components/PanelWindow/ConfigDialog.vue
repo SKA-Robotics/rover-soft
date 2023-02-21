@@ -10,9 +10,21 @@ const windowTypes = Object.entries(windows).map(([type, window]) => ({
 }))
 const configOptions = computed(() =>
     tempConfig.value.type in windows
-        ? Object.entries(windows[tempConfig.value.type].configOptions)
+        ? Object.entries(windows[tempConfig.value.type].configOptions).filter(
+              (input) => !isHidden.value[input[0]]
+          )
         : []
 )
+const isHidden = computed(() => {
+    let dict = {}
+    tempConfig.value.type in windows
+        ? Object.entries(windows[tempConfig.value.type].configOptions).map(
+              ([name, obj]) =>
+                  (dict[name] = obj.hide !== undefined && obj.hide())
+          )
+        : {}
+    return dict
+})
 
 const tempConfig = ref(JSON.parse(JSON.stringify(props.config)))
 watch(props, () => {
