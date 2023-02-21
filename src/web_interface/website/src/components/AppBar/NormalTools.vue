@@ -1,7 +1,11 @@
 <script setup>
 import { defineProps } from 'vue'
 import { useViewModeStore } from '@/stores'
-import { morelowy } from './../../assets/pwColors.json'
+import { events } from './../DiagnosticsDialogue/dev.json'
+import {
+    getEventsByCategoryName,
+    getSeverityColorForCategory,
+} from '@/components/DiagnosticsDialogue/helpers'
 
 const props = defineProps(['show'])
 
@@ -46,8 +50,8 @@ const { editMode, toggleDiagnostics } = viewModeStore
                 v-show="props.show"
             >
                 <v-badge
-                    :color="morelowy"
-                    content="7"
+                    :color="getSeverityColorForCategory(events, 'all')"
+                    :content="getEventsByCategoryName(events, 'all').length"
                 >
                     <!-- @TODO: Connect with backend-->
                     <v-icon>mdi-alert</v-icon>

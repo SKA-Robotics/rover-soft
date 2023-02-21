@@ -3,6 +3,11 @@ import { computed, ref } from 'vue'
 import { useViewModeStore } from '@/stores'
 import { categories, events } from './dev.json'
 import DiagnosticsEvent from '@/components/DiagnosticsDialogue/DiagnosticsEvent.vue'
+import {
+    getEventsByCategory,
+    getEventsByCategoryName,
+    getSeverityColorForCategory,
+} from '@/components/DiagnosticsDialogue/helpers'
 
 const viewModeStore = useViewModeStore()
 const { toggleDiagnostics } = viewModeStore
@@ -11,18 +16,7 @@ const sortedEvents = events.sort((a, b) => b.timestamp - a.timestamp)
 const selectedCategory = ref(0)
 const displayEvents = computed(() => {
     const category = categories[selectedCategory.value]
-
-    if (!category) {
-        return sortedEvents
-    }
-
-    if ('displayAll' in category && category.displayAll === true) {
-        return sortedEvents
-    }
-
-    return sortedEvents.filter(
-        (e) => e.category === category.name.toLowerCase()
-    )
+    return getEventsByCategory(sortedEvents, category)
 })
 </script>
 <template>
@@ -65,7 +59,22 @@ const displayEvents = computed(() => {
                                         :key="i"
                                     >
                                         <v-list-item-icon>
-                                            <v-icon>{{ item.icon }}</v-icon>
+                                            <v-badge
+                                                :content="
+                                                    getEventsByCategoryName(
+                                                        sortedEvents,
+                                                        item.name.toLowerCase()
+                                                    ).length
+                                                "
+                                                :color="
+                                                    getSeverityColorForCategory(
+                                                        events,
+                                                        item.name.toLowerCase()
+                                                    )
+                                                "
+                                            >
+                                                <v-icon>{{ item.icon }}</v-icon>
+                                            </v-badge>
                                         </v-list-item-icon>
                                         <v-list-item-title>
                                             {{ item.name }}
