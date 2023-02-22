@@ -18,11 +18,9 @@ class SiriusManip:
 
         self.MODES_DATA = rospy.get_param("~control_modes")
         self.LINKS_DATA = rospy.get_param("~links")
-        self.solver = IKSolver(
-            self.LINKS_DATA["names"],
-            self.LINKS_DATA["lengths"],
-            self.LINKS_DATA["limits"]
-            )
+        self.solver = IKSolver(self.LINKS_DATA["names"],
+                               self.LINKS_DATA["lengths"],
+                               self.LINKS_DATA["limits"])
 
         rospy.Subscriber("/clicked_point",
                          PointStamped,
@@ -34,7 +32,6 @@ class SiriusManip:
         self.jointstate_publisher = rospy.Publisher("/joint_states",
                                                     JointState,
                                                     queue_size=10)
-        self.rate = rospy.Rate(10.0)
 
         # TODO read actual joint state, remove the line below when it's done
         self.currentPos = ManipPose()
@@ -49,7 +46,7 @@ class SiriusManip:
         target.x = data.point.x
         target.y = data.point.y
         target.z = data.point.z
-        target.pitch = random.uniform(-math.pi/4, 0)
+        target.pitch = random.uniform(-math.pi / 4, 0)
 
         self.move_cartesian(target)
 
@@ -78,16 +75,16 @@ class SiriusManip:
     def _publish_jointstate(self, jointstate: JointState):
         jointstate.header.stamp = rospy.Time.now()
         self.jointstate_publisher.publish(jointstate)
-    
+
     def get_pose(self) -> ManipPose:
         # TODO read actual joint state
         return self.currentPos
-    
+
     def get_jointstate(self) -> JointState:
         # TODO read actual joint state
         return self.solver.get_IK_solution(self.currentPos)
 
-    # For traversing small distances in a straight line. Using this 
+    # For traversing small distances in a straight line. Using this
     # mode to span large distances may lead to errors as the manipulator
     # would enter collision with itself
     def move_cartesian(self, target_pose: ManipPose):
@@ -95,12 +92,11 @@ class SiriusManip:
 
         # Calculate the vector of the movement
         direction = [
-            target_pose.x - pose.x,
-            target_pose.y - pose.y,
-            target_pose.z - pose.z,
-            target_pose.pitch - pose.pitch
+            target_pose.x - pose.x, target_pose.y - pose.y,
+            target_pose.z - pose.z, target_pose.pitch - pose.pitch
         ]
-        distance = math.sqrt(direction[0]**2 + direction[1]**2 + direction[2]**2 + direction[3]**2)
+        distance = math.sqrt(direction[0]**2 + direction[1]**2 +
+                             direction[2]**2 + direction[3]**2)
         if distance == 0:
             print("Target point is the same as current point")
             return
@@ -119,7 +115,7 @@ class SiriusManip:
         accelerate = True
         deccelerate = False
         while distance > error:
-            if accelerate: # ACCELERATION PHASE
+            if accelerate:  # ACCELERATION PHASE
                 # Accelerate to reach max velocity
                 velocity += acceleration * rate.sleep_dur.to_sec()
                 if velocity > max_velocity:
@@ -133,15 +129,16 @@ class SiriusManip:
                     accelerate = False
                     decceleration_distance = distance
                     decceleration_velocity = velocity
-            if not accelerate and not deccelerate: # CONSTANT VELOCITY PHASE
+            if not accelerate and not deccelerate:  # CONSTANT VELOCITY PHASE
                 # Start deccelerating if the target point is closer than the distance needed for full stop
                 if distance < acceleration_distance:
                     deccelerate = True
                     decceleration_distance = distance
                     decceleration_velocity = velocity
-            if deccelerate: # DECCElERATION PHASE
+            if deccelerate:  # DECCElERATION PHASE
                 # deccelerate until stopped
-                velocity = decceleration_velocity * ((distance / decceleration_distance)) ** 0.5
+                velocity = decceleration_velocity * (
+                    (distance / decceleration_distance))**0.5
 
             # Pose update
             pose.x += direction[0] * velocity * rate.sleep_dur.to_sec()
@@ -153,10 +150,15 @@ class SiriusManip:
             self._move(pose)
 
             # Calculate distance to target
-            distance = math.sqrt((pose.x - target_pose.x)**2 + (pose.y - target_pose.y)**2 + (pose.z - target_pose.z)**2 + (pose.pitch - target_pose.pitch)**2)
+            distance = math.sqrt((pose.x - target_pose.x)**2 +
+                                 (pose.y - target_pose.y)**2 +
+                                 (pose.z - target_pose.z)**2 +
+                                 (pose.pitch - target_pose.pitch)**2)
             rate.sleep()
-        
-        err = math.sqrt((pose.x - target_pose.x)**2 + (pose.y - target_pose.y)**2 + (pose.z - target_pose.z)**2)
+
+        err = math.sqrt((pose.x - target_pose.x)**2 +
+                        (pose.y - target_pose.y)**2 +
+                        (pose.z - target_pose.z)**2)
         rospy.loginfo("Reached target point. Position error: %f m" % err)
 
     # For executing long movements. No chance of big trouble
@@ -171,7 +173,8 @@ class SiriusManip:
             target_jointstate.position[2] - jointstate.position[2],
             target_jointstate.position[3] - jointstate.position[3]
         ]
-        distance = math.sqrt(direction[0]**2 + direction[1]**2 + direction[2]**2 + direction[3]**2)
+        distance = math.sqrt(direction[0]**2 + direction[1]**2 +
+                             direction[2]**2 + direction[3]**2)
         if distance == 0:
             print("Target point is the same as current point")
             return
@@ -190,7 +193,7 @@ class SiriusManip:
         accelerate = True
         deccelerate = False
         while distance > error:
-            if accelerate: # ACCELERATION PHASE
+            if accelerate:  # ACCELERATION PHASE
                 # Accelerate to reach max velocity
                 velocity += acceleration * rate.sleep_dur.to_sec()
                 if velocity > max_velocity:
@@ -204,30 +207,39 @@ class SiriusManip:
                     accelerate = False
                     decceleration_distance = distance
                     decceleration_velocity = velocity
-            if not accelerate and not deccelerate: # CONSTANT VELOCITY PHASE
+            if not accelerate and not deccelerate:  # CONSTANT VELOCITY PHASE
                 # Start deccelerating if the target point is closer than the distance needed for full stop
                 if distance < acceleration_distance:
                     deccelerate = True
                     decceleration_distance = distance
                     decceleration_velocity = velocity
-            if deccelerate: # DECCElERATION PHASE
+            if deccelerate:  # DECCElERATION PHASE
                 # deccelerate until stopped
-                velocity = decceleration_velocity * ((distance / decceleration_distance)) ** 0.5
+                velocity = decceleration_velocity * (
+                    (distance / decceleration_distance))**0.5
 
             # jointstate update
-            jointstate.position[0] += direction[0] * velocity * rate.sleep_dur.to_sec()
-            jointstate.position[1] += direction[1] * velocity * rate.sleep_dur.to_sec()
-            jointstate.position[2] += direction[2] * velocity * rate.sleep_dur.to_sec()
-            jointstate.position[3] += direction[3] * velocity * rate.sleep_dur.to_sec()
+            jointstate.position[
+                0] += direction[0] * velocity * rate.sleep_dur.to_sec()
+            jointstate.position[
+                1] += direction[1] * velocity * rate.sleep_dur.to_sec()
+            jointstate.position[
+                2] += direction[2] * velocity * rate.sleep_dur.to_sec()
+            jointstate.position[
+                3] += direction[3] * velocity * rate.sleep_dur.to_sec()
 
             # Move to new jointstate
             self._publish_jointstate(jointstate)
             # TODO read actual joint state, remove the line below when it's done
 
             # Calculate distance to target
-            distance = math.sqrt((jointstate.position[0] - target_jointstate.position[0])**2 + (jointstate.position[1] - target_jointstate.position[1])**2 + (jointstate.position[2] - target_jointstate.position[2])**2 + (jointstate.position[3] - target_jointstate.position[3])**2)
+            distance = math.sqrt(
+                (jointstate.position[0] - target_jointstate.position[0])**2 +
+                (jointstate.position[1] - target_jointstate.position[1])**2 +
+                (jointstate.position[2] - target_jointstate.position[2])**2 +
+                (jointstate.position[3] - target_jointstate.position[3])**2)
             rate.sleep()
-        
+
         rospy.loginfo("Reached target point.")
         self.currentPos = target_pose
 

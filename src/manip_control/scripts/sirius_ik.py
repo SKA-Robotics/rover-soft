@@ -4,7 +4,6 @@ from sensor_msgs.msg import JointState
 from sirius_msgs.msg import ManipPose
 
 
-
 # Class implementing kinematics of SiriusII manipulator
 class IKSolver:
 
@@ -34,7 +33,7 @@ class IKSolver:
 
         # Project target position to manip plane
         d = math.sqrt(x * x + y * y)
-        # Translate, so link 0 length does not need to be considered 
+        # Translate, so link 0 length does not need to be considered
         # in formulas below
         z = target.z - l[0]
 
@@ -45,8 +44,8 @@ class IKSolver:
         zp = z + l[3] * math.sin(alpha)
 
         # Find 2nd link's start position
-        # The geometry constraints lead to equation system with 
-        # two solutions. Due to physical constraints of the manipulator 
+        # The geometry constraints lead to equation system with
+        # two solutions. Due to physical constraints of the manipulator
         # only one of these solutions will be possible to reach
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp -
                (zp *
@@ -110,7 +109,8 @@ class IKSolver:
     def get_FK_solution(self, jointstate: JointState) -> ManipPose:
         # Check if all necessary joint states are given
         if not all(
-            [joint_name in jointstate.name for joint_name in self.joint_names]):
+            [joint_name in jointstate.name
+             for joint_name in self.joint_names]):
             raise Exception("Incorrect Jointstate names given.")
 
         # Extract needed angles from jointstate
