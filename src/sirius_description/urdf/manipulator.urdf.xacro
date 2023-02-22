@@ -42,6 +42,7 @@
     </collision>
   </link>
   <gazebo reference="base_link">
+      <kinematic> true </kinematic>
       <material>
         Gazebo/Yellow
       </material>
