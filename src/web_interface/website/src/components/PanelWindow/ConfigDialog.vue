@@ -11,7 +11,7 @@ const windowTypes = Object.entries(windows).map(([type, window]) => ({
 const configOptions = computed(() =>
     tempConfig.value.type in windows
         ? Object.entries(windows[tempConfig.value.type].configOptions).filter(
-              (input) => !isHidden.value[input[0]]
+              (input) => typeof input != 'function' && !isHidden.value[input[0]]
           )
         : []
 )
@@ -20,7 +20,7 @@ const isHidden = computed(() => {
     tempConfig.value.type in windows
         ? Object.entries(windows[tempConfig.value.type].configOptions).map(
               ([name, obj]) =>
-                  (dict[name] = obj.hide !== undefined && obj.hide())
+                  (dict[name] = obj.hide !== undefined && obj.hide.value)
           )
         : {}
     return dict
@@ -30,6 +30,11 @@ const tempConfig = ref(JSON.parse(JSON.stringify(props.config)))
 watch(props, () => {
     tempConfig.value = JSON.parse(JSON.stringify(props.config))
 })
+
+function updateValue(name, value) {
+    if (windows[tempConfig.value.type].configOptions.update)
+        windows[tempConfig.value.type].configOptions.update(name, value)
+}
 </script>
 <template>
     <v-dialog
@@ -68,6 +73,7 @@ watch(props, () => {
                             :is="configInputs[options.type]"
                             :configOptions="options"
                             v-model="tempConfig.extraConfig[name]"
+                            @input="(value) => updateValue(name, value)"
                         ></component>
                     </v-container>
                 </v-container>

@@ -2,6 +2,7 @@ import TestWindow from './TestWindow.vue'
 import CameraWindow from './CameraWindow.vue'
 import ChartWindow from './ChartWindow.vue'
 import { useGstreamerStore, useRosStore } from '@/stores'
+import { ref } from 'vue'
 
 export default {
     testWindow: {
@@ -75,12 +76,17 @@ export default {
             messageProperty: {
                 name: 'Message Property',
                 type: 'text',
-                hide: () => false,
+                hide: ref(true),
             },
             refreshingFrequency: {
                 name: 'Refreshing Frequency',
                 type: 'range',
                 range: () => ({ min: 1, max: 20, step: 1 }),
+            },
+            update: function (name, value) {
+                if (name === 'topicName') {
+                    this.messageProperty.hide.value = value === undefined
+                }
             },
         },
     },

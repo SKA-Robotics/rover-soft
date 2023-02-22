@@ -1,6 +1,13 @@
 <script setup>
 import { useRosStore } from '@/stores'
-import { defineProps, watch, ref, computed, shallowRef } from 'vue'
+import {
+    defineProps,
+    watch,
+    ref,
+    computed,
+    shallowRef,
+    onBeforeUnmount,
+} from 'vue'
 import { Topic } from 'roslib'
 import { Scatter } from 'vue-chartjs'
 import {
@@ -19,9 +26,15 @@ const props = defineProps(['extraConfig'])
 const rosStore = useRosStore()
 
 // getting config update
-const config = ref(props.extraConfig)
+const topicName = ref(null)
+const messageType = ref(null)
+const messageProperty = ref(null)
+const title = computed(() => {
+    return `Topic name: ${topicName.value},  Message type: ${messageType.value}`
+})
+const refreshingTimer = ref(null)
+
 watch(props, () => {
-    config.value = props.extraConfig
     topicName.value = props.extraConfig.topicName
     messageProperty.value = props.extraConfig.messageProperty
 
@@ -36,27 +49,23 @@ watch(props, () => {
     if (refreshingTimer.value != null) clearInterval(refreshingTimer.value)
     refreshingTimer.value = setInterval(() => {
         rerenderChart()
-    }, 1000 / config.value.refreshingFrequency)
+    }, 1000 / props.extraConfig.refreshingFrequency)
 })
-const topicName = ref(null)
-const messageType = ref(null)
-const messageProperty = ref(null)
-const title = computed(() => {
-    return `Topic name: ${topicName.value},  Message type: ${messageType.value}`
-})
-const refreshingTimer = ref(null)
 
 // updating chart with ROS topic data
 const startTime = ref(0)
 const listener = ref(null)
+
 function setListener() {
     // console.log(`Listner got message with type: ${messageType.value}`)
+
     if (!messageProperty.value) messageProperty.value = ''
     messageProperty.value.trim()
     const keys = messageProperty.value.split('/')
     options.value.scales.y.title.text = messageProperty.value
     delete data.value.datasets[0].data
     data.value.datasets[0].data = []
+
     // console.log(messageProperty.value)
 
     if (listener.value) listener.value.unsubscribe()
@@ -72,21 +81,38 @@ function setListener() {
 
     listener.value = new Topic({
         ros: rosStore.ws,
-        name: topicName,
-        messageType: messageType,
+        name: topicName.value,
+        messageType: messageType.value,
     })
+
+    // // TODO: Check why switching to code below results incorrect behaviour
+    // listener.value = new Topic({
+    //     ros: rosStore.ws,
+    //     name: topicName,
+    //     messageType: messageType,
+    // })
+
     listener.value.subscribe((msg) => {
+        // if (
+        //     listener.value.messageType !== 'geometry_msgs/Twist' &&
+        //     msg.linear !== undefined
+        // )
+        //     console.log(listener.value)
+
+        let prop = msg
         try {
             keys.forEach((key) => {
-                if (key != '') msg = msg[key]
+                // if (prop === undefined || prop[key] === undefined)
+                //     console.log(prop)
+                if (key != '') prop = prop[key]
             })
         } catch (error) {
-            console.log(`Message: ${msg} results an error occurance. ${error}`)
+            // console.log(`Message: ${msg} results an error occurance. ${error}`)
             return
         }
         let point = {
             x: new Date().getTime() / 1000 - startTime.value,
-            y: parseFloat(msg),
+            y: parseFloat(prop),
         }
         // console.log(point)
         if (!isNaN(point.y)) data.value.datasets[0].data.push(point)
@@ -95,6 +121,7 @@ function setListener() {
 
 // chart rerfreshing using key changing technique
 const chartKey = ref(0)
+
 function rerenderChart() {
     chartKey.value += 1
 }
@@ -157,6 +184,11 @@ const options = ref({
             backgroundColor: '#ff0000',
         },
     },
+})
+
+onBeforeUnmount(() => {
+    listener.value.unsubscribe()
+    if (refreshingTimer.value != null) clearInterval(refreshingTimer.value)
 })
 </script>
 
