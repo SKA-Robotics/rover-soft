@@ -47,20 +47,14 @@ class IKSolver:
         # The geometry constraints lead to equation system with
         # two solutions. Due to physical constraints of the manipulator
         # only one of these solutions will be possible to reach
-        dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp -
-               (zp *
-                (dp * math.sqrt(
-                    (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] -
-                     zp * zp) * (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] -
-                                 l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
-                 (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp)) /
+        dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (dp * math.sqrt(
+            (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
+            (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
+                                                                      (l[2] * l[2]) * zp + zp * zp * zp)) /
                (dp * dp + zp * zp)) / (dp * 2.0)
-        zpp = (dp * math.sqrt(
-            (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp)
-            * (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] +
-               zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
-               (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 +
-                                                     (zp * zp) * 2.0)
+        zpp = (dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
+                              (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
+               (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
 
         # Given the position, angles of the joints can be calculated
         beta = math.atan2(zpp, dpp)
@@ -70,36 +64,24 @@ class IKSolver:
         solution.position[3] = alpha - gamma
 
         # Check if the calculated angles are within manipulator's limits
-        if all([
-                checkBounds(solution.position[i], limits[i])
-                for i in range(1, len(solution.position))
-        ]):
+        if all([checkBounds(solution.position[i], limits[i]) for i in range(1, len(solution.position))]):
             return solution
 
         # If the previous solution did not pass the check, try the second solution
-        dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp -
-               (zp *
-                (-dp * math.sqrt(
-                    (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] -
-                     zp * zp) * (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] -
-                                 l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
-                 (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp)) /
+        dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (-dp * math.sqrt(
+            (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
+            (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
+                                                                      (l[2] * l[2]) * zp + zp * zp * zp)) /
                (dp * dp + zp * zp)) / (dp * 2.0)
-        zpp = (-dp * math.sqrt(
-            (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp)
-            * (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] +
-               zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
-               (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 +
-                                                     (zp * zp) * 2.0)
+        zpp = (-dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
+                               (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
+               (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
         beta = math.atan2(zpp, dpp)
         solution.position[1] = beta - math.pi / 2
         gamma = math.atan2(zpp - zp, dp - dpp)
         solution.position[2] = beta + gamma
         solution.position[3] = alpha - gamma
-        if all([
-                checkBounds(solution.position[i], limits[i])
-                for i in range(1, len(solution.position))
-        ]):
+        if all([checkBounds(solution.position[i], limits[i]) for i in range(1, len(solution.position))]):
             return solution
 
         # Both of the solutions are wrong. Exception is to be thrown
@@ -108,27 +90,22 @@ class IKSolver:
     # Calculates manipulator's tip pose given joint angles
     def get_FK_solution(self, jointstate: JointState) -> ManipPose:
         # Check if all necessary joint states are given
-        if not all(
-            [joint_name in jointstate.name
-             for joint_name in self.joint_names]):
+        if not all([joint_name in jointstate.name for joint_name in self.joint_names]):
             raise Exception("Incorrect Jointstate names given.")
 
         # Extract needed angles from jointstate
         angles = []
         for joint_name in self.joint_names:
-            angles.append(
-                jointstate.position[jointstate.name.index(joint_name)])
+            angles.append(jointstate.position[jointstate.name.index(joint_name)])
 
         l = self.lengths
         solution = ManipPose()
 
         # Calculate solution using SiriusII-specific FK formula
-        d = l[1] * math.sin(angles[1]) + l[2] * math.sin(
-            angles[1] + angles[2]) + l[3] * math.sin(angles[1] + angles[2] +
-                                                     angles[3])
-        z = l[1] * math.cos(angles[1]) + l[2] * math.cos(
-            angles[1] + angles[2]) + l[3] * math.cos(angles[1] + angles[2] +
-                                                     angles[3])
+        d = l[1] * math.sin(
+            angles[1]) + l[2] * math.sin(angles[1] + angles[2]) + l[3] * math.sin(angles[1] + angles[2] + angles[3])
+        z = l[1] * math.cos(
+            angles[1]) + l[2] * math.cos(angles[1] + angles[2]) + l[3] * math.cos(angles[1] + angles[2] + angles[3])
         solution.z = z + l[0]
         solution.x = d * math.cos(angles[0])
         solution.y = d * math.sin(angles[0])
