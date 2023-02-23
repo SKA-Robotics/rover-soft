@@ -113,12 +113,10 @@ function setSerieOptions(serie, index) {
         options.value.plugins.title.text = serie.topicName
     }
 
-    const angle =
-        (index * 2 * Math.PI * (seriesConfig.value.length - 1)) /
-        seriesConfig.value.length
-    const r = 128 + 127 * Math.cos(angle)
-    const g = 128 + 127 * Math.cos(angle - (2 * Math.PI) / 3)
-    const b = 128 + 127 * Math.cos(angle - (4 * Math.PI) / 3)
+    const angle = (index * 2 * Math.PI) / seriesConfig.value.length
+    const r = 170 + 85 * Math.cos(angle)
+    const g = 170 + 85 * Math.cos(angle - (2 * Math.PI) / 3)
+    const b = 170 + 85 * Math.cos(angle - (4 * Math.PI) / 3)
 
     data.value.datasets.push({
         label: serie.topicName + '/' + serie.messageProperty,
@@ -142,8 +140,6 @@ const data = ref({
         {
             label: 'ROS value [u]',
             fill: false,
-            borderColor: '#f87979',
-            backgroundColor: '#f87979',
             data: [],
         },
     ],
@@ -159,6 +155,9 @@ const options = ref({
             title: {
                 display: true,
                 text: 'Time [s]',
+                font: {
+                    weight: 'bold',
+                },
             },
             beginAtZero: true,
         },
@@ -167,6 +166,9 @@ const options = ref({
             title: {
                 display: true,
                 text: 'ROS value [u]',
+                font: {
+                    weight: 'bold',
+                },
             },
         },
     },
@@ -174,9 +176,18 @@ const options = ref({
         legend: {
             display: false,
             position: 'top',
+            labels: {
+                font: {
+                    weight: 'bold',
+                },
+            },
         },
         title: {
             display: false,
+            font: {
+                size: 16,
+                weight: 'bold',
+            },
             padding: {
                 top: 0,
                 bottom: 10,

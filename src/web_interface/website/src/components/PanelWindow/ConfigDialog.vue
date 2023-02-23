@@ -106,11 +106,13 @@ function updateValue(name, value, index = undefined, arrayName = undefined) {
                             v-model="tempConfig.extraConfig[name]"
                             @input="(value) => updateValue(name, value)"
                         ></component>
-                        <ul
+                        <v-list
                             v-for="[arrayName, array] in arrayConfigOptions"
                             :key="arrayName"
+                            class="frame"
                         >
-                            <li
+                            <v-list-item
+                                style="display: block"
                                 v-for="(elements, index) in array"
                                 :key="arrayName + index"
                             >
@@ -134,8 +136,8 @@ function updateValue(name, value, index = undefined, arrayName = undefined) {
                                             )
                                     "
                                 ></component>
-                            </li>
-                        </ul>
+                            </v-list-item>
+                        </v-list>
                     </v-container>
                 </v-container>
             </v-card-text>
@@ -160,4 +162,11 @@ function updateValue(name, value, index = undefined, arrayName = undefined) {
         </v-card>
     </v-dialog>
 </template>
-<style scoped></style>
+<style scoped>
+.frame {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+}
+</style>
