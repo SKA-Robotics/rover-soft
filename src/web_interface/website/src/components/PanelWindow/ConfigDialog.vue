@@ -11,18 +11,48 @@ const windowTypes = Object.entries(windows).map(([type, window]) => ({
 const configOptions = computed(() =>
     tempConfig.value.type in windows
         ? Object.entries(windows[tempConfig.value.type].configOptions).filter(
-              (input) => typeof input != 'function' && !isHidden.value[input[0]]
+              ([name, obj]) => {
+                  if (!Array.isArray(obj) && !Array.isArray(obj.value))
+                      return typeof name != 'function' && !isHidden.value[obj]
+              }
           )
+        : []
+)
+const arrayConfigOptions = computed(() =>
+    tempConfig.value.type in windows
+        ? Object.entries(windows[tempConfig.value.type].configOptions)
+              .filter(([name, obj]) => {
+                  if (Array.isArray(obj) || Array.isArray(obj.value)) {
+                      if (!tempConfig.value.extraConfig[name]) {
+                          tempConfig.value.extraConfig[name] = Array(
+                              obj.value.length
+                          )
+                              .fill(undefined)
+                              .map(() => new Object())
+                      }
+                      while (
+                          tempConfig.value.extraConfig[name].length <
+                          obj.value.length
+                      )
+                          tempConfig.value.extraConfig[name].push(new Object())
+                      //   console.log(obj)
+                      //   console.log(tempConfig.value.extraConfig)
+                      return true
+                  }
+              })
+              .map(([key, value]) => [
+                  key,
+                  value.value.map((element) => Object.entries(element)),
+              ])
         : []
 )
 const isHidden = computed(() => {
     let dict = {}
-    tempConfig.value.type in windows
-        ? Object.entries(windows[tempConfig.value.type].configOptions).map(
-              ([name, obj]) =>
-                  (dict[name] = obj.hide !== undefined && obj.hide.value)
-          )
-        : {}
+    if (tempConfig.value.type in windows)
+        Object.entries(windows[tempConfig.value.type].configOptions).forEach(
+            ([name, obj]) =>
+                (dict[name] = obj.hide !== undefined && obj.hide.value)
+        )
     return dict
 })
 
@@ -31,9 +61,14 @@ watch(props, () => {
     tempConfig.value = JSON.parse(JSON.stringify(props.config))
 })
 
-function updateValue(name, value) {
+function updateValue(name, value, index = undefined, arrayName = undefined) {
     if (windows[tempConfig.value.type].configOptions.update)
-        windows[tempConfig.value.type].configOptions.update(name, value)
+        windows[tempConfig.value.type].configOptions.update(
+            name,
+            value,
+            index,
+            arrayName
+        )
 }
 </script>
 <template>
@@ -75,6 +110,48 @@ function updateValue(name, value) {
                             v-model="tempConfig.extraConfig[name]"
                             @input="(value) => updateValue(name, value)"
                         ></component>
+                        <ul
+                            v-for="[arrayName, array] in arrayConfigOptions"
+                            :key="arrayName"
+                        >
+                            <!-- <p>
+                                {{ name }}
+                                {{ elements }}
+                            </p> -->
+                            <li
+                                v-for="(elements, index) in array"
+                                :key="arrayName + index"
+                            >
+                                <!-- <div
+                                    v-for="[name, options] in elements"
+                                    :key="name"
+                                >
+                                    <p>{{ index }}</p>
+                                    <p>{{ name }}</p>
+                                    <p>{{ options }}</p>
+                                </div> -->
+                                <component
+                                    v-for="[name, options] in elements"
+                                    :key="name + index"
+                                    :is="configInputs[options.type]"
+                                    :configOptions="options"
+                                    v-model="
+                                        tempConfig.extraConfig[arrayName][
+                                            index
+                                        ][name]
+                                    "
+                                    @input="
+                                        (value) =>
+                                            updateValue(
+                                                name,
+                                                value,
+                                                index,
+                                                arrayName
+                                            )
+                                    "
+                                ></component>
+                            </li>
+                        </ul>
                     </v-container>
                 </v-container>
             </v-card-text>

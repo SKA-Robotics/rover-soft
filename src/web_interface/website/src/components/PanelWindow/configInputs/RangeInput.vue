@@ -2,7 +2,10 @@
 import { defineProps, computed } from 'vue'
 const props = defineProps(['configOptions', 'value'])
 
-const range = computed(() => props.configOptions.range())
+const range = computed(() => {
+    if (props.configOptions.range) return props.configOptions.range()
+    else return {}
+})
 </script>
 <template>
     <v-slider

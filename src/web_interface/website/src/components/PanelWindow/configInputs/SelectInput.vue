@@ -2,7 +2,11 @@
 import { computed, defineProps } from 'vue'
 const props = defineProps(['configOptions', 'value'])
 
-const possibleValues = computed(() => props.configOptions.possibleValues())
+const possibleValues = computed(() => {
+    if (props.configOptions.possibleValues)
+        return props.configOptions.possibleValues()
+    else return []
+})
 </script>
 <template>
     <v-select

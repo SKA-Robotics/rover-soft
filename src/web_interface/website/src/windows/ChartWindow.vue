@@ -35,8 +35,8 @@ const title = computed(() => {
 const refreshingTimer = ref(null)
 
 watch(props, () => {
-    topicName.value = props.extraConfig.topicName
-    messageProperty.value = props.extraConfig.messageProperty
+    topicName.value = props.extraConfig.series[0].topicName
+    messageProperty.value = props.extraConfig.series[0].messageProperty
 
     rosStore.ws.getTopics((result) => {
         // console.log(result)
@@ -49,7 +49,7 @@ watch(props, () => {
     if (refreshingTimer.value != null) clearInterval(refreshingTimer.value)
     refreshingTimer.value = setInterval(() => {
         rerenderChart()
-    }, 1000 / props.extraConfig.refreshingFrequency)
+    }, 1000 / props.extraConfig.series[0].refreshingFrequency)
 })
 
 // updating chart with ROS topic data
@@ -187,7 +187,7 @@ const options = ref({
 })
 
 onBeforeUnmount(() => {
-    listener.value.unsubscribe()
+    if (listener.value) listener.value.unsubscribe()
     if (refreshingTimer.value != null) clearInterval(refreshingTimer.value)
 })
 </script>
