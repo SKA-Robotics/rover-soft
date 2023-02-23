@@ -4,7 +4,7 @@ import { Ros } from 'roslib'
 
 export const useRosStore = defineStore('ros', () => {
     // set 'sirius.local' for release or your Linux/WSL adress for develop
-    const address = ref('172.31.169.201')
+    const address = ref('172.30.229.247')
     const port = ref(8081)
     const url = computed(() =>
         new URL(`ws://${address.value}:${port.value}`).toString()

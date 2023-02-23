@@ -83,7 +83,6 @@ export default {
                     messageProperty: {
                         name: 'Message Property',
                         type: 'text',
-                        hide: ref(true),
                     },
                 },
             ]),
@@ -91,6 +90,7 @@ export default {
                 name: 'Refreshing Frequency',
                 type: 'range',
                 range: () => ({ min: 1, max: 20, step: 1 }),
+                hide: ref(true),
             },
             update: function (
                 name,
@@ -98,12 +98,18 @@ export default {
                 index = undefined,
                 arrayName = undefined
             ) {
-                // if (name === 'topicName') {
-                //     this.messageProperty.hide.value = value === undefined
-                // }
+                // Index and array name must be specified together or not at all
+                if ((index === undefined) != (arrayName === undefined)) return
+
+                // Ignore array element update
                 if (index !== undefined || arrayName !== undefined) return
+
+                // Hiding test
                 if (name === 'seriesNumber') {
-                    // console.log(value)
+                    this.refreshingFrequency.hide.value = value === undefined
+                }
+
+                if (name === 'seriesNumber') {
                     value = parseInt(value)
                     const range = this.seriesNumber.range()
                     if (value < range.min || value > range.max) return
@@ -115,13 +121,6 @@ export default {
                                     this.series.value.length - 1
                                 ],
                             })
-                        // this.series.push(
-                        //     JSON.parse(
-                        //         JSON.stringify(
-                        //             this.series[this.series.length - 1]
-                        //         )
-                        //     )
-                        // )
                         else this.series.value.pop()
                     }
                 }

@@ -11,10 +11,10 @@ const windowTypes = Object.entries(windows).map(([type, window]) => ({
 const configOptions = computed(() =>
     tempConfig.value.type in windows
         ? Object.entries(windows[tempConfig.value.type].configOptions).filter(
-              ([name, obj]) => {
-                  if (!Array.isArray(obj) && !Array.isArray(obj.value))
-                      return typeof name != 'function' && !isHidden.value[obj]
-              }
+              ([name, obj]) =>
+                  !Array.isArray(obj) && !Array.isArray(obj.value)
+                      ? typeof obj != 'function' && !isHidden.value[name]
+                      : false
           )
         : []
 )
@@ -22,27 +22,23 @@ const arrayConfigOptions = computed(() =>
     tempConfig.value.type in windows
         ? Object.entries(windows[tempConfig.value.type].configOptions)
               .filter(([name, obj]) => {
-                  if (Array.isArray(obj) || Array.isArray(obj.value)) {
-                      if (!tempConfig.value.extraConfig[name]) {
-                          tempConfig.value.extraConfig[name] = Array(
-                              obj.value.length
-                          )
-                              .fill(undefined)
-                              .map(() => new Object())
-                      }
-                      while (
-                          tempConfig.value.extraConfig[name].length <
-                          obj.value.length
-                      )
-                          tempConfig.value.extraConfig[name].push(new Object())
-                      //   console.log(obj)
-                      //   console.log(tempConfig.value.extraConfig)
-                      return true
+                  if (!Array.isArray(obj) && !Array.isArray(obj.value))
+                      return false
+                  if (obj.value) obj = obj.value
+                  if (!tempConfig.value.extraConfig[name]) {
+                      tempConfig.value.extraConfig[name] = Array(obj.length)
+                          .fill(undefined)
+                          .map(() => new Object())
                   }
+                  while (tempConfig.value.extraConfig[name].length < obj.length)
+                      tempConfig.value.extraConfig[name].push(new Object())
+                  return true
               })
-              .map(([key, value]) => [
-                  key,
-                  value.value.map((element) => Object.entries(element)),
+              .map(([name, obj]) => [
+                  name,
+                  obj.value
+                      ? obj.value.map((element) => Object.entries(element))
+                      : obj.map((element) => Object.entries(element)),
               ])
         : []
 )
@@ -114,22 +110,10 @@ function updateValue(name, value, index = undefined, arrayName = undefined) {
                             v-for="[arrayName, array] in arrayConfigOptions"
                             :key="arrayName"
                         >
-                            <!-- <p>
-                                {{ name }}
-                                {{ elements }}
-                            </p> -->
                             <li
                                 v-for="(elements, index) in array"
                                 :key="arrayName + index"
                             >
-                                <!-- <div
-                                    v-for="[name, options] in elements"
-                                    :key="name"
-                                >
-                                    <p>{{ index }}</p>
-                                    <p>{{ name }}</p>
-                                    <p>{{ options }}</p>
-                                </div> -->
                                 <component
                                     v-for="[name, options] in elements"
                                     :key="name + index"
