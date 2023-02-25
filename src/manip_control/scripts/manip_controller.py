@@ -5,7 +5,7 @@ import random
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import PointStamped
 from sirius_msgs.msg import ManipPose
-from std_msgs.msg import Float32
+from std_msgs.msg import Float64
 
 from sirius_ik import IKSolver
 
@@ -30,6 +30,8 @@ class SiriusManip:
         self.currentPos.y = 0.0
         self.currentPos.z = 0.25
         self.currentPos.pitch = 0.0
+        # This is temporary, to make it work for SAR. After encoders are install integate it properly.
+        self.joint_publisher = [rospy.Publisher(f"manipulator/joint{index}_position_controller/command", Float64, queue_size=10) for index in [1, 2, 3, 4, 5]]
 
     def point_callback(self, data):
         rospy.loginfo("Received request:\n" + str(data.point))
@@ -64,8 +66,13 @@ class SiriusManip:
         self.point_publisher.publish(msg)
 
     def _publish_jointstate(self, jointstate: JointState):
-        jointstate.header.stamp = rospy.Time.now()
-        self.jointstate_publisher.publish(jointstate)
+        # jointstate.header.stamp = rospy.Time.now()
+        # self.jointstate_publisher.publish(jointstate)
+
+        # This is temporary, to make it work for SAR. After encoders are install integate it properly.
+        for index, element in enumerate(jointstate.position):
+            self.joint_publisher[index].publish(Float64(element)) 
+
 
     def get_pose(self) -> ManipPose:
         # TODO read actual joint state

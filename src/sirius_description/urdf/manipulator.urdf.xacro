@@ -127,8 +127,8 @@
     <limit
       lower="-1.45"
       upper="0.79"
-      effort="0"
-      velocity="0" />
+      effort="10"
+      velocity="5" />
   </joint>
   <transmission name="trans_cyl_arm1">
     <type>transmission_interface/SimpleTransmission</type>
@@ -176,8 +176,8 @@
     <limit
       lower="0.0"
       upper="2.36"
-      effort="0"
-      velocity="0" />
+      effort="10"
+      velocity="5" />
   </joint>
   <transmission name="trans_arm1_arm2">
     <type>transmission_interface/SimpleTransmission</type>
@@ -225,8 +225,8 @@
     <limit
       lower="-1.45"
       upper="0.79"
-      effort="0"
-      velocity="0" />
+      effort="10"
+      velocity="5" />
   </joint>
   <transmission name="trans_arm2_arm3">
     <type>transmission_interface/SimpleTransmission</type>
