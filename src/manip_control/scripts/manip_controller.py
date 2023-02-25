@@ -31,7 +31,10 @@ class SiriusManip:
         self.currentPos.z = 0.25
         self.currentPos.pitch = 0.0
         # This is temporary, to make it work for SAR. After encoders are install integate it properly.
-        self.joint_publisher = [rospy.Publisher(f"manipulator/joint{index}_position_controller/command", Float64, queue_size=10) for index in [1, 2, 3, 4, 5]]
+        self.joint_publisher = [
+            rospy.Publisher(f"manipulator/joint{index}_position_controller/command", Float64, queue_size=10)
+            for index in [1, 2, 3, 4, 5]
+        ]
 
     def point_callback(self, data):
         rospy.loginfo("Received request:\n" + str(data.point))
@@ -71,8 +74,7 @@ class SiriusManip:
 
         # This is temporary, to make it work for SAR. After encoders are install integate it properly.
         for index, element in enumerate(jointstate.position):
-            self.joint_publisher[index].publish(Float64(element)) 
-
+            self.joint_publisher[index].publish(Float64(element))
 
     def get_pose(self) -> ManipPose:
         # TODO read actual joint state

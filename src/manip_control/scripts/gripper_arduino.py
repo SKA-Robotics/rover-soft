@@ -4,7 +4,9 @@ import rospy
 import traceback
 from sensor_msgs.msg import Joy
 
+
 class GripperController:
+
     def __init__(self, portname, baudrate):
         self.sub = rospy.Subscriber('/joy', Joy, self.joy_callback)
         try:
@@ -21,24 +23,20 @@ class GripperController:
     def joy_callback(self, msg):
         command = int((msg.axes[1] + 1.0) * 40) + 100
         rospy.loginfo(command)
-        self.serial.write([
-            128,
-            clamp(command, 1, 254),
-            192
-            ])
+        self.serial.write([128, clamp(command, 1, 254), 192])
 
     def __del__(self):
         self.serial.close()
 
+
 def clamp(value, min_value, max_value):
     return max(min_value, min(max_value, value))
+
 
 if __name__ == '__main__':
     try:
         rospy.init_node('gaja_driver')
-        driver = GripperController(
-            rospy.get_param("~port_name", "/dev/ttyACM0"),
-            rospy.get_param("~baudrate", 9600))
+        driver = GripperController(rospy.get_param("~port_name", "/dev/ttyACM0"), rospy.get_param("~baudrate", 9600))
         driver.run()
     except rospy.ROSInterruptException:
         pass
