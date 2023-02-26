@@ -8,7 +8,7 @@ const { item } = props
 function getIcon(category) {
     for (const cat of categories) {
         if ('name' in cat && 'icon' in cat) {
-            if (cat.name.toLowerCase() === category.toLowerCase()) {
+            if (cat.id === category) {
                 return cat.icon
             }
         }

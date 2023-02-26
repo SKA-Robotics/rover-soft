@@ -4,19 +4,21 @@ import { useViewModeStore } from '@/stores'
 import { categories, events } from './dev.json'
 import DiagnosticsEvent from '@/components/DiagnosticsDialogue/DiagnosticsEvent.vue'
 import {
-    getEventsByCategory,
-    getEventsByCategoryName,
-    getSeverityColorForCategory,
-} from '@/components/DiagnosticsDialogue/helpers'
+    getCategoryByIndex,
+    getHighestLevelEventColor,
+    groupEventsByCategory,
+} from '@/components/DiagnosticsDialogue/events'
 
 const viewModeStore = useViewModeStore()
 const { toggleDiagnostics } = viewModeStore
 
 const sortedEvents = events.sort((a, b) => b.timestamp - a.timestamp)
+const groupedEvents = groupEventsByCategory(sortedEvents, categories)
+
 const selectedCategory = ref(0)
 const displayEvents = computed(() => {
-    const category = categories[selectedCategory.value]
-    return getEventsByCategory(sortedEvents, category)
+    const category = getCategoryByIndex(categories, selectedCategory.value)
+    return groupedEvents[category.id]
 })
 </script>
 <template>
@@ -61,15 +63,12 @@ const displayEvents = computed(() => {
                                         <v-list-item-icon>
                                             <v-badge
                                                 :content="
-                                                    getEventsByCategoryName(
-                                                        sortedEvents,
-                                                        item.name.toLowerCase()
-                                                    ).length
+                                                    groupedEvents[item.id]
+                                                        .length
                                                 "
                                                 :color="
-                                                    getSeverityColorForCategory(
-                                                        events,
-                                                        item.name.toLowerCase()
+                                                    getHighestLevelEventColor(
+                                                        groupedEvents[item.id]
                                                     )
                                                 "
                                             >

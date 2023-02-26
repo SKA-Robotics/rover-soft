@@ -1,31 +1,38 @@
 {
   "categories": [
     {
+      "id": "all",
       "name": "All",
       "icon": "mdi-car",
       "displayAll": true
     },
     {
+      "id": "movement",
       "name": "Movement",
       "icon": "mdi-tire"
     },
     {
+      "id": "power",
       "name": "Power",
       "icon": "mdi-battery-high"
     },
     {
+      "id": "steering",
       "name": "Steering",
       "icon": "mdi-steering"
     },
     {
+      "id": "vision",
       "name": "Vision",
       "icon": "mdi-cctv"
     },
     {
+      "id": "sensors",
       "name": "Sensors",
       "icon": "mdi-leak"
     },
     {
+      "id": "other",
       "name": "Other",
       "icon": "mdi-package"
     }
