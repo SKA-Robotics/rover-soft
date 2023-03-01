@@ -2,10 +2,10 @@ steering_modes:
   rover:
     normal:
       linear:
-        scale_coefficient: 0.08 # max velocity/effort in range (0,1)
+        scale_coefficient: 1.0 # max velocity/effort in range (0,1)
         shape_coefficient: 3.0 # 1.0 - linear characteristics, 2.0 - square-antisymmetric, etc.
       angular:
-        scale_coefficient: 0.11
+        scale_coefficient: 1.0
         shape_coefficient: 3.0
     tank:
       scale_coefficient: 0.08

@@ -27,7 +27,7 @@
         <remap from="/roboclaw_driver/131/loop_rate" to="/sirius/controller/wheels/publish_rate"/>
     </node>
 
-    <!-- <node name="manip_control" pkg="ral_sirius_1" type="manip_control.py" output="screen"/> -->
+    <node name="manip_control" pkg="ral_sirius_1" type="manip_control.py" output="screen"/>
     <!-- <node pkg="ral_sirius_1" type="manip_arduino_node.py" name="manip_arduino_node" output="screen"/> -->
     <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
     <include file="$(find web_interface)/launch/servers.launch"/>
