@@ -9,7 +9,7 @@
 #include <realtime_tools/realtime_publisher.h>
 #include <pluginlib/class_list_macros.hpp>
 
-#include <sensor_msgs/JointState.h>
+#include <sirius_msgs/JointState.h>
 
 namespace odrive
 {
@@ -29,11 +29,11 @@ class OdriveHWInterface : public hardware_interface::RobotHW
     std::string motor1;
     int number_of_motors;
     std::vector<int> odrive_motors;
-    realtime_tools::RealtimePublisher<sensor_msgs::JointState> publisher[2];
-    std::vector<sensor_msgs::JointState> joint_state;
+    realtime_tools::RealtimePublisher<sirius_msgs::JointState> publisher[2];
+    std::vector<sirius_msgs::JointState> joint_state;
     std::vector<double> target_velocity;
-    void motor0_callback(const sensor_msgs::JointState::ConstPtr& msg);
-    void motor1_callback(const sensor_msgs::JointState::ConstPtr& msg);
+    void motor0_callback(const sirius_msgs::JointState::ConstPtr& msg);
+    void motor1_callback(const sirius_msgs::JointState::ConstPtr& msg);
 };
 
 }  // namespace odrive

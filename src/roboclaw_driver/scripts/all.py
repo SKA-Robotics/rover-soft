@@ -467,9 +467,9 @@ class Motor:
     def __init__(self, roboclaw, index=1, namespace="~", rate=10):
         self.encoder_offset = 0
         self.rc = roboclaw
-        self.index = index
+        self.index = index + 1
         self.rate = rate
-        self.namespace = f'{namespace}motor{index}/'
+        self.namespace = f'{namespace}motor{self.index-1}/'
 
         self.updateParameters()
 
@@ -750,7 +750,7 @@ class Driver:
             self.rc.address = self.address
 
         if not hasattr(self, 'motors'):
-            self.motors = [1, 2]
+            self.motors = [0, 1]
             self.motor = {}
             for motor in self.motors:
                 self.motor[str(motor)] = Motor(self.rc, motor, self.namespace, rate=self.rate)

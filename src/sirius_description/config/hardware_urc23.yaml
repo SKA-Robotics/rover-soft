@@ -1,0 +1,49 @@
+robot_hardware:
+  - wheels_left
+  - wheels_right
+wheels_left:
+  type: odrive/OdriveHWInterface
+  motor0: left_back_wheel_joint
+  motor1: left_front_wheel_joint
+wheels_right:
+  type: odrive/OdriveHWInterface
+  motor0: right_back_wheel_joint
+  motor1: right_front_wheel_joint
+roboclaw_driver:
+  baudrate: 115200
+  "131":
+    communication_timeout: 1.2
+    multiunit_mode: false
+    relay_mode: false
+    swap_buttons: false
+    motor1:
+      command_timeout: 1200
+      torque_constant: 1.2986
+      # reverse_motor: false
+      # reverse_encoder: true
+      max_current: 25
+      ticks_per_revolution: 88064
+
+    motor0:
+      command_timeout: 1200
+      torque_constant: 1.2986
+      # reverse_motor: true
+      # reverse_encoder: false
+      max_current: 25
+      ticks_per_revolution: 88064
+
+odrive_driver: 
+  drivers: ['wheels_back']
+  wheels_back: 
+    serial_number: '335D36513539'
+    motor0: 
+      reverse_motor: False
+      # transmission: 0.0138814559112      
+      transmission: 43
+      # transmission: 0.13953488372
+    motor1:
+      reverse_motor: True
+      # transmission: 0.0138814559112
+      transmission: 43
+      # transmission: 0.13953488372
+

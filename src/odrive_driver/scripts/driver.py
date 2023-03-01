@@ -4,8 +4,9 @@ from odrive.enums import AXIS_STATE_CLOSED_LOOP_CONTROL, AXIS_STATE_IDLE, CONTRO
 import rospy
 import odrive
 
-from sensor_msgs.msg import JointState
+from sirius_msgs.msg import JointState
 from std_msgs.msg import Header
+from math import pi
 
 
 class Motor:
@@ -43,7 +44,7 @@ class Motor:
                 self.axis.requested_state = AXIS_STATE_IDLE
         elif self.axis.current_state != AXIS_STATE_CLOSED_LOOP_CONTROL:
             self.axis.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
-        self.axis.controller.input_vel = msg.velocity[0] * self.direction / self.transmission
+        self.axis.controller.input_vel = msg.velocity[0] * self.direction * self.transmission / (2 * pi)
 
     def disable(self):
         self.axis.requested_state = AXIS_STATE_IDLE

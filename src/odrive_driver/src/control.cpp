@@ -62,11 +62,11 @@ bool OdriveHWInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
     return true;
 };
 
-void OdriveHWInterface::motor0_callback(const sensor_msgs::JointState::ConstPtr& msg)
+void OdriveHWInterface::motor0_callback(const sirius_msgs::JointState::ConstPtr& msg)
 {
     joint_state[0] = *msg;
 };
-void OdriveHWInterface::motor1_callback(const sensor_msgs::JointState::ConstPtr& msg)
+void OdriveHWInterface::motor1_callback(const sirius_msgs::JointState::ConstPtr& msg)
 {
     joint_state[number_of_motors - 1] = *msg;
 };
