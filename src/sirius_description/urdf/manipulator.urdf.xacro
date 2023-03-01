@@ -88,7 +88,7 @@
     </joint>
     <actuator name="motor_base_cyl">
         <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
+        <mechanicalReduction>150</mechanicalReduction>
     </actuator>
   </transmission>
 
@@ -137,7 +137,7 @@
     </joint>
     <actuator name="motor_cyl_arm1">
         <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
+        <mechanicalReduction>120</mechanicalReduction>
     </actuator>
   </transmission>
 
@@ -176,8 +176,8 @@
     <limit
       lower="0.0"
       upper="2.36"
-      effort="10"
-      velocity="5" />
+      effort="100"
+      velocity="50" />
   </joint>
   <transmission name="trans_arm1_arm2">
     <type>transmission_interface/SimpleTransmission</type>
@@ -186,7 +186,7 @@
     </joint>
     <actuator name="motor_arm1_arm2">
         <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
+        <mechanicalReduction>100</mechanicalReduction>
     </actuator>
   </transmission>
 
@@ -225,8 +225,8 @@
     <limit
       lower="-1.45"
       upper="0.79"
-      effort="10"
-      velocity="5" />
+      effort="100"
+      velocity="50" />
   </joint>
   <transmission name="trans_arm2_arm3">
     <type>transmission_interface/SimpleTransmission</type>
