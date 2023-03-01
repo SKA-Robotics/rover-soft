@@ -7,12 +7,12 @@ from sensor_msgs.msg import JointState as SensorJointState
 CMD_MANIP_TOPIC = '/cmd_manip'
 
 LIMB_IDS = {
-    'arm_rotate': "/roboclaw_driver/130/motor0/set_joint_state",
-    'claw_clamp': "/roboclaw_driver/130/motor1/set_joint_state",
-    'claw_rotate': "/roboclaw_driver/131/motor0/set_joint_state",
-    'claw_lift': "/roboclaw_driver/131/motor1/set_joint_state",
-    'arm_tilt': "/roboclaw_driver/132/motor0/set_joint_state",
-    'arm_lift': "/roboclaw_driver/132/motor1/set_joint_state",
+    'arm_rotate': "/roboclaw_driver/128/motor0/set_joint_state",
+    'claw_clamp': "/roboclaw_driver/128/motor1/set_joint_state",
+    'claw_rotate': "/roboclaw_driver/129/motor0/set_joint_state",
+    'claw_lift': "/roboclaw_driver/129/motor1/set_joint_state",
+    'arm_tilt': "/roboclaw_driver/130/motor0/set_joint_state",
+    'arm_lift': "/roboclaw_driver/130/motor1/set_joint_state",
 }
 
 
