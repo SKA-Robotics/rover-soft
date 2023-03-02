@@ -9,6 +9,8 @@ class GripperController:
 
     def __init__(self, portname, baudrate):
         self.sub = rospy.Subscriber('/joy', Joy, self.joy_callback)
+        self.angle = 0.5
+        self.speed = 0.03
         try:
             self.serial = serial.Serial(portname, baudrate)
         except serial.SerialException as e:
@@ -21,7 +23,9 @@ class GripperController:
                 print(self.serial.readline())
 
     def joy_callback(self, msg):
-        command = int((msg.axes[1] + 1.0) * 40) + 100
+        self.angle = clamp(self.angle + msg.axes[-1] * self.speed, -1, 1)
+        rospy.loginfo(self.angle)
+        command = int((self.angle + 1.0) * 123) + 1
         rospy.loginfo(command)
         self.serial.write([128, clamp(command, 1, 254), 192])
 
@@ -35,7 +39,7 @@ def clamp(value, min_value, max_value):
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('gaja_driver')
+        rospy.init_node('gripper')
         driver = GripperController(rospy.get_param("~port_name", "/dev/ttyACM0"), rospy.get_param("~baudrate", 9600))
         driver.run()
     except rospy.ROSInterruptException:
