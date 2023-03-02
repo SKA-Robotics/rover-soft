@@ -168,8 +168,8 @@ class JoystickController:
         manip_message.effort = list()
         for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name].items():
             manip_message.name.append(name)
-            manip_message.effort.append(params['scale_coefficient'] * effort(name) *
-                                        abs(effort(name))**(params['shape_coefficient'] - 1.0))
+            manip_message.effort.append(params['scale_coefficient'] * effort[name] *
+                                        abs(effort[name])**(params['shape_coefficient'] - 1.0))
         self.manip_publisher.publish(manip_message)
 
     def change_mode(self, buttons_values):
