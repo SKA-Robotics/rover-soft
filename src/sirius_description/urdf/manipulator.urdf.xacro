@@ -44,7 +44,7 @@
   <gazebo reference="base_link">
       <kinematic> true </kinematic>
       <material>
-        Gazebo/Yellow
+        Gazebo/Grey
       </material>
   </gazebo>
 
@@ -115,7 +115,7 @@
   </link>
   <gazebo reference="arm1">
       <material>
-        Gazebo/Green
+        Gazebo/White
       </material>
   </gazebo>
 
@@ -164,7 +164,7 @@
   </link>
   <gazebo reference="arm2">
       <material>
-        Gazebo/Blue
+        Gazebo/Grey
       </material>
   </gazebo>
 
@@ -213,7 +213,7 @@
   </link>
   <gazebo reference="arm3">
       <material>
-        Gazebo/Red
+        Gazebo/White
       </material>
   </gazebo>
 

@@ -1,3 +1,10 @@
+jointstate_topic: /manipulator/joint_states
+command_topics:
+    base_cyl: manipulator/joint1_position_controller/command
+    cyl_arm1: manipulator/joint2_position_controller/command
+    arm1_arm2: manipulator/joint3_position_controller/command
+    arm2_arm3: manipulator/joint4_position_controller/command
+    arm3_tool: manipulator/joint5_position_controller/command
 control_modes:
   cartesian:
     max_velocity: 0.21

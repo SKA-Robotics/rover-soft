@@ -109,7 +109,7 @@ class IKSolver:
         solution.z = z + l[0]
         solution.x = d * math.cos(angles[0])
         solution.y = d * math.sin(angles[0])
-        solution.pitch = 0.5 * math.pi - angles[1] - angles[2] - angles[3]
+        solution.pitch = angles[1] + angles[2] + angles[3] - 0.5 * math.pi
 
         return solution
 
