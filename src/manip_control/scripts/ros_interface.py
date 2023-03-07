@@ -3,15 +3,18 @@ import rospy
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 
+
 class ManipInterface:
+
     def get_jointstate(self):
         pass
 
-    def set_jointstate(self, jointstate : JointState):
+    def set_jointstate(self, jointstate: JointState):
         pass
 
 
 class ROSManipInterface(ManipInterface):
+
     def __init__(self):
         super().__init__()
         rospy.loginfo("Initializg ROSManipInterface")
@@ -28,7 +31,7 @@ class ROSManipInterface(ManipInterface):
         self._distribute_joint_commands(jointstate)
 
     def _update_jointstate(self, msg):
-        self.jointstate = msg        
+        self.jointstate = msg
 
     def _initialize_publishers(self):
         self.publishers = {}
@@ -38,7 +41,7 @@ class ROSManipInterface(ManipInterface):
             info = info + f"\n    - {joint}: {topic}"
         rospy.loginfo(info)
 
-    def _distribute_joint_commands(self, jointstate : JointState):
+    def _distribute_joint_commands(self, jointstate: JointState):
         for index, value in enumerate(jointstate.position):
             publisher = self.publishers[jointstate.name[index]]
             publisher.publish(Float64(value))

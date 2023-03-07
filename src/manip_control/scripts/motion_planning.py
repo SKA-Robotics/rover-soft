@@ -1,6 +1,8 @@
 import math
 
+
 class MotionInterpolator:
+
     def __init__(self, acceleration, max_velocity, max_error):
         self.acceleration = acceleration
         self.max_velocity = max_velocity
@@ -18,22 +20,22 @@ class MotionInterpolator:
         self.position = start
         self.end = end
         self.distance = self._calculate_distance(start, end)
-    
+
     def _calculate_movement_vector(self, start, end):
         if len(start) != len(end):
             raise Exception("Cannot compare lists of different sizes!")
         vector = self._subtract_positions(start, end)
         return self._normalize_movement_vector(vector)
-    
+
     def _subtract_positions(self, start, end):
-        return [y-x for x, y in zip(start, end)]
-        
+        return [y - x for x, y in zip(start, end)]
+
     def _normalize_movement_vector(self, vector):
         norm = self._vector_norm(vector)
         return [x / norm for x in vector]
-        
+
     def _vector_norm(self, vector):
-        return math.sqrt(sum([x*x for x in vector]))
+        return math.sqrt(sum([x * x for x in vector]))
 
     def _calculate_distance(self, start, end):
         delta_vector = self._subtract_positions(start, end)
@@ -44,7 +46,7 @@ class MotionInterpolator:
         self._update_position(timestep)
         self.distance = self._calculate_distance(self.position, self.end)
         return self.position
-    
+
     def _update_position(self, timestep):
         for index, direction in enumerate(self.direction):
             self.position[index] += direction * self.velocity * timestep
@@ -72,12 +74,12 @@ class MotionInterpolator:
 
     def _decrement_velocity(self, timestep):
         self.velocity = self.decceleration_velocity * ((self.distance / self.decceleration_distance))**0.5
-        
+
     def _stop_accelerating(self):
         self.accelerate = False
         if self.velocity > self.max_velocity:
             self.velocity = self.max_velocity
-    
+
     def _start_deccelerating(self):
         self.deccelerate = True
         self.decceleration_distance = self.distance

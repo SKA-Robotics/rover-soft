@@ -16,7 +16,7 @@ from motion_planning import MotionInterpolator
 #TODO: decouple logic and ROS specific code.
 class SiriusManip:
 
-    def __init__(self, manip_interface : ManipInterface):
+    def __init__(self, manip_interface: ManipInterface):
         self.manip_interface = manip_interface
 
         self.MODES_DATA = rospy.get_param("~control_modes")
@@ -77,8 +77,9 @@ class SiriusManip:
         rate = rospy.Rate(self.MODES_DATA["cartesian"]["interpolation_rate"])
 
         interpolator = MotionInterpolator(acceleration=acceleration, max_velocity=max_velocity, max_error=error)
-        interpolator.set_movement([pose.x, pose.y, pose.z, pose.pitch], [target_pose.x, target_pose.y, target_pose.z, target_pose.pitch])
-        
+        interpolator.set_movement([pose.x, pose.y, pose.z, pose.pitch],
+                                  [target_pose.x, target_pose.y, target_pose.z, target_pose.pitch])
+
         while interpolator.is_not_done():
             pose_list = interpolator.movement_step(rate.sleep_dur.to_sec())
             pose.x = pose_list[0]
