@@ -22,7 +22,7 @@ class ROSManipInterface(ManipInterface):
         self._initialize_publishers()
 
     def get_jointstate(self):
-        return self.jointstate
+         self.jointstate
 
     def set_jointstate(self, jointstate: JointState):
         self._distribute_joint_commands(jointstate)

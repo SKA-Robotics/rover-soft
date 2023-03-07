@@ -10,6 +10,7 @@ from std_msgs.msg import Float64
 
 from sirius_ik import IKSolver
 from ros_interface import ManipInterface, ROSManipInterface
+from motion_planning import MotionInterpolator
 
 
 #TODO: decouple logic and ROS specific code.
