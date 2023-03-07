@@ -4,6 +4,7 @@ class MotionInterpolator:
     def __init__(self, acceleration, max_velocity, max_error):
         self.acceleration = acceleration
         self.max_velocity = max_velocity
+        self.max_error = max_error
 
     def set_movement(self, start, end):
         self.direction = self._calculate_movement_vector(start, end)
@@ -45,8 +46,8 @@ class MotionInterpolator:
         return self.position
     
     def _update_position(self, timestep):
-        for x, direction in zip(self.position, self.direction):
-            x += direction * self.velocity * timestep
+        for index, direction in enumerate(self.direction):
+            self.position[index] += direction * self.velocity * timestep
 
     def _update_velocity(self, timestep):
         if self.accelerate:
@@ -81,3 +82,6 @@ class MotionInterpolator:
         self.deccelerate = True
         self.decceleration_distance = self.distance
         self.decceleration_velocity = self.velocity
+
+    def is_not_done(self):
+        return self.distance > self.max_error

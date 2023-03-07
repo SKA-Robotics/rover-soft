@@ -82,70 +82,25 @@ class SiriusManip:
     # would enter collision with itself
     def move_cartesian(self, target_pose: ManipPose):
         pose = self.get_pose()
-
-        # Calculate the vector of the movement
-        direction = [
-            target_pose.x - pose.x, target_pose.y - pose.y, target_pose.z - pose.z, target_pose.pitch - pose.pitch
-        ]
-        distance = math.sqrt(direction[0]**2 + direction[1]**2 + direction[2]**2 + direction[3]**2)
-        if distance == 0:
-            print("Target point is the same as current point")
-            return
-        direction = [x / distance for x in direction]
-
         # Load movement parameters
         acceleration = self.MODES_DATA["cartesian"]["acceleration"]
         max_velocity = self.MODES_DATA["cartesian"]["max_velocity"]
         error = self.MODES_DATA["cartesian"]["max_error"]
         rate = rospy.Rate(self.MODES_DATA["cartesian"]["interpolation_rate"])
 
-        velocity = 0.0
-        acceleration_distance = 0
-        decceleration_distance = 0
-        decceleration_velocity = 0
-        accelerate = True
-        deccelerate = False
-        while distance > error:
-            if accelerate:  # ACCELERATION PHASE
-                # Accelerate to reach max velocity
-                velocity += acceleration * rate.sleep_dur.to_sec()
-                if velocity > max_velocity:
-                    velocity = max_velocity
-                    accelerate = False
-                # Measure the distance needed to fully accelerate
-                acceleration_distance += velocity * rate.sleep_dur.to_sec()
-                if distance < acceleration_distance:
-                    # Start deccelerating if the target point is closer than the distance needed for full stop
-                    deccelerate = True
-                    accelerate = False
-                    decceleration_distance = distance
-                    decceleration_velocity = velocity
-            if not accelerate and not deccelerate:  # CONSTANT VELOCITY PHASE
-                # Start deccelerating if the target point is closer than the distance needed for full stop
-                if distance < acceleration_distance:
-                    deccelerate = True
-                    decceleration_distance = distance
-                    decceleration_velocity = velocity
-            if deccelerate:  # DECCElERATION PHASE
-                # deccelerate until stopped
-                velocity = decceleration_velocity * ((distance / decceleration_distance))**0.5
-
-            # Pose update
-            pose.x += direction[0] * velocity * rate.sleep_dur.to_sec()
-            pose.y += direction[1] * velocity * rate.sleep_dur.to_sec()
-            pose.z += direction[2] * velocity * rate.sleep_dur.to_sec()
-            pose.pitch += direction[3] * velocity * rate.sleep_dur.to_sec()
-
-            # Move to new pose
+        interpolator = MotionInterpolator(acceleration=acceleration, max_velocity=max_velocity, max_error=error)
+        interpolator.set_movement([pose.x, pose.y, pose.z, pose.pitch], [target_pose.x, target_pose.y, target_pose.z, target_pose.pitch])
+        
+        while interpolator.is_not_done():
+            pose_list = interpolator.movement_step(rate.sleep_dur.to_sec())
+            pose.x = pose_list[0]
+            pose.y = pose_list[1]
+            pose.z = pose_list[2]
+            pose.pitch = pose_list[3]
             self._move(pose)
-
-            # Calculate distance to target
-            distance = math.sqrt((pose.x - target_pose.x)**2 + (pose.y - target_pose.y)**2 +
-                                 (pose.z - target_pose.z)**2 + (pose.pitch - target_pose.pitch)**2)
             rate.sleep()
 
-        err = math.sqrt((pose.x - target_pose.x)**2 + (pose.y - target_pose.y)**2 + (pose.z - target_pose.z)**2)
-        rospy.loginfo("Reached target point. Position error: %f m" % err)
+        rospy.loginfo("Reached target point.")
 
     # For executing long movements. No chance of big trouble
     def move_jointspace(self, target_pose: ManipPose):
