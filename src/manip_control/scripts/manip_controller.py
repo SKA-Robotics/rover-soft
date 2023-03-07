@@ -25,15 +25,6 @@ class SiriusManip:
 
         rospy.Subscriber("/clicked_point", PointStamped, self.point_callback, queue_size=10)
         self.point_publisher = rospy.Publisher("/received_point", PointStamped, queue_size=10)
-        self.jointstate_publisher = rospy.Publisher("/joint_states", JointState, queue_size=10)
-
-        # TODO read actual joint state, remove the line below when it's done
-        self.currentPos = ManipPose()
-        self.currentPos.x = 0.5
-        self.currentPos.y = 0.0
-        self.currentPos.z = 0.25
-        self.currentPos.pitch = 0.0
-        # This is temporary, to make it work for SAR. After encoders are install integate it properly.
 
     def point_callback(self, data):
         rospy.loginfo("Received request:\n" + str(data.point))
@@ -43,15 +34,13 @@ class SiriusManip:
         target.z = data.point.z
         target.pitch = random.uniform(-math.pi / 4, 0)
 
-        self.move_cartesian(target)
+        self.move_jointspace(target)
 
     def _move(self, pose: ManipPose):
         jointstate = JointState()
         try:
             jointstate = self.solver.get_IK_solution(pose)
             self._publish_jointstate(jointstate)
-            # TODO read actual joint state, remove the line below when it's done
-            self.currentPos = pose
         except Exception as e:
             #TODO add diagnostic information
             rospy.logwarn("Could not move to target point")
@@ -71,8 +60,7 @@ class SiriusManip:
         self.manip_interface.set_jointstate(jointstate)
 
     def get_pose(self) -> ManipPose:
-        self.currentPos = self.solver.get_FK_solution(self.get_jointstate())
-        return self.currentPos
+        return self.solver.get_FK_solution(self.get_jointstate())
 
     def get_jointstate(self) -> JointState:
         return self.manip_interface.get_jointstate()
@@ -107,75 +95,22 @@ class SiriusManip:
         jointstate = self.solver.get_IK_solution(self.get_pose())
         target_jointstate = self.solver.get_IK_solution(target_pose)
 
-        # Calculate the vector of the movement
-        direction = [
-            target_jointstate.position[0] - jointstate.position[0],
-            target_jointstate.position[1] - jointstate.position[1],
-            target_jointstate.position[2] - jointstate.position[2],
-            target_jointstate.position[3] - jointstate.position[3]
-        ]
-        distance = math.sqrt(direction[0]**2 + direction[1]**2 + direction[2]**2 + direction[3]**2)
-        if distance == 0:
-            print("Target point is the same as current point")
-            return
-        direction = [x / distance for x in direction]
-
         # Load movement parameters
         acceleration = self.MODES_DATA["jointspace"]["acceleration"]
         max_velocity = self.MODES_DATA["jointspace"]["max_velocity"]
         error = self.MODES_DATA["jointspace"]["max_error"]
         rate = rospy.Rate(self.MODES_DATA["jointspace"]["interpolation_rate"])
 
-        velocity = 0.0
-        acceleration_distance = 0
-        decceleration_distance = 0
-        decceleration_velocity = 0
-        accelerate = True
-        deccelerate = False
-        while distance > error:
-            if accelerate:  # ACCELERATION PHASE
-                # Accelerate to reach max velocity
-                velocity += acceleration * rate.sleep_dur.to_sec()
-                if velocity > max_velocity:
-                    velocity = max_velocity
-                    accelerate = False
-                # Measure the distance needed to fully accelerate
-                acceleration_distance += velocity * rate.sleep_dur.to_sec()
-                if distance < acceleration_distance:
-                    # Start deccelerating if the target point is closer than the distance needed for full stop
-                    deccelerate = True
-                    accelerate = False
-                    decceleration_distance = distance
-                    decceleration_velocity = velocity
-            if not accelerate and not deccelerate:  # CONSTANT VELOCITY PHASE
-                # Start deccelerating if the target point is closer than the distance needed for full stop
-                if distance < acceleration_distance:
-                    deccelerate = True
-                    decceleration_distance = distance
-                    decceleration_velocity = velocity
-            if deccelerate:  # DECCElERATION PHASE
-                # deccelerate until stopped
-                velocity = decceleration_velocity * ((distance / decceleration_distance))**0.5
+        interpolator = MotionInterpolator(acceleration=acceleration, max_velocity=max_velocity, max_error=error)
+        interpolator.set_movement(jointstate.position, target_jointstate.position)
 
-            # jointstate update
-            jointstate.position[0] += direction[0] * velocity * rate.sleep_dur.to_sec()
-            jointstate.position[1] += direction[1] * velocity * rate.sleep_dur.to_sec()
-            jointstate.position[2] += direction[2] * velocity * rate.sleep_dur.to_sec()
-            jointstate.position[3] += direction[3] * velocity * rate.sleep_dur.to_sec()
-
-            # Move to new jointstate
+        while interpolator.is_not_done():
+            positions = interpolator.movement_step(rate.sleep_dur.to_sec())
+            jointstate.position = positions
             self._publish_jointstate(jointstate)
-            # TODO read actual joint state, remove the line below when it's done
-
-            # Calculate distance to target
-            distance = math.sqrt((jointstate.position[0] - target_jointstate.position[0])**2 +
-                                 (jointstate.position[1] - target_jointstate.position[1])**2 +
-                                 (jointstate.position[2] - target_jointstate.position[2])**2 +
-                                 (jointstate.position[3] - target_jointstate.position[3])**2)
             rate.sleep()
 
         rospy.loginfo("Reached target point.")
-        self.currentPos = target_pose
 
     def run(self):
         rospy.spin()
