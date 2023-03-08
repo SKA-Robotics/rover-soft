@@ -1,5 +1,5 @@
 import pytest
-from motion_planning import MotionInterpolator
+from motion_interpolation import MotionInterpolator
 
 
 def assert_equals(given, target):
