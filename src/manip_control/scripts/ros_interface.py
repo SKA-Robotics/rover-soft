@@ -12,17 +12,25 @@ class ManipInterface:
     def set_jointstate(self, jointstate: JointState):
         pass
 
+    def get_manip_params(self):
+        pass
+
 
 class ROSManipInterface(ManipInterface):
 
     def __init__(self):
         super().__init__()
         rospy.loginfo("Initializg ROSManipInterface")
+        self._load_ROSparams()
         self.jointstate_topic = rospy.get_param("~jointstate_topic", "/manipulator/joint_states")
         self.command_topics = rospy.get_param("~command_topics", {})
         self.jointstate = JointState()
         rospy.Subscriber(self.jointstate_topic, JointState, self._update_jointstate)
         self._initialize_publishers()
+
+    def _load_ROSparams(self):
+        self.MODES_DATA = rospy.get_param("~control_modes")
+        self.LINKS_DATA = rospy.get_param("~links")
 
     def get_jointstate(self):
         return self.jointstate
@@ -45,3 +53,6 @@ class ROSManipInterface(ManipInterface):
         for index, value in enumerate(jointstate.position):
             publisher = self.publishers[jointstate.name[index]]
             publisher.publish(Float64(value))
+
+    def get_manip_params(self):
+        return {"control_modes": self.MODES_DATA, "links": self.LINKS_DATA}

@@ -7,13 +7,13 @@ command_topics:
     arm3_tool: manipulator/joint5_position_controller/command
 control_modes:
   cartesian:
-    max_velocity: 0.1
-    acceleration: 0.06
+    max_velocity: 0.05
+    acceleration: 0.03
     max_error: 0.001
     interpolation_rate: 10.0
   jointspace:
-    max_velocity: 0.21
-    acceleration: 0.07
+    max_velocity: 0.25
+    acceleration: 0.03
     max_error: 0.001
     interpolation_rate: 10.0
 
