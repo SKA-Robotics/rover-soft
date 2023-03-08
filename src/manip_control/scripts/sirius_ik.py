@@ -3,6 +3,7 @@ import math
 from sensor_msgs.msg import JointState
 from sirius_msgs.msg import ManipPose
 
+#TODO: Create abstract base class of kinematics solver
 
 # Class implementing kinematics of SiriusII manipulator
 class IKSolver:

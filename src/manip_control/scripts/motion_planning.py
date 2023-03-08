@@ -1,12 +1,21 @@
 import math
+import rospy
+from sirius_msgs.msg import ManipPose
+from ros_interface import ManipInterface
+from sirius_ik import IKSolver
 
-
-class MotionInterpolator:
-
+class InterpolationSettings:
     def __init__(self, acceleration, max_velocity, max_error):
         self.acceleration = acceleration
         self.max_velocity = max_velocity
         self.max_error = max_error
+
+
+class MotionInterpolator:
+    def __init__(self, settings : InterpolationSettings):
+        self.acceleration = settings.acceleration
+        self.max_velocity = settings.max_velocity
+        self.max_error = settings.max_error
 
     def set_movement(self, start, end):
         self.direction = self._calculate_movement_vector(start, end)
@@ -87,3 +96,35 @@ class MotionInterpolator:
 
     def is_not_done(self):
         return self.distance > self.max_error
+
+
+class MotionStrategy:
+    def execute(manip_interface : ManipInterface):
+        pass
+
+
+class CartesianMotion(MotionStrategy):
+    def __init__(self, target_pose : ManipPose, interpolation_settings : InterpolationSettings, ik_solver : IKSolver, rate):
+        self.motion_interpolator = MotionInterpolator(interpolation_settings)
+        self.ik_solver = ik_solver
+        self.target_pose = target_pose
+        self.rate = rospy.Rate(rate)
+    
+    def execute(self, manip_interface: ManipInterface):
+        start_pose = manip_interface.get_jointstate()
+        end_pose = self.target_pose
+        pose = start_pose
+        self.motion_interpolator.set_movement(
+            [start_pose.x, start_pose.y, start_pose.z, start_pose.pitch],
+            [end_pose.x, end_pose.y, end_pose.z, end_pose.pitch])
+
+        while self.motion_interpolator.is_not_done():
+            pose_list = self.motion_interpolator.movement_step(self.rate.sleep_dur)
+            pose.x = pose_list[0]
+            pose.y = pose_list[1]
+            pose.z = pose_list[2]
+            pose.pitch = pose_list[3]
+            jointstate = self.ik_solver.get_IK_solution(pose)
+            manip_interface.set_jointstate(jointstate)
+            self.rate.sleep()
+             
