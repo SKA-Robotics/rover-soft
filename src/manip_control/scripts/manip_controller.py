@@ -11,6 +11,7 @@ from ros_interface import ManipInterface, ROSManipInterface
 from motion_interpolation import InterpolationSettings
 from motion_strategies import CartesianMotion, JointspaceMotion
 
+
 class SiriusManip:
 
     def __init__(self, manip_interface: ManipInterface):
@@ -35,8 +36,8 @@ class SiriusManip:
 
     def move_jointspace(self, target_pose: ManipPose):
         self._move(target_pose, JointspaceMotion, "jointspace")
-    
-    def _get_controlmode_settings(self, mode_name : str):
+
+    def _get_controlmode_settings(self, mode_name: str):
         interpolation_settings = InterpolationSettings(
             acceleration=self.manip_interface.get_manip_params()["control_modes"][mode_name]["acceleration"],
             max_velocity=self.manip_interface.get_manip_params()["control_modes"][mode_name]["max_velocity"],
@@ -44,7 +45,7 @@ class SiriusManip:
         rate = self.manip_interface.get_manip_params()["control_modes"][mode_name]["interpolation_rate"]
         return interpolation_settings, rate
 
-    def _move(self, target_pose : ManipPose, motion_strategy, mode_name : str):
+    def _move(self, target_pose: ManipPose, motion_strategy, mode_name: str):
         interpolation_settings, rate = self._get_controlmode_settings(mode_name)
         motion = motion_strategy(target_pose, interpolation_settings, self.solver, rate)
         motion.execute(self.manip_interface)

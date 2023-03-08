@@ -33,7 +33,7 @@ class ROSManipInterface(ManipInterface):
         self.LINKS_DATA = rospy.get_param("~links")
 
     def get_jointstate(self):
-        return self.jointstate
+        return filter_jointstate(self.jointstate, self.LINKS_DATA["names"])
 
     def set_jointstate(self, jointstate: JointState):
         self._distribute_joint_commands(jointstate)
@@ -56,3 +56,15 @@ class ROSManipInterface(ManipInterface):
 
     def get_manip_params(self):
         return {"control_modes": self.MODES_DATA, "links": self.LINKS_DATA}
+
+
+def filter_jointstate(jointstate: JointState, names):
+    filtered_jointstate = JointState()
+    filtered_jointstate.header = jointstate.header
+    for name in names:
+        index = jointstate.name.index(name)
+        filtered_jointstate.name.append(name)
+        filtered_jointstate.position.append(jointstate.position[index])
+        filtered_jointstate.velocity.append(jointstate.velocity[index])
+        filtered_jointstate.effort.append(jointstate.effort[index])
+    return filtered_jointstate

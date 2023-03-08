@@ -1,6 +1,8 @@
 import math
 
+
 class InterpolationSettings:
+
     def __init__(self, acceleration, max_velocity, max_error):
         self.acceleration = acceleration
         self.max_velocity = max_velocity
@@ -8,7 +10,8 @@ class InterpolationSettings:
 
 
 class MotionInterpolator:
-    def __init__(self, settings : InterpolationSettings):
+
+    def __init__(self, settings: InterpolationSettings):
         self.acceleration = settings.acceleration
         self.max_velocity = settings.max_velocity
         self.max_error = settings.max_error
