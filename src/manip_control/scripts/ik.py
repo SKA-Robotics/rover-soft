@@ -1,7 +1,24 @@
 #!/usr/bin/python3
 import math
 from sensor_msgs.msg import JointState
-from sirius_msgs.msg import ManipPose
+
+
+class ManipPose:
+
+    def __init__(self, x=0, y=0, z=0, roll=0, pitch=0, yaw=0):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.roll = roll
+        self.pitch = pitch
+        self.yaw = yaw
+
+    def from_list(data):
+        return ManipPose(*data)
+
+    def to_list(self):
+        return [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
+
 
 #TODO: Create abstract base class of kinematics solver
 
@@ -19,7 +36,7 @@ class IKSolver:
         # Initialize solution JointState object
         solution = JointState()
         solution.name = self.joint_names
-        solution.position = [0] * 4
+        solution.position = [0] * len(self.joint_names)
 
         limits = self.limits
         l = self.lengths

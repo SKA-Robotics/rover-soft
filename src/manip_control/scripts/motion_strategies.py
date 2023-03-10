@@ -1,9 +1,8 @@
 import rospy
-from sirius_msgs.msg import ManipPose
 
 from ros_interface import ManipInterface
 from motion_interpolation import InterpolationSettings, MotionInterpolator
-from ik import IKSolver
+from ik import IKSolver, ManipPose
 
 
 class MotionStrategy:
@@ -30,6 +29,7 @@ class InterpolatedMotion(MotionStrategy):
             position = self.motion_interpolator.movement_step(self.rate.sleep_dur.to_sec())
             self._move_to_position(position, manip_interface)
             self.rate.sleep()
+        print("")
 
     def _calculate_start_coords(self, manip_interface: ManipInterface):
         pass
@@ -45,14 +45,16 @@ class CartesianMotion(InterpolatedMotion):
 
     def _calculate_start_coords(self, manip_interface: ManipInterface):
         pose = self.ik_solver.get_FK_solution(manip_interface.get_jointstate())
-        return [pose.x, pose.y, pose.z, pose.pitch]
+        print(f"Start coords: {pose.to_list()}")
+        return pose.to_list()
 
     def _calculate_end_coords(self, manip_interface: ManipInterface):
         pose = self.target_pose
-        return [pose.x, pose.y, pose.z, pose.pitch]
+        return pose.to_list()
 
     def _move_to_position(self, position, manip_interface: ManipInterface):
-        pose = ManipPose(position[0], position[1], position[2], position[3])
+        print(f"{position}\t\t\t\r", end="")
+        pose = ManipPose.from_list(position)
         jointstate = self.ik_solver.get_IK_solution(pose)
         manip_interface.set_jointstate(jointstate)
 

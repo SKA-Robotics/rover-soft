@@ -2,6 +2,7 @@ import rospy
 
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
+from geometry_msgs.msg import PointStamped
 
 
 class ManipInterface:
@@ -56,6 +57,53 @@ class ROSManipInterface(ManipInterface):
 
     def get_manip_params(self):
         return {"control_modes": self.MODES_DATA, "links": self.LINKS_DATA}
+
+
+class PosePublishingDecorator(ManipInterface):
+
+    def __init__(self, interface: ManipInterface):
+        self._component = interface
+        self.ik_solver = None
+        self.pose_publisher = None
+
+    def set_ik_solver(self, ik_solver):
+        self.ik_solver = ik_solver
+
+    def set_topic_name(self, topic_name):
+        self.pose_publisher = ROSPosePublisher(topic_name)
+
+    def get_jointstate(self):
+        return self._component.get_jointstate()
+
+    def set_jointstate(self, jointstate: JointState):
+        if self._can_publish():
+            self._publish(jointstate)
+        return self._component.set_jointstate(jointstate)
+
+    def _publish(self, jointstate):
+        pose = self.ik_solver.get_FK_solution(jointstate)
+        self.pose_publisher.publish(pose)
+
+    def _can_publish(self):
+        return self.ik_solver is not None and self.pose_publisher is not None
+
+    def get_manip_params(self):
+        return self._component.get_manip_params()
+
+
+class ROSPosePublisher:
+
+    def __init__(self, topic):
+        self.publisher = rospy.Publisher(topic, PointStamped, queue_size=10)
+
+    def publish(self, pose):
+        msg = PointStamped()
+        msg.header.stamp = rospy.Time.now()
+        msg.header.frame_id = "base_link"
+        msg.point.x = pose.x
+        msg.point.y = pose.y
+        msg.point.z = pose.z
+        self.publisher.publish(msg)
 
 
 def filter_jointstate(jointstate: JointState, names):

@@ -1,5 +1,6 @@
 import pytest
 from motion_interpolation import MotionInterpolator
+from ik import ManipPose
 
 
 def assert_equals(given, target):
@@ -51,3 +52,8 @@ def test_calculate_distance():
     interpolator = MotionInterpolator(1, 1, 0.1)
     distance = interpolator._calculate_distance([1, -2], [4, 2])
     assert_equals(distance, 5)
+
+
+def test_pose_to_list_conversion():
+    list = [1, 7, 0, 1, 1, 3]
+    assert_equals_list(ManipPose.from_list(list).to_list(), list)
