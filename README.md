@@ -1,6 +1,6 @@
 # SKAR Rover Software
 
-This repository contains source code of our software that runs on the on-board computers of Sirius rover family.
+This repository contains source code of our software that runs on the on-board computers of Sirius rover family. aaaaaaaa
 
 ## Requirements
 * ROS Noetic running on Ubuntu 20.04
