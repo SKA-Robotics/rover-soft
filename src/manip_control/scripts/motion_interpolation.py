@@ -8,7 +8,7 @@ class InterpolationSettings:
         self.max_velocity = max_velocity
         self.max_error = max_error
         self.weights = weights
-    
+
     def from_params(params):
         interpolation_settings = InterpolationSettings(
             acceleration=params["acceleration"],
