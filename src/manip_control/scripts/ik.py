@@ -43,6 +43,7 @@ class IKSolver:
         x = target.x
         y = target.y
 
+        solution.position[4] = target.roll
         # Calculate solution using SiriusII-specific IK formula
         # First joint angle can be easily obtained as it is
         # the only joint allowing for movement along y-axis
@@ -129,9 +130,35 @@ class IKSolver:
         solution.x = d * math.cos(angles[0])
         solution.y = d * math.sin(angles[0])
         solution.pitch = angles[1] + angles[2] + angles[3] - 0.5 * math.pi
+        solution.roll = angles[4]
 
         return solution
 
 
 def checkBounds(value, bounds):
     return value >= bounds[0] and value <= bounds[1]
+
+
+if __name__=="__main__":
+    pose = ManipPose(0.7, 0.2, 0.3, 0.4, 0.1, 0.2)
+    print(pose.to_list())
+    solver = IKSolver([
+    "base_cyl",
+    "cyl_arm1",
+    "arm1_arm2",
+    "arm2_arm3",
+    "arm3_tool"],[
+    0.0655,
+    0.4350,
+    0.4650,
+    0.129],[
+    [-3.0, 3.0],
+    [-3.0, 3.0],
+    [-3.0, 3.0],
+    [-3.0, 3.0],
+    [-1000.0,1000.0]]
+    )
+    jointstate = solver.get_IK_solution(pose)
+    print(jointstate.position)
+    print(solver.get_FK_solution(jointstate).to_list())
+

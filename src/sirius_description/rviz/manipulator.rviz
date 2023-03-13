@@ -7,16 +7,9 @@ Panels:
         - /Global Options1
         - /Grid1/Offset1
         - /RobotModel1/Links1
-        - /RobotModel1/Links1/arm11
-        - /RobotModel1/Links1/arm21
-        - /RobotModel1/Links1/arm31
-        - /RobotModel1/Links1/base_link1
-        - /RobotModel1/Links1/cylinder1
-        - /RobotModel1/Links1/fake1
-        - /RobotModel1/Links1/root_link1
-        - /RobotModel1/Links1/tool1
         - /Clicked Point1
         - /Received Point1
+        - /ManipPose1
       Splitter Ratio: 0.5
     Tree Height: 751
   - Class: rviz/Selection
@@ -65,56 +58,18 @@ Visualization Manager:
     - Alpha: 0.3330000042915344
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: true
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        arm1:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-          Value: true
-        arm2:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-          Value: true
-        arm3:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-          Value: true
-        base_link:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-          Value: true
-        cylinder:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-          Value: true
-        fake:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-        root_link:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-        tool:
-          Alpha: 1
-          Show Axes: true
-          Show Trail: false
-          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
     - Alpha: 1
       Class: rviz/PointStamped
@@ -136,6 +91,17 @@ Visualization Manager:
       Queue Size: 10
       Radius: 0.029999999329447746
       Topic: /received_point
+      Unreliable: false
+      Value: true
+    - Alpha: 0.6000000238418579
+      Class: rviz/PointStamped
+      Color: 78; 154; 6
+      Enabled: true
+      History Length: 1
+      Name: ManipPose
+      Queue Size: 10
+      Radius: 0.009999999776482582
+      Topic: /actualManipPose
       Unreliable: false
       Value: true
   Enabled: true
@@ -166,7 +132,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.4651747941970825
+      Distance: 0.8231694102287292
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -174,17 +140,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.66823410987854
-        Y: -0.045200273394584656
-        Z: 0.34865835309028625
+        X: 0.8449319005012512
+        Y: -0.005440505221486092
+        Z: 0.42197054624557495
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5497987270355225
+      Pitch: 0.2047995775938034
       Target Frame: <Fixed Frame>
-      Yaw: 5.081790447235107
+      Yaw: 2.063603639602661
     Saved: ~
 Window Geometry:
   Displays:

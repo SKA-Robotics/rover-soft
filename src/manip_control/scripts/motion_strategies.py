@@ -29,7 +29,6 @@ class InterpolatedMotion(MotionStrategy):
             position = self.motion_interpolator.movement_step(self.rate.sleep_dur.to_sec())
             self._move_to_position(position, manip_interface)
             self.rate.sleep()
-        print("")
 
     def _calculate_start_coords(self, manip_interface: ManipInterface):
         pass
@@ -45,7 +44,6 @@ class CartesianMotion(InterpolatedMotion):
 
     def _calculate_start_coords(self, manip_interface: ManipInterface):
         pose = self.ik_solver.get_FK_solution(manip_interface.get_jointstate())
-        print(f"Start coords: {pose.to_list()}")
         return pose.to_list()
 
     def _calculate_end_coords(self, manip_interface: ManipInterface):
@@ -53,7 +51,6 @@ class CartesianMotion(InterpolatedMotion):
         return pose.to_list()
 
     def _move_to_position(self, position, manip_interface: ManipInterface):
-        print(f"{position}\t\t\t\r", end="")
         pose = ManipPose.from_list(position)
         jointstate = self.ik_solver.get_IK_solution(pose)
         manip_interface.set_jointstate(jointstate)

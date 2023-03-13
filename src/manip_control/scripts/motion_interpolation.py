@@ -3,10 +3,20 @@ import math
 
 class InterpolationSettings:
 
-    def __init__(self, acceleration, max_velocity, max_error):
+    def __init__(self, acceleration, max_velocity, max_error, weights):
         self.acceleration = acceleration
         self.max_velocity = max_velocity
         self.max_error = max_error
+        self.weights = weights
+    
+    def from_params(params):
+        interpolation_settings = InterpolationSettings(
+            acceleration=params["acceleration"],
+            max_velocity=params["max_velocity"],
+            max_error=params["max_error"],
+            weights=params["velocity_weighing"],
+        )
+        return interpolation_settings
 
 
 class MotionInterpolator:
@@ -15,6 +25,7 @@ class MotionInterpolator:
         self.acceleration = settings.acceleration
         self.max_velocity = settings.max_velocity
         self.max_error = settings.max_error
+        self.weights = settings.weights
 
     def set_movement(self, start, end):
         self.direction = self._calculate_movement_vector(start, end)
@@ -43,7 +54,7 @@ class MotionInterpolator:
         return [x / norm for x in vector]
 
     def _vector_norm(self, vector):
-        return math.sqrt(sum([x * x for x in vector]))
+        return math.sqrt(sum([x * x * w for x, w in zip(vector, self.weights)]))
 
     def _calculate_distance(self, start, end):
         delta_vector = self._subtract_positions(start, end)

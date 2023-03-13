@@ -29,10 +29,8 @@ class Manip:
         self._move(target_pose, JointspaceMotion, "jointspace")
 
     def _get_controlmode_settings(self, mode_name: str):
-        interpolation_settings = InterpolationSettings(
-            acceleration=self.manip_interface.get_manip_params()["control_modes"][mode_name]["acceleration"],
-            max_velocity=self.manip_interface.get_manip_params()["control_modes"][mode_name]["max_velocity"],
-            max_error=self.manip_interface.get_manip_params()["control_modes"][mode_name]["max_error"])
+        params = self.manip_interface.get_manip_params()["control_modes"][mode_name]
+        interpolation_settings = InterpolationSettings.from_params(params)
         rate = self.manip_interface.get_manip_params()["control_modes"][mode_name]["interpolation_rate"]
         return interpolation_settings, rate
 
@@ -66,6 +64,7 @@ class ManipNode:
         target.y = data.point.y
         target.z = data.point.z
         target.pitch = random.uniform(-math.pi / 4, 0)
+        target.roll = random.uniform(-math.pi, math.pi)
         self.manip.move_cartesian(target)
 
 
