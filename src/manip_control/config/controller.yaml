@@ -17,5 +17,5 @@ control_modes:
     acceleration: 0.03
     max_error: 0.001
     interpolation_rate: 10.0
-    velocity_weighin: [1, 1, 1, 1, 0.05]
+    velocity_weighing: [1, 1, 1, 1, 0.05]
 
