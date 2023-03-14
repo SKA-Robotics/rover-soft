@@ -21,6 +21,8 @@ const rosStore = useRosStore()
 // getting config update
 const seriesConfig = ref([])
 const refreshingTimer = ref(null)
+const chartTitle = ref('')
+const yAxisTitle = ref('')
 
 watch(props, () => {
     seriesConfig.value.forEach((serie, index) => {
@@ -32,6 +34,9 @@ watch(props, () => {
     seriesConfig.value = JSON.parse(
         JSON.stringify(props.extraConfig.series)
     ).slice(0, props.extraConfig.seriesNumber)
+
+    chartTitle.value = props.extraConfig.chartTitle
+    yAxisTitle.value = props.extraConfig.yAxisTitle
 
     rosStore.ws.getTopics((result) => {
         setChartOptions()
@@ -89,9 +94,11 @@ function setChartOptions() {
         options.value.plugins.legend.display = false
         options.value.plugins.title.display = true
     } else {
-        options.value.scales.y.title.display = false
+        options.value.scales.y.title.display = yAxisTitle.value
+        options.value.scales.y.title.text = yAxisTitle.value
         options.value.plugins.legend.display = true
-        options.value.plugins.title.display = false
+        options.value.plugins.title.display = chartTitle.value
+        options.value.plugins.title.text = chartTitle.value
     }
     const currentDate = new Date()
     startTime.value = currentDate.getTime() / 1000
@@ -109,8 +116,12 @@ function setSerieOptions(serie, index) {
     serie.messageProperty.trim()
 
     if (seriesConfig.value.length == 1) {
-        options.value.scales.y.title.text = serie.messageProperty
-        options.value.plugins.title.text = serie.topicName
+        options.value.scales.y.title.text = yAxisTitle.value
+            ? yAxisTitle.value
+            : serie.messageProperty
+        options.value.plugins.title.text = chartTitle.value
+            ? chartTitle.value
+            : serie.topicName
     }
 
     const angle = (index * 2 * Math.PI) / seriesConfig.value.length
@@ -119,7 +130,9 @@ function setSerieOptions(serie, index) {
     const b = 170 + 85 * Math.cos(angle - (4 * Math.PI) / 3)
 
     data.value.datasets.push({
-        label: serie.topicName + '/' + serie.messageProperty,
+        label: serie.label
+            ? serie.label
+            : serie.topicName + '/' + serie.messageProperty,
         fill: false,
         borderColor: `rgb(${r}, ${g}, ${b})`,
         backgroundColor: `rgb(${r}, ${g}, ${b})`,

@@ -84,29 +84,41 @@ export default {
                         name: 'Message Property',
                         type: 'text',
                     },
+                    label: {
+                        name: 'Label',
+                        type: 'text',
+                        hide: ref(false),
+                    },
                 },
             ]),
             refreshingFrequency: {
                 name: 'Refreshing Frequency',
                 type: 'range',
                 range: () => ({ min: 1, max: 20, step: 1 }),
-                hide: ref(true),
+            },
+            chartTitle: {
+                name: 'Chart Title',
+                type: 'text',
+            },
+            yAxisTitle: {
+                name: 'Y-axis Title',
+                type: 'text',
             },
             update: function (
                 name,
                 value,
-                index = undefined,
-                arrayName = undefined
+                arrayName = undefined,
+                index = undefined
             ) {
-                // Index and array name must be specified together or not at all
-                if ((index === undefined) != (arrayName === undefined)) return
+                // Array and index name must be specified together or not at all
+                if ((arrayName === undefined) != (index === undefined)) return
 
                 // Ignore array element update
-                if (index !== undefined || arrayName !== undefined) return
+                if (arrayName !== undefined || index !== undefined) return
 
-                // Hiding test
+                // Hiding unused label
                 if (name === 'seriesNumber') {
-                    this.refreshingFrequency.hide.value = value === undefined
+                    this.series.value[0].label.hide = value <= 1
                 }
 
                 if (name === 'seriesNumber') {
@@ -126,5 +138,10 @@ export default {
                 }
             },
         },
+        icon: 'mdi-chart-box-outline',
+        // icon: 'mdi-chart-line',
+        // icon: 'mdi-chart-box',
+        // icon: 'mdi-chart-bell-curve-cumulative',
+        // icon: 'mdi-chart-areaspline',
     },
 }

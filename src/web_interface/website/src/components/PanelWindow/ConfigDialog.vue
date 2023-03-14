@@ -11,9 +11,9 @@ const windowTypes = Object.entries(windows).map(([type, window]) => ({
 const configOptions = computed(() =>
     tempConfig.value.type in windows
         ? Object.entries(windows[tempConfig.value.type].configOptions).filter(
-              ([name, obj]) =>
+              ([, obj]) =>
                   !Array.isArray(obj) && !Array.isArray(obj.value)
-                      ? typeof obj != 'function' && !isHidden.value[name]
+                      ? typeof obj != 'function' && !obj.hide
                       : false
           )
         : []
@@ -34,36 +34,31 @@ const arrayConfigOptions = computed(() =>
                       tempConfig.value.extraConfig[name].push(new Object())
                   return true
               })
-              .map(([name, obj]) => [
+              .map(([name, array]) => [
                   name,
-                  obj.value
-                      ? obj.value.map((element) => Object.entries(element))
-                      : obj.map((element) => Object.entries(element)),
+                  (array.value ? array.value : array).map((element) =>
+                      Object.entries(element).filter(([, obj]) =>
+                          !Array.isArray(obj)
+                              ? typeof obj != 'function' && !obj.hide
+                              : false
+                      )
+                  ),
               ])
         : []
 )
-const isHidden = computed(() => {
-    let dict = {}
-    if (tempConfig.value.type in windows)
-        Object.entries(windows[tempConfig.value.type].configOptions).forEach(
-            ([name, obj]) =>
-                (dict[name] = obj.hide !== undefined && obj.hide.value)
-        )
-    return dict
-})
 
 const tempConfig = ref(JSON.parse(JSON.stringify(props.config)))
 watch(props, () => {
     tempConfig.value = JSON.parse(JSON.stringify(props.config))
 })
 
-function updateValue(name, value, index = undefined, arrayName = undefined) {
+function updateValue(name, value, arrayName = undefined, index = undefined) {
     if (windows[tempConfig.value.type].configOptions.update)
         windows[tempConfig.value.type].configOptions.update(
             name,
             value,
-            index,
-            arrayName
+            arrayName,
+            index
         )
 }
 </script>
@@ -131,8 +126,8 @@ function updateValue(name, value, index = undefined, arrayName = undefined) {
                                             updateValue(
                                                 name,
                                                 value,
-                                                index,
-                                                arrayName
+                                                arrayName,
+                                                index
                                             )
                                     "
                                 ></component>
