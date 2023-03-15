@@ -61,10 +61,23 @@ export default {
         typeName: 'Chart Window',
         component: ChartWindow,
         configOptions: {
-            seriesNumber: {
-                name: 'Number of series',
+            chartTitle: {
+                name: 'Chart Title',
+                type: 'text',
+            },
+            yAxisTitle: {
+                name: 'Y-axis Title',
+                type: 'text',
+            },
+            refreshingFrequency: {
+                name: 'Refreshing Frequency [Hz]',
+                type: 'range',
+                range: () => ({ min: 1, max: 20, step: 1 }),
+            },
+            maxTimeRange: {
+                name: 'Max Time Range [s]',
                 type: 'number',
-                range: () => ({ min: 1, max: 6, step: 1 }),
+                range: () => ({ min: 1, step: 1 }),
             },
             series: ref([
                 {
@@ -87,55 +100,39 @@ export default {
                     label: {
                         name: 'Label',
                         type: 'text',
-                        hide: ref(false),
+                        hide: ref(true),
                     },
                 },
             ]),
-            refreshingFrequency: {
-                name: 'Refreshing Frequency',
-                type: 'range',
-                range: () => ({ min: 1, max: 20, step: 1 }),
-            },
-            chartTitle: {
-                name: 'Chart Title',
-                type: 'text',
-            },
-            yAxisTitle: {
-                name: 'Y-axis Title',
-                type: 'text',
-            },
             update: function (
                 name,
                 value,
                 arrayName = undefined,
                 index = undefined
             ) {
-                // Array and index name must be specified together or not at all
-                if ((arrayName === undefined) != (index === undefined)) return
+                // Array update (not element)
+                if (arrayName !== undefined && index === undefined) {
+                    if (name === 'push' || name === 'pop') {
+                        value = parseInt(value) + this.series.value.length
+                        if (value < 1 || value > 6) return
+
+                        // Hiding unused label
+                        this.series.value[0].label.hide = value <= 1
+
+                        while (value != this.series.value.length) {
+                            if (this.series.value.length < value)
+                                this.series.value.push({
+                                    ...this.series.value[
+                                        this.series.value.length - 1
+                                    ],
+                                })
+                            else this.series.value.pop()
+                        }
+                    }
+                }
 
                 // Ignore array element update
                 if (arrayName !== undefined || index !== undefined) return
-
-                // Hiding unused label
-                if (name === 'seriesNumber') {
-                    this.series.value[0].label.hide = value <= 1
-                }
-
-                if (name === 'seriesNumber') {
-                    value = parseInt(value)
-                    const range = this.seriesNumber.range()
-                    if (value < range.min || value > range.max) return
-
-                    while (value != this.series.value.length) {
-                        if (this.series.value.length < value)
-                            this.series.value.push({
-                                ...this.series.value[
-                                    this.series.value.length - 1
-                                ],
-                            })
-                        else this.series.value.pop()
-                    }
-                }
             },
         },
         icon: 'mdi-chart-box-outline',

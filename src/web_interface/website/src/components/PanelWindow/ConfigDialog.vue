@@ -32,6 +32,8 @@ const arrayConfigOptions = computed(() =>
                   }
                   while (tempConfig.value.extraConfig[name].length < obj.length)
                       tempConfig.value.extraConfig[name].push(new Object())
+                  while (tempConfig.value.extraConfig[name].length > obj.length)
+                      tempConfig.value.extraConfig[name].pop()
                   return true
               })
               .map(([name, array]) => [
@@ -60,6 +62,15 @@ function updateValue(name, value, arrayName = undefined, index = undefined) {
             arrayName,
             index
         )
+}
+function scrollToBottom(arrayName) {
+    setTimeout(
+        () =>
+            document
+                .getElementById(`buttons ${arrayName}`)
+                .scrollIntoView({ behavior: 'smooth' }),
+        0.1
+    )
 }
 </script>
 <template>
@@ -104,10 +115,10 @@ function updateValue(name, value, arrayName = undefined, index = undefined) {
                         <v-list
                             v-for="[arrayName, array] in arrayConfigOptions"
                             :key="arrayName"
-                            class="frame"
+                            class="outer-frame"
                         >
                             <v-list-item
-                                style="display: block"
+                                class="inner-frame"
                                 v-for="(elements, index) in array"
                                 :key="arrayName + index"
                             >
@@ -131,6 +142,34 @@ function updateValue(name, value, arrayName = undefined, index = undefined) {
                                             )
                                     "
                                 ></component>
+                            </v-list-item>
+                            <v-list-item
+                                :id="'buttons ' + arrayName"
+                                style="display: flex; justify-content: right"
+                            >
+                                <v-btn
+                                    icon
+                                    color="var(--v-miętowy-base)"
+                                    height="4em"
+                                    width="4em"
+                                    @click="
+                                        {
+                                            updateValue('push', 1, arrayName)
+                                            scrollToBottom(arrayName)
+                                        }
+                                    "
+                                >
+                                    <v-icon size="3em">mdi-plus-box</v-icon>
+                                </v-btn>
+                                <v-btn
+                                    icon
+                                    color="var(--v-morelowy-base)"
+                                    height="4em"
+                                    width="4em"
+                                    @click="updateValue('pop', -1, arrayName)"
+                                >
+                                    <v-icon size="3em">mdi-minus-box</v-icon>
+                                </v-btn>
                             </v-list-item>
                         </v-list>
                     </v-container>
@@ -158,10 +197,19 @@ function updateValue(name, value, arrayName = undefined, index = undefined) {
     </v-dialog>
 </template>
 <style scoped>
-.frame {
-    border-color: black;
+.inner-frame {
+    display: block;
+    margin: 5px;
+    background-color: #fafafa;
+    border-color: gray;
     border-style: solid;
     border-width: 1px;
     border-radius: 10px;
+}
+.outer-frame {
+    border-color: black;
+    border-style: solid;
+    border-width: 1.5px;
+    border-radius: 15px;
 }
 </style>

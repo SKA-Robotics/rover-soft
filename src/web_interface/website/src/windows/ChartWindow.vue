@@ -23,6 +23,7 @@ const seriesConfig = ref([])
 const refreshingTimer = ref(null)
 const chartTitle = ref('')
 const yAxisTitle = ref('')
+const maxTimeRange = ref('')
 
 watch(props, () => {
     seriesConfig.value.forEach((serie, index) => {
@@ -31,12 +32,11 @@ watch(props, () => {
     })
     data.value.datasets.length = 0
 
-    seriesConfig.value = JSON.parse(
-        JSON.stringify(props.extraConfig.series)
-    ).slice(0, props.extraConfig.seriesNumber)
+    seriesConfig.value = JSON.parse(JSON.stringify(props.extraConfig.series))
 
     chartTitle.value = props.extraConfig.chartTitle
     yAxisTitle.value = props.extraConfig.yAxisTitle
+    maxTimeRange.value = props.extraConfig.maxTimeRange
 
     rosStore.ws.getTopics((result) => {
         setChartOptions()
@@ -83,7 +83,21 @@ function setListener(serie, index) {
             y: parseFloat(prop),
         }
         // console.log(point)
-        if (!isNaN(point.y)) data.value.datasets[index].data.push(point)
+        if (isNaN(point.y)) return
+
+        // reduce points number of constant signal
+        let array = data.value.datasets[index].data
+        array.length >= 2 &&
+        point.y == array.at(-1).y &&
+        point.y == array.at(-2).y
+            ? (array[array.length - 1] = point)
+            : array.push(point)
+
+        // remove obsolete elements
+        while (array.at(-1).x - array.at(0).x > maxTimeRange.value)
+            array.length > 2
+                ? array.shift()
+                : (array[0].x = Math.ceil(array.at(-1).x - maxTimeRange.value))
     })
 }
 
@@ -172,7 +186,7 @@ const options = ref({
                     weight: 'bold',
                 },
             },
-            beginAtZero: true,
+            beginAtZero: false,
         },
         y: {
             display: true,
