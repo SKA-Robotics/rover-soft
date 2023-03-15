@@ -4,17 +4,8 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from geometry_msgs.msg import PointStamped
 
-
-class ManipInterface:
-
-    def get_jointstate(self):
-        pass
-
-    def set_jointstate(self, jointstate: JointState):
-        pass
-
-    def get_manip_params(self):
-        pass
+from manip_interface import ManipInterface
+from ik import ManipJointState
 
 
 class ROSManipInterface(ManipInterface):
@@ -33,10 +24,11 @@ class ROSManipInterface(ManipInterface):
         self.MODES_DATA = rospy.get_param("~control_modes")
         self.LINKS_DATA = rospy.get_param("~links")
 
-    def get_jointstate(self):
-        return filter_jointstate(self.jointstate, self.LINKS_DATA["names"])
+    def get_jointstate(self) -> ManipJointState:
+        return JointStateConverter.ros_to_manip(self.jointstate, self.LINKS_DATA["names"])
 
-    def set_jointstate(self, jointstate: JointState):
+    def set_jointstate(self, jointstate: ManipJointState):
+        jointstate = JointStateConverter.manip_to_ros(jointstate, self.LINKS_DATA["names"])
         self._distribute_joint_commands(jointstate)
 
     def _update_jointstate(self, msg):
@@ -72,15 +64,15 @@ class PosePublishingDecorator(ManipInterface):
     def set_topic_name(self, topic_name):
         self.pose_publisher = ROSPosePublisher(topic_name)
 
-    def get_jointstate(self):
+    def get_jointstate(self) -> ManipJointState:
         return self._component.get_jointstate()
 
-    def set_jointstate(self, jointstate: JointState):
+    def set_jointstate(self, jointstate: ManipJointState):
         if self._can_publish():
             self._publish(jointstate)
         return self._component.set_jointstate(jointstate)
 
-    def _publish(self, jointstate):
+    def _publish(self, jointstate: ManipJointState):
         pose = self.ik_solver.get_FK_solution(jointstate)
         self.pose_publisher.publish(pose)
 
@@ -106,13 +98,27 @@ class ROSPosePublisher:
         self.publisher.publish(msg)
 
 
-def filter_jointstate(jointstate: JointState, names):
-    filtered_jointstate = JointState()
-    filtered_jointstate.header = jointstate.header
-    for name in names:
-        index = jointstate.name.index(name)
-        filtered_jointstate.name.append(name)
-        filtered_jointstate.position.append(jointstate.position[index])
-        filtered_jointstate.velocity.append(jointstate.velocity[index])
-        filtered_jointstate.effort.append(jointstate.effort[index])
-    return filtered_jointstate
+class JointStateConverter:
+
+    def manip_to_ros(joinstate: ManipJointState, names) -> JointState:
+        assert len(joinstate.position) == len(names)
+        result = JointState()
+        result.header.stamp = rospy.Time.now()
+        result.name = names
+        result.position = joinstate.position
+        return result
+
+    def ros_to_manip(jointstate: JointState, names) -> ManipJointState:
+        filtered_jointstate = JointStateConverter.filter_ros(jointstate, names)
+        return ManipJointState.from_list(filtered_jointstate.position)
+
+    def filter_ros(jointstate: JointState, names):
+        filtered_jointstate = JointState()
+        filtered_jointstate.header = jointstate.header
+        for name in names:
+            index = jointstate.name.index(name)
+            filtered_jointstate.name.append(name)
+            filtered_jointstate.position.append(jointstate.position[index])
+            filtered_jointstate.velocity.append(jointstate.velocity[index])
+            filtered_jointstate.effort.append(jointstate.effort[index])
+        return filtered_jointstate

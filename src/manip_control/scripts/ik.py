@@ -20,12 +20,13 @@ class ManipPose:
 
 
 class ManipJointState:
+
     def __init__(self, joint_value_list):
         self.position = joint_value_list
-    
+
     def from_list(data):
         return ManipJointState(data)
-    
+
     def to_list(self):
         return self.position
 
@@ -44,7 +45,7 @@ class IKSolver:
     # Calculates angles of all joints given target position
     def get_IK_solution(self, target: ManipPose) -> ManipJointState:
         # Initialize solution JointState object
-        solution = [0] * len(self.joint_names)
+        solution = [0] * len(self.limits)
 
         limits = self.limits
         l = self.lengths
@@ -56,7 +57,7 @@ class IKSolver:
         # First joint angle can be easily obtained as it is
         # the only joint allowing for movement along y-axis
         solution[0] = math.atan2(y, x)
-        if not checkBounds(solution.position[0], limits[0]):
+        if not checkBounds(solution[0], limits[0]):
             raise Exception("No IK solution!")
 
         # Project target position to manip plane
