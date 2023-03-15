@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import math
-from sensor_msgs.msg import JointState
 
 
 class ManipPose:
@@ -20,6 +19,17 @@ class ManipPose:
         return [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
 
 
+class ManipJointState:
+    def __init__(self, joint_value_list):
+        self.position = joint_value_list
+    
+    def from_list(data):
+        return ManipJointState(data)
+    
+    def to_list(self):
+        return self.position
+
+
 #TODO: Create abstract base class of kinematics solver
 
 
@@ -32,22 +42,20 @@ class IKSolver:
         self.lengths = lengths
 
     # Calculates angles of all joints given target position
-    def get_IK_solution(self, target: ManipPose) -> JointState:
+    def get_IK_solution(self, target: ManipPose) -> ManipJointState:
         # Initialize solution JointState object
-        solution = JointState()
-        solution.name = self.joint_names
-        solution.position = [0] * len(self.joint_names)
+        solution = [0] * len(self.joint_names)
 
         limits = self.limits
         l = self.lengths
         x = target.x
         y = target.y
 
-        solution.position[4] = target.roll
+        solution[4] = target.roll
         # Calculate solution using SiriusII-specific IK formula
         # First joint angle can be easily obtained as it is
         # the only joint allowing for movement along y-axis
-        solution.position[0] = math.atan2(y, x)
+        solution[0] = math.atan2(y, x)
         if not checkBounds(solution.position[0], limits[0]):
             raise Exception("No IK solution!")
 
@@ -78,14 +86,14 @@ class IKSolver:
 
         # Given the position, angles of the joints can be calculated
         beta = math.atan2(zpp, dpp)
-        solution.position[1] = math.pi / 2 - beta
+        solution[1] = math.pi / 2 - beta
         gamma = math.atan2(zpp - zp, dp - dpp)
-        solution.position[2] = beta + gamma
-        solution.position[3] = alpha - gamma
+        solution[2] = beta + gamma
+        solution[3] = alpha - gamma
 
         # Check if the calculated angles are within manipulator's limits
-        if all([checkBounds(solution.position[i], limits[i]) for i in range(1, len(solution.position))]):
-            return solution
+        if all([checkBounds(solution[i], limits[i]) for i in range(1, len(solution))]):
+            return ManipJointState.from_list(solution)
 
         # If the previous solution did not pass the check, try the second solution
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (-dp * math.sqrt(
@@ -97,26 +105,19 @@ class IKSolver:
                                (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
                (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
         beta = math.atan2(zpp, dpp)
-        solution.position[1] = beta - math.pi / 2
+        solution[1] = beta - math.pi / 2
         gamma = math.atan2(zpp - zp, dp - dpp)
-        solution.position[2] = beta + gamma
-        solution.position[3] = alpha - gamma
-        if all([checkBounds(solution.position[i], limits[i]) for i in range(1, len(solution.position))]):
-            return solution
+        solution[2] = beta + gamma
+        solution[3] = alpha - gamma
+        if all([checkBounds(solution[i], limits[i]) for i in range(1, len(solution))]):
+            return ManipJointState.from_list(solution)
 
         # Both of the solutions are wrong. Exception is to be thrown
         raise Exception("No IK solution!")
 
     # Calculates manipulator's tip pose given joint angles
-    def get_FK_solution(self, jointstate: JointState) -> ManipPose:
-        # Check if all necessary joint states are given
-        if not all([joint_name in jointstate.name for joint_name in self.joint_names]):
-            raise Exception("Incorrect Jointstate names given.")
-
-        # Extract needed angles from jointstate
-        angles = []
-        for joint_name in self.joint_names:
-            angles.append(jointstate.position[jointstate.name.index(joint_name)])
+    def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
+        angles = jointstate.position
 
         l = self.lengths
         solution = ManipPose()
