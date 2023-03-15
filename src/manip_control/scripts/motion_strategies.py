@@ -1,6 +1,4 @@
-import rospy
-
-from ros_interface import ManipInterface
+from manip_interface import ManipInterface
 from motion_interpolation import InterpolationSettings, MotionInterpolator
 from ik import IKSolver, ManipPose
 
@@ -18,7 +16,7 @@ class InterpolatedMotion(MotionStrategy):
         self.motion_interpolator = MotionInterpolator(interpolation_settings)
         self.ik_solver = ik_solver
         self.target_pose = target_pose
-        self.rate = rospy.Rate(rate)
+        self.loop_delay = 1 / rate
 
     def execute(self, manip_interface: ManipInterface):
         position = self._calculate_start_coords(manip_interface)
@@ -26,9 +24,9 @@ class InterpolatedMotion(MotionStrategy):
         self.motion_interpolator.set_movement(position, end_position)
 
         while self.motion_interpolator.is_not_done():
-            position = self.motion_interpolator.movement_step(self.rate.sleep_dur.to_sec())
+            position = self.motion_interpolator.movement_step(self.loop_delay)
             self._move_to_position(position, manip_interface)
-            self.rate.sleep()
+            manip_interface.sleep(self.loop_delay)
 
     def _calculate_start_coords(self, manip_interface: ManipInterface):
         pass

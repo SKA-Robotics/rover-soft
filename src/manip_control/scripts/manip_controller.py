@@ -6,7 +6,8 @@ import traceback
 from geometry_msgs.msg import PointStamped
 
 from ik import IKSolver, ManipPose
-from ros_interface import ManipInterface, ROSManipInterface, PosePublishingDecorator
+from manip_interface import ManipInterface
+from ros_manip_interface import ROSManipInterface, PosePublishingDecorator
 from motion_interpolation import InterpolationSettings
 from motion_strategies import CartesianMotion, JointspaceMotion
 

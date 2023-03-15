@@ -9,5 +9,8 @@ class ManipInterface:
     def set_jointstate(self, jointstate: ManipJointState):
         pass
 
+    def sleep(self, time):
+        pass
+
     def get_manip_params(self):
         pass

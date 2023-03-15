@@ -47,6 +47,9 @@ class ROSManipInterface(ManipInterface):
             publisher = self.publishers[jointstate.name[index]]
             publisher.publish(Float64(value))
 
+    def sleep(self, time):
+        rospy.sleep(rospy.Duration(time))
+
     def get_manip_params(self):
         return {"control_modes": self.MODES_DATA, "links": self.LINKS_DATA}
 
@@ -78,6 +81,9 @@ class PosePublishingDecorator(ManipInterface):
 
     def _can_publish(self):
         return self.ik_solver is not None and self.pose_publisher is not None
+
+    def sleep(self, time):
+        return self._component.sleep(time)
 
     def get_manip_params(self):
         return self._component.get_manip_params()
