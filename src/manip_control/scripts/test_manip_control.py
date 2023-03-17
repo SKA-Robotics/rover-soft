@@ -35,6 +35,16 @@ class TestIKSolver:
     solver = ik.IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
                                                                (-3.0, 3.0)])
     example_pose = ik.ManipPose.from_list([0.5, 0.1, 0.2, 0.8, 0.6, 0.0])
+    example_pose_jointstate = ik.ManipJointState.from_list(
+        [0.19739555984988078, -0.00465756979259524, 2.0870661094695873, 0.08838778711790474, 0.8])
+
+    def test_IK_solution(self):
+        jointstate = self.solver.get_IK_solution(self.example_pose)
+        assert_list_equals(jointstate.to_list(), self.example_pose_jointstate.to_list())
+
+    def test_FK_solution(self):
+        pose = self.solver.get_FK_solution(self.example_pose_jointstate)
+        assert_list_equals(pose.to_list(), self.example_pose.to_list())
 
     def test_backAndForth(self):
         jointstate = self.solver.get_IK_solution(self.example_pose)
