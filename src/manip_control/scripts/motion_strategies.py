@@ -19,14 +19,19 @@ class InterpolatedMotion(MotionStrategy):
         self.loop_delay = 1 / rate
 
     def execute(self, manip_interface: ManipInterface):
+        self._initialize_execution(manip_interface)
+        while self.motion_interpolator.is_not_done():
+            self._step(manip_interface)
+
+    def _initialize_execution(self, manip_interface: ManipInterface):
         position = self._calculate_start_coords(manip_interface)
         end_position = self._calculate_end_coords(manip_interface)
         self.motion_interpolator.set_movement(position, end_position)
 
-        while self.motion_interpolator.is_not_done():
-            position = self.motion_interpolator.movement_step(self.loop_delay)
-            self._move_to_position(position, manip_interface)
-            manip_interface.sleep(self.loop_delay)
+    def _step(self, manip_interface: ManipInterface):
+        position = self.motion_interpolator.movement_step(self.loop_delay)
+        self._move_to_position(position, manip_interface)
+        manip_interface.sleep(self.loop_delay)
 
     def _calculate_start_coords(self, manip_interface: ManipInterface):
         pass

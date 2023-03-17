@@ -4,6 +4,7 @@ import math
 import ik
 import manip_interface
 import motion_interpolation
+import motion_strategies
 
 
 def assert_equals(given, expected):
@@ -91,3 +92,63 @@ class TestMotionInterpolation:
         while self.interpolator.is_not_done():
             pos = self.interpolator.movement_step(0.05)
         assert_list_equals_within_epsilon(pos, self.end, 0.015)
+
+
+class TestMotionStrategies:
+    interpolation_settings = motion_interpolation.InterpolationSettings(1, 10, 0.01, [1, 1, 1, 1])
+    interface = manip_interface.DummyManipInterface()
+    solver = ik.IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
+                                                               (-3.0, 3.0)])
+    rate = 10
+    startJointstate = ik.ManipJointState([0.1, 0.3, 1.0, 0.1, 0.2])
+    startPose = solver.get_FK_solution(startJointstate)
+    targetJointstate = ik.ManipJointState([0.0, 0.5, 1.3, -0.1, -0.2])
+    targetPose = solver.get_FK_solution(targetJointstate)
+
+    def test_cart_startEndPosition(self):
+        motion = motion_strategies.CartesianMotion(self.targetPose, self.interpolation_settings, self.solver, self.rate)
+        self.interface.set_jointstate(self.startJointstate)
+        startPose = motion._calculate_start_coords(self.interface)
+        endPose = motion._calculate_end_coords(self.interface)
+        assert_list_equals(startPose, self.startPose.to_list())
+        assert_list_equals(endPose, self.targetPose.to_list())
+
+    def test_cart_targetReached(self):
+        motion = motion_strategies.CartesianMotion(self.targetPose, self.interpolation_settings, self.solver, self.rate)
+        self.interface.set_jointstate(self.startJointstate)
+        motion.execute(self.interface)
+        jointstate = self.interface.get_jointstate()
+        assert_list_equals_within_epsilon(jointstate.to_list(), self.targetJointstate.to_list(), 0.015)
+
+    def test_cart_moveOneStep(self):
+        motion = motion_strategies.CartesianMotion(self.targetPose, self.interpolation_settings, self.solver, 1000)
+        self.interface.set_jointstate(self.startJointstate)
+        motion._initialize_execution(self.interface)
+        motion._step(self.interface)
+        assert_list_equals_within_epsilon(self.interface.get_jointstate().to_list(), self.startJointstate.to_list(),
+                                          0.01)
+
+    def test_joint_startEndPosition(self):
+        motion = motion_strategies.JointspaceMotion(self.targetPose, self.interpolation_settings, self.solver,
+                                                    self.rate)
+        self.interface.set_jointstate(self.startJointstate)
+        startJointstate = motion._calculate_start_coords(self.interface)
+        endJointstate = motion._calculate_end_coords(self.interface)
+        assert_list_equals(startJointstate, self.startJointstate.to_list())
+        assert_list_equals(endJointstate, self.targetJointstate.to_list())
+
+    def test_joint_targetReached(self):
+        motion = motion_strategies.JointspaceMotion(self.targetPose, self.interpolation_settings, self.solver,
+                                                    self.rate)
+        self.interface.set_jointstate(self.startJointstate)
+        motion.execute(self.interface)
+        jointstate = self.interface.get_jointstate()
+        assert_list_equals_within_epsilon(jointstate.to_list(), self.targetJointstate.to_list(), 0.015)
+
+    def test_joint_moveOneStep(self):
+        motion = motion_strategies.JointspaceMotion(self.targetPose, self.interpolation_settings, self.solver, 1000)
+        self.interface.set_jointstate(self.startJointstate)
+        motion._initialize_execution(self.interface)
+        motion._step(self.interface)
+        assert_list_equals_within_epsilon(self.interface.get_jointstate().to_list(), self.startJointstate.to_list(),
+                                          0.01)

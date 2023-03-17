@@ -26,3 +26,9 @@ class DummyManipInterface:
 
     def set_jointstate(self, jointstate: ManipJointState):
         self.jointstate = jointstate
+
+    def sleep(self, time):
+        pass
+
+    def get_manip_params(self):
+        pass
