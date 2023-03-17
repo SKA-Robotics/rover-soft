@@ -2,6 +2,7 @@ import pytest
 import math
 
 import ik
+import manip_interface
 
 
 def assert_equals(given, expected):
@@ -50,3 +51,13 @@ class TestIKSolver:
         jointstate = self.solver.get_IK_solution(self.example_pose)
         new_pose = self.solver.get_FK_solution(jointstate)
         assert_list_equals(new_pose.to_list(), self.example_pose.to_list())
+
+
+class TestManipInterface:
+    interface = manip_interface.DummyManipInterface()
+
+    def test_setgetJointstate(self):
+        jointstate = ik.ManipJointState([0.0, 0.1, 1.0, -0.1, 0.1])
+        self.interface.set_jointstate(jointstate)
+        received_jointstate = self.interface.get_jointstate()
+        assert_list_equals(received_jointstate.to_list(), jointstate.to_list())
