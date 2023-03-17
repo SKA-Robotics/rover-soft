@@ -40,7 +40,7 @@ def test_manipJointState_listConversionNoSideEffect():
 
 
 class TestIKSolver:
-    solver = ik.IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
+    solver = ik.SiriusII_IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
                                                                (-3.0, 3.0)])
     example_pose = ik.ManipPose.from_list([0.5, 0.1, 0.2, 0.8, 0.6, 0.0])
     example_pose_jointstate = ik.ManipJointState.from_list(
@@ -97,7 +97,7 @@ class TestMotionInterpolation:
 class TestMotionStrategies:
     interpolation_settings = motion_interpolation.InterpolationSettings(1, 10, 0.01, [1, 1, 1, 1])
     interface = manip_interface.DummyManipInterface()
-    solver = ik.IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
+    solver = ik.SiriusII_IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
                                                                (-3.0, 3.0)])
     rate = 10
     startJointstate = ik.ManipJointState([0.1, 0.3, 1.0, 0.1, 0.2])

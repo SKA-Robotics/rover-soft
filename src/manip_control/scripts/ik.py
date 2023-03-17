@@ -31,29 +31,31 @@ class ManipJointState:
         return self.position
 
 
-#TODO: Create abstract base class of kinematics solver
-
-
-# Class implementing kinematics of SiriusII manipulator
 class IKSolver:
-
     def __init__(self, names, lengths, limits):
         self.joint_names = names
         self.limits = limits
         self.lengths = lengths
-
-    # Calculates angles of all joints given target position
+    
     def get_IK_solution(self, target: ManipPose) -> ManipJointState:
-        # Initialize solution JointState object
-        solution = [0] * len(self.limits)
+        pass
 
+    def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
+        pass
+
+# Class implementing kinematics of SiriusII manipulator
+class SiriusII_IKSolver(IKSolver):
+
+    def get_IK_solution(self, target: ManipPose) -> ManipJointState:
+
+        solution = self._initialize_solution()
         limits = self.limits
         l = self.lengths
         x = target.x
         y = target.y
 
+        # Last joint value simply equals to its target value
         solution[4] = target.roll
-        # Calculate solution using SiriusII-specific IK formula
         # First joint angle can be easily obtained as it is
         # the only joint allowing for movement along y-axis
         solution[0] = math.atan2(y, x)
@@ -69,34 +71,46 @@ class IKSolver:
         # Find 3rd link's start position given its absolute angle
         # (target.alpha) and end position (target position)
         alpha = target.pitch
-        dp = d - l[3] * math.cos(alpha)
-        zp = z + l[3] * math.sin(alpha)
+        dp, zp = self._get_link3_startposition(l, d, z, alpha)
 
         # Find 2nd link's start position
         # The geometry constraints lead to equation system with
         # two solutions. Due to physical constraints of the manipulator
         # only one of these solutions will be possible to reach
-        dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (dp * math.sqrt(
-            (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
-            (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
-                                                                      (l[2] * l[2]) * zp + zp * zp * zp)) /
-               (dp * dp + zp * zp)) / (dp * 2.0)
-        zpp = (dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
-                              (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
-               (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
-
+        dpp, zpp = self._find_middlepoint_solution1(l, dp, zp)
         # Given the position, angles of the joints can be calculated
-        beta = math.atan2(zpp, dpp)
-        solution[1] = math.pi / 2 - beta
-        gamma = math.atan2(zpp - zp, dp - dpp)
-        solution[2] = beta + gamma
-        solution[3] = alpha - gamma
-
+        solution[1], solution[2], solution[3] = self._calculate_angles(target, dp, zp, dpp, zpp)
         # Check if the calculated angles are within manipulator's limits
-        if all([checkBounds(solution[i], limits[i]) for i in range(1, len(solution))]):
+        if self._angles_within_constraints(solution, limits):
             return ManipJointState.from_list(solution)
 
         # If the previous solution did not pass the check, try the second solution
+        dpp, zpp = self._find_middlepoint_solution2(l, dp, zp)
+        solution[1], solution[2], solution[3] = self._calculate_angles(target, dp, zp, dpp, zpp)
+        if self._angles_within_constraints(solution, limits):
+            return ManipJointState.from_list(solution)
+
+        # Both of the solutions are wrong. Exception is to be thrown
+        raise Exception("No IK solution!")
+
+    def _get_link3_startposition(self, l, d, z, alpha):
+        dp = d - l[3] * math.cos(alpha)
+        zp = z + l[3] * math.sin(alpha)
+        return dp,zp
+
+    def _angles_within_constraints(self, solution, limits):
+        return all([checkBounds(solution[i], limits[i]) for i in range(1, len(solution))])
+
+    def _calculate_angles(self, target, dp, zp, dpp, zpp):
+        alpha = target.pitch
+        beta = math.atan2(zpp, dpp)
+        gamma = math.atan2(zpp - zp, dp - dpp)
+        angle1 = math.pi / 2 - beta
+        angle2 = beta + gamma
+        angle3 = alpha - gamma
+        return angle1, angle2, angle3
+
+    def _find_middlepoint_solution2(self, l, dp, zp):
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (-dp * math.sqrt(
             (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
             (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
@@ -105,18 +119,25 @@ class IKSolver:
         zpp = (-dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
                                (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
                (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
-        beta = math.atan2(zpp, dpp)
-        solution[1] = beta - math.pi / 2
-        gamma = math.atan2(zpp - zp, dp - dpp)
-        solution[2] = beta + gamma
-        solution[3] = alpha - gamma
-        if all([checkBounds(solution[i], limits[i]) for i in range(1, len(solution))]):
-            return ManipJointState.from_list(solution)
+               
+        return dpp,zpp
 
-        # Both of the solutions are wrong. Exception is to be thrown
-        raise Exception("No IK solution!")
+    def _find_middlepoint_solution1(self, l, dp, zp):
+        dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (dp * math.sqrt(
+            (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
+            (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
+                                                                      (l[2] * l[2]) * zp + zp * zp * zp)) /
+               (dp * dp + zp * zp)) / (dp * 2.0)
+        zpp = (dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
+                              (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
+               (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
+               
+        return dpp,zpp
 
-    # Calculates manipulator's tip pose given joint angles
+    def _initialize_solution(self):
+        solution = [0] * len(self.limits)
+        return solution
+
     def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
         angles = jointstate.position
 

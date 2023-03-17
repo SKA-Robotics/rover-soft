@@ -5,7 +5,7 @@ import random
 import traceback
 from geometry_msgs.msg import PointStamped
 
-from ik import IKSolver, ManipPose
+from ik import SiriusII_IKSolver, ManipPose
 from manip_interface import ManipInterface
 from ros_manip_interface import ROSManipInterface, PosePublishingDecorator
 from motion_interpolation import InterpolationSettings
@@ -20,7 +20,7 @@ class Manip:
 
     def _create_ik_solver(self):
         link_params = self.manip_interface.get_manip_params()["links"]
-        return IKSolver(link_params["names"], link_params["lengths"], link_params["limits"])
+        return SiriusII_IKSolver(link_params["names"], link_params["lengths"], link_params["limits"])
 
     def move_cartesian(self, target_pose: ManipPose):
         self._move(target_pose, CartesianMotion, "cartesian")
