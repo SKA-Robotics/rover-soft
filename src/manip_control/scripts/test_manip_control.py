@@ -3,6 +3,7 @@ import math
 
 import ik
 import manip_interface
+import motion_interpolation
 
 
 def assert_equals(given, expected):
@@ -12,6 +13,11 @@ def assert_equals(given, expected):
 def assert_list_equals(given, expected):
     for g, e in zip(given, expected):
         assert_equals(g, e)
+
+
+def assert_list_equals_within_epsilon(given, expected, epsilon):
+    for g, e in zip(given, expected):
+        assert abs(g - e) < epsilon
 
 
 def test_alwaysOk():
@@ -61,3 +67,27 @@ class TestManipInterface:
         self.interface.set_jointstate(jointstate)
         received_jointstate = self.interface.get_jointstate()
         assert_list_equals(received_jointstate.to_list(), jointstate.to_list())
+
+
+class TestMotionInterpolation:
+    interpolation_settings = motion_interpolation.InterpolationSettings(1, 10, 0.01, [1, 1, 1, 1])
+    interpolator = motion_interpolation.MotionInterpolator(interpolation_settings)
+    start = [0, 0, 0]
+    end = [2, -1, 0]
+
+    def test_startingPosition(self):
+        self.interpolator.set_movement(self.start, self.end)
+        assert_list_equals(self.interpolator.position, self.start)
+
+    def test_oneStep(self):
+        self.interpolator.set_movement(self.start, self.end)
+        pos = self.interpolator.movement_step(1)
+        expected_pos = [2 / math.sqrt(5), -1 / math.sqrt(5), 0]
+        assert_list_equals(expected_pos, pos)
+
+    def test_toTheEnd(self):
+        self.interpolator.set_movement(self.start, self.end)
+        pos = []
+        while self.interpolator.is_not_done():
+            pos = self.interpolator.movement_step(0.05)
+        assert_list_equals_within_epsilon(pos, self.end, 0.015)
