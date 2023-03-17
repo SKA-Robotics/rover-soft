@@ -19,9 +19,8 @@ class Manip:
         self.solver = self._create_ik_solver()
 
     def _create_ik_solver(self):
-        return IKSolver(self.manip_interface.get_manip_params()["links"]["names"],
-                        self.manip_interface.get_manip_params()["links"]["lengths"],
-                        self.manip_interface.get_manip_params()["links"]["limits"])
+        link_params = self.manip_interface.get_manip_params()["links"]
+        return IKSolver(link_params["names"], link_params["lengths"], link_params["limits"])
 
     def move_cartesian(self, target_pose: ManipPose):
         self._move(target_pose, CartesianMotion, "cartesian")
@@ -32,7 +31,7 @@ class Manip:
     def _get_controlmode_settings(self, mode_name: str):
         params = self.manip_interface.get_manip_params()["control_modes"][mode_name]
         interpolation_settings = InterpolationSettings.from_params(params)
-        rate = self.manip_interface.get_manip_params()["control_modes"][mode_name]["interpolation_rate"]
+        rate = params["interpolation_rate"]
         return interpolation_settings, rate
 
     def _move(self, target_pose: ManipPose, motion_strategy, mode_name: str):
