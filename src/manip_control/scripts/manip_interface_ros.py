@@ -4,7 +4,7 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from geometry_msgs.msg import PointStamped
 
-from manip_interface import ManipInterface
+from manip_interface import ManipInterface, ManipParams
 from ik import ManipJointState
 
 
@@ -13,7 +13,7 @@ class ROSManipInterface(ManipInterface):
     def __init__(self):
         super().__init__()
         rospy.loginfo("Initializg ROSManipInterface")
-        self._load_ROSparams()
+        self._params = self._load_ROSparams()
         self.jointstate_topic = rospy.get_param("~jointstate_topic", "/manipulator/joint_states")
         self.command_topics = rospy.get_param("~command_topics", {})
         self.jointstate = JointState()
@@ -21,14 +21,16 @@ class ROSManipInterface(ManipInterface):
         self._initialize_publishers()
 
     def _load_ROSparams(self):
-        self.MODES_DATA = rospy.get_param("~control_modes")
-        self.LINKS_DATA = rospy.get_param("~links")
+        mode_params = rospy.get_param("~control_modes")
+        link_params = rospy.get_param("~links")
+        params_dict = {"links": link_params, "control_modes": mode_params}
+        return ManipParams.from_dict(params_dict)
 
     def get_jointstate(self) -> ManipJointState:
-        return JointStateConverter.ros_to_manip(self.jointstate, self.LINKS_DATA["names"])
+        return JointStateConverter.ros_to_manip(self.jointstate, self._params.joint_names())
 
     def set_jointstate(self, jointstate: ManipJointState):
-        jointstate = JointStateConverter.manip_to_ros(jointstate, self.LINKS_DATA["names"])
+        jointstate = JointStateConverter.manip_to_ros(jointstate, self._params.joint_names())
         self._distribute_joint_commands(jointstate)
 
     def _update_jointstate(self, msg):
@@ -50,8 +52,8 @@ class ROSManipInterface(ManipInterface):
     def sleep(self, time):
         rospy.sleep(rospy.Duration(time))
 
-    def get_manip_params(self):
-        return {"control_modes": self.MODES_DATA, "links": self.LINKS_DATA}
+    def get_manip_params(self) -> ManipParams:
+        return self._params
 
 
 class PosePublishingDecorator(ManipInterface):

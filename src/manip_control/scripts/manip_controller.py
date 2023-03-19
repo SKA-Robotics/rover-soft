@@ -7,7 +7,7 @@ from geometry_msgs.msg import PointStamped
 
 from ik import SiriusII_IKSolver, ManipPose
 from manip_interface import ManipInterface
-from ros_manip_interface import ROSManipInterface, PosePublishingDecorator
+from manip_interface_ros import ROSManipInterface, PosePublishingDecorator
 from motion_interpolation import InterpolationSettings
 from motion_strategies import CartesianMotion, JointspaceMotion
 
@@ -16,11 +16,11 @@ class Manip:
 
     def __init__(self, manip_interface: ManipInterface):
         self.manip_interface = manip_interface
-        self.solver = self._create_ik_solver()
+        self.params = self.manip_interface.get_manip_params()
+        self.solver = self._create_ik_solver(self.params)
 
-    def _create_ik_solver(self):
-        link_params = self.manip_interface.get_manip_params()["links"]
-        return SiriusII_IKSolver(link_params["names"], link_params["lengths"], link_params["limits"])
+    def _create_ik_solver(self, params):
+        return SiriusII_IKSolver(params.joint_names(), params.link_lengths(), params.joint_limits())
 
     def move_cartesian(self, target_pose: ManipPose):
         self._move(target_pose, CartesianMotion, "cartesian")
@@ -29,9 +29,9 @@ class Manip:
         self._move(target_pose, JointspaceMotion, "jointspace")
 
     def _get_controlmode_settings(self, mode_name: str):
-        params = self.manip_interface.get_manip_params()["control_modes"][mode_name]
-        interpolation_settings = InterpolationSettings.from_params(params)
-        rate = params["interpolation_rate"]
+        mode_params = self.params.control_mode_params(mode_name)
+        interpolation_settings = InterpolationSettings.from_params(mode_params)
+        rate = mode_params["interpolation_rate"]
         return interpolation_settings, rate
 
     def _move(self, target_pose: ManipPose, motion_strategy, mode_name: str):

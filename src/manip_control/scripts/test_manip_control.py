@@ -3,6 +3,7 @@ import math
 
 import ik
 import manip_interface
+import manip_interface_dummy
 import motion_interpolation
 import motion_strategies
 
@@ -61,7 +62,7 @@ class TestIKSolver:
 
 
 class TestManipInterface:
-    interface = manip_interface.DummyManipInterface()
+    interface = manip_interface_dummy.DummyManipInterface()
 
     def test_setgetJointstate(self):
         jointstate = ik.ManipJointState([0.0, 0.1, 1.0, -0.1, 0.1])
@@ -96,7 +97,7 @@ class TestMotionInterpolation:
 
 class TestMotionStrategies:
     interpolation_settings = motion_interpolation.InterpolationSettings(1, 10, 0.01, [1, 1, 1, 1])
-    interface = manip_interface.DummyManipInterface()
+    interface = manip_interface_dummy.DummyManipInterface()
     solver = ik.SiriusII_IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
                                                                (-3.0, 3.0)])
     rate = 10
