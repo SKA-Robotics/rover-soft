@@ -5,9 +5,10 @@ import random
 import traceback
 from geometry_msgs.msg import PointStamped
 
-from ik import SiriusII_IKSolver, ManipPose
+from ik import SiriusII_IKSolver, ManipPose, ManipJointState
 from manip_interface import ManipInterface
-from manip_interface_ros import ROSManipInterface, PosePublishingDecorator
+from manip_interface_ros import ROSManipInterface, PosePublishingDecorator, JointstatePublishingDecorator
+from manip_interface_dummy import DummyManipInterface
 from motion_interpolation import InterpolationSettings
 from motion_strategies import CartesianMotion, JointspaceMotion
 
@@ -48,7 +49,13 @@ class ManipNode:
 
     def __init__(self):
         rospy.init_node("manip_controller")
-        interface = PosePublishingDecorator(ROSManipInterface())
+        interface = DummyManipInterface()
+        interface.set_manip_params(ROSManipInterface().get_manip_params())
+        interface.set_jointstate(ManipJointState.from_list([0, 0, 0, 0, 0, 0]))
+        interface.set_time_scale(1)
+        interface = JointstatePublishingDecorator(interface)
+        interface.set_topic_name("/joint_states")
+        interface = PosePublishingDecorator(interface)
         self.manip = Manip(interface)
         interface.set_ik_solver(self.manip.get_ik_solver())
         interface.set_topic_name("/received_point")

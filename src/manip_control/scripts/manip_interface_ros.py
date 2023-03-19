@@ -91,6 +91,47 @@ class PosePublishingDecorator(ManipInterface):
         return self._component.get_manip_params()
 
 
+class JointstatePublishingDecorator(ManipInterface):
+
+    def __init__(self, interface: ManipInterface):
+        self._component = interface
+        self.jointstate_publisher = None
+
+    def set_topic_name(self, topic_name):
+        self.jointstate_publisher = ROSJointStatePublisher(topic_name)
+
+    def get_jointstate(self) -> ManipJointState:
+        return self._component.get_jointstate()
+
+    def set_jointstate(self, jointstate: ManipJointState):
+        if self._can_publish():
+            self._publish(jointstate)
+        return self._component.set_jointstate(jointstate)
+
+    def _publish(self, jointstate: ManipJointState):
+        ros_jointstate = JointStateConverter.manip_to_ros(jointstate, self._component.get_manip_params().joint_names())
+        self.jointstate_publisher.publish(ros_jointstate)
+
+    def _can_publish(self):
+        return self.jointstate_publisher is not None
+
+    def sleep(self, time):
+        return self._component.sleep(time)
+
+    def get_manip_params(self):
+        return self._component.get_manip_params()
+
+
+class ROSJointStatePublisher:
+
+    def __init__(self, topic):
+        self.publisher = rospy.Publisher(topic, JointState, queue_size=10)
+
+    def publish(self, jointstate):
+        jointstate.header.stamp = rospy.Time.now()
+        self.publisher.publish(jointstate)
+
+
 class ROSPosePublisher:
 
     def __init__(self, topic):
