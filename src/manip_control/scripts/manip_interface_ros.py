@@ -38,8 +38,9 @@ class ROSManipInterface(ManipInterface):
         self._distribute_joint_commands(jointstate_cmd)
 
     def _update_jointstate(self, msg):
-        self.jointstate = JointStateConverter.ros_to_manip(msg, self._params.joint_names())
-        self.subscriber.unregister()
+        self.actual_jointstate = JointStateConverter.ros_to_manip(msg, self._params.joint_names())
+        if self.jointstate is None:
+            self.jointstate = self.actual_jointstate 
 
     def _initialize_publishers(self):
         self.publishers = {}
