@@ -34,7 +34,7 @@
         <param name="publish_frequency" type="double" value="20.0" />
         <!-- If you remap then joint_states_publisher_gui will stop working,
         error: no transform from fake to base_link-->
-        <!-- <remap from="/joint_states" to="/manipulator/joint_states" /> -->
+        <remap from="/joint_states" to="/manipulator/joint_states" />
     </node>
 
     <!-- load the controllers -->

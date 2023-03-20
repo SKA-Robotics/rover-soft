@@ -13,28 +13,33 @@ class ROSManipInterface(ManipInterface):
     def __init__(self):
         super().__init__()
         rospy.loginfo("Initializg ROSManipInterface")
+        self.jointstate = None
         self._params = self._load_ROSparams()
+        self._initialize_subscriber()
+        self._initialize_publishers()
+
+    def _initialize_subscriber(self):
         self.jointstate_topic = rospy.get_param("~jointstate_topic", "/manipulator/joint_states")
         self.command_topics = rospy.get_param("~command_topics", {})
-        self.jointstate = JointState()
-        rospy.Subscriber(self.jointstate_topic, JointState, self._update_jointstate)
-        self._initialize_publishers()
+        self.subscriber = rospy.Subscriber(self.jointstate_topic, JointState, self._update_jointstate)
 
     def _load_ROSparams(self):
         mode_params = rospy.get_param("~control_modes")
         link_params = rospy.get_param("~links")
         params_dict = {"links": link_params, "control_modes": mode_params}
         return ManipParams.from_dict(params_dict)
-
+    
     def get_jointstate(self) -> ManipJointState:
-        return JointStateConverter.ros_to_manip(self.jointstate, self._params.joint_names())
+        return self.jointstate
 
     def set_jointstate(self, jointstate: ManipJointState):
-        jointstate = JointStateConverter.manip_to_ros(jointstate, self._params.joint_names())
-        self._distribute_joint_commands(jointstate)
+        self.jointstate = jointstate
+        jointstate_cmd = JointStateConverter.manip_to_ros(jointstate, self._params.joint_names())
+        self._distribute_joint_commands(jointstate_cmd)
 
     def _update_jointstate(self, msg):
-        self.jointstate = msg
+        self.jointstate = JointStateConverter.ros_to_manip(msg, self._params.joint_names())
+        self.subscriber.unregister()
 
     def _initialize_publishers(self):
         self.publishers = {}
