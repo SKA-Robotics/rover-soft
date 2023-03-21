@@ -28,7 +28,7 @@ class ROSManipInterface(ManipInterface):
         link_params = rospy.get_param("~links")
         params_dict = {"links": link_params, "control_modes": mode_params}
         return ManipParams.from_dict(params_dict)
-    
+
     def get_jointstate(self) -> ManipJointState:
         return self.jointstate
 
@@ -40,7 +40,7 @@ class ROSManipInterface(ManipInterface):
     def _update_jointstate(self, msg):
         self.actual_jointstate = JointStateConverter.ros_to_manip(msg, self._params.joint_names())
         if self.jointstate is None:
-            self.jointstate = self.actual_jointstate 
+            self.jointstate = self.actual_jointstate
 
     def _initialize_publishers(self):
         self.publishers = {}

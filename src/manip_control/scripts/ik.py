@@ -32,16 +32,18 @@ class ManipJointState:
 
 
 class IKSolver:
+
     def __init__(self, names, lengths, limits):
         self.joint_names = names
         self.limits = limits
         self.lengths = lengths
-    
+
     def get_IK_solution(self, target: ManipPose) -> ManipJointState:
         pass
 
     def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
         pass
+
 
 # Class implementing kinematics of SiriusII manipulator
 class SiriusII_IKSolver(IKSolver):
@@ -81,13 +83,13 @@ class SiriusII_IKSolver(IKSolver):
         # Given the position, angles of the joints can be calculated
         solution[1], solution[2], solution[3] = self._calculate_angles(target, dp, zp, dpp, zpp)
         # Check if the calculated angles are within manipulator's limits
-        if self._angles_within_constraints(solution, limits):
+        if self._angles_within_constraints(solution):
             return ManipJointState.from_list(solution)
 
         # If the previous solution did not pass the check, try the second solution
         dpp, zpp = self._find_middlepoint_solution2(l, dp, zp)
         solution[1], solution[2], solution[3] = self._calculate_angles(target, dp, zp, dpp, zpp)
-        if self._angles_within_constraints(solution, limits):
+        if self._angles_within_constraints(solution):
             return ManipJointState.from_list(solution)
 
         # Both of the solutions are wrong. Exception is to be thrown
@@ -96,10 +98,10 @@ class SiriusII_IKSolver(IKSolver):
     def _get_link3_startposition(self, l, d, z, alpha):
         dp = d - l[3] * math.cos(alpha)
         zp = z + l[3] * math.sin(alpha)
-        return dp,zp
+        return dp, zp
 
-    def _angles_within_constraints(self, solution, limits):
-        return all([checkBounds(solution[i], limits[i]) for i in range(1, len(solution))])
+    def _angles_within_constraints(self, solution):
+        return all([checkBounds(solution[i], self.limits[i]) for i in range(1, len(solution))])
 
     def _calculate_angles(self, target, dp, zp, dpp, zpp):
         alpha = target.pitch
@@ -119,8 +121,8 @@ class SiriusII_IKSolver(IKSolver):
         zpp = (-dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
                                (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
                (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
-               
-        return dpp,zpp
+
+        return dpp, zpp
 
     def _find_middlepoint_solution1(self, l, dp, zp):
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (dp * math.sqrt(
@@ -131,8 +133,8 @@ class SiriusII_IKSolver(IKSolver):
         zpp = (dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
                               (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
                (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
-               
-        return dpp,zpp
+
+        return dpp, zpp
 
     def _initialize_solution(self):
         solution = [0] * len(self.limits)

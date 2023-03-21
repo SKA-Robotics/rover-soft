@@ -3,6 +3,7 @@ import time
 from manip_interface import ManipInterface, ManipParams
 from ik import ManipJointState
 
+
 class DummyManipInterface(ManipInterface):
 
     def __init__(self):

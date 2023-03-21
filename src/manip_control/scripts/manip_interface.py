@@ -1,6 +1,8 @@
 from ik import ManipJointState
 
+
 class ManipParams:
+
     def from_dict(dict):
         result = ManipParams()
         link_dict = dict["links"]
@@ -12,16 +14,17 @@ class ManipParams:
 
     def joint_names(self):
         return self._joint_names
-    
+
     def joint_limits(self):
         return self._joint_limits
-    
+
     def link_lengths(self):
         return self._link_lengths
-    
+
     def control_mode_params(self, name):
         return self._control_modes[name]
-    
+
+
 class ManipInterface:
 
     def get_jointstate(self) -> ManipJointState:
