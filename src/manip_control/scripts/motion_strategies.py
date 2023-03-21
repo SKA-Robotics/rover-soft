@@ -73,3 +73,20 @@ class JointspaceMotion(InterpolatedMotion):
         jointstate = manip_interface.get_jointstate()
         jointstate.position = position
         manip_interface.set_jointstate(jointstate)
+
+
+class IncrementalMotion(MotionStrategy):
+
+    def __init__(self, delta: ManipPose, ik_solver: IKSolver):
+        self.deltaPose = delta
+        self.solver = ik_solver
+
+    def execute(self, manip_interface: ManipInterface):
+        currentJointstate = manip_interface.get_jointstate()
+        currentPose = self.solver.get_FK_solution(currentJointstate)
+        targetPose = self._add_poses(currentPose, self.deltaPose)
+        targetJointstate = self.solver.get_IK_solution(targetPose)
+        manip_interface.set_jointstate(targetJointstate)
+
+    def _add_poses(self, pose1, pose2):
+        return ManipPose.from_list([x1 + x2 for x1, x2 in zip(pose1.to_list(), pose2.to_list())])

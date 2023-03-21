@@ -153,3 +153,31 @@ class TestMotionStrategies:
         motion._step(self.interface)
         assert_list_equals_within_epsilon(self.interface.get_jointstate().to_list(), self.startJointstate.to_list(),
                                           0.01)
+
+
+class TestIncrementalMotions:
+    interface = manip_interface_dummy.DummyManipInterface()
+    solver = ik.SiriusII_IKSolver([], [0.0655, 0.4350, 0.4650, 0.129], [(-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0),
+                                                                        (-3.0, 3.0), (-3.0, 3.0)])
+    startJointstate = ik.ManipJointState([0.1, 0.3, 1.0, 0.1, 0.2])
+    startPose = solver.get_FK_solution(startJointstate)
+
+    def test_noActualMovement(self):
+        self.interface.set_jointstate(self.startJointstate)
+        motion = motion_strategies.IncrementalMotion(ik.ManipPose.from_list([0, 0, 0, 0, 0, 0]), self.solver)
+        motion.execute(self.interface)
+        newjointstate = self.interface.get_jointstate()
+        newpose = self.solver.get_FK_solution(newjointstate)
+        assert_list_equals(newpose.to_list(), self.startPose.to_list())
+
+    def test_thereIsMovement(self):
+        self.interface.set_jointstate(self.startJointstate)
+        motion = motion_strategies.IncrementalMotion(ik.ManipPose.from_list([0.01, 0, 0.02, 0, -0.01, 0]), self.solver)
+        motion.execute(self.interface)
+        newjointstate = self.interface.get_jointstate()
+        newpose = self.solver.get_FK_solution(newjointstate)
+        expected_result = self.startPose.to_list()
+        expected_result[0] += 0.01
+        expected_result[2] += 0.02
+        expected_result[4] -= 0.01
+        assert_list_equals(newpose.to_list(), expected_result)
