@@ -7,8 +7,6 @@ Panels:
         - /Global Options1
         - /Grid1/Offset1
         - /Clicked Point1
-        - /Received Point1
-        - /ManipPose1
       Splitter Ratio: 0.4941176474094391
     Tree Height: 751
   - Class: rviz/Selection
@@ -119,28 +117,6 @@ Visualization Manager:
       Topic: /clicked_point
       Unreliable: false
       Value: true
-    - Alpha: 0.20000000298023224
-      Class: rviz/PointStamped
-      Color: 204; 41; 204
-      Enabled: true
-      History Length: 1
-      Name: Received Point
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Topic: /received_point
-      Unreliable: false
-      Value: true
-    - Alpha: 0.6000000238418579
-      Class: rviz/PointStamped
-      Color: 78; 154; 6
-      Enabled: true
-      History Length: 1
-      Name: ManipPose
-      Queue Size: 10
-      Radius: 0.009999999776482582
-      Topic: /actualManipPose
-      Unreliable: false
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -169,7 +145,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.7815628051757812
+      Distance: 1.636399269104004
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -177,17 +153,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.8449319005012512
-        Y: -0.005440505221486092
-        Z: 0.42197054624557495
-      Focal Shape Fixed Size: true
+        X: 0.14394256472587585
+        Y: -0.03672357276082039
+        Z: -0.07581524550914764
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2047995775938034
+      Pitch: 0.7853981852531433
       Target Frame: <Fixed Frame>
-      Yaw: 2.063603639602661
+      Yaw: 0.7853981852531433
     Saved: ~
 Window Geometry:
   Displays:
@@ -206,4 +182,4 @@ Window Geometry:
     collapsed: true
   Width: 1920
   X: 1080
-  Y: 461
+  Y: 433

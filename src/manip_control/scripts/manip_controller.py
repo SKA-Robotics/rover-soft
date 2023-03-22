@@ -36,7 +36,6 @@ class ManipController:
                 rospy.loginfo("Target pose reached")
             deltatime = self.rate.sleep_dur.to_sec()
             pose_delta = self.joystick_receiver.get_pose_delta(deltatime)
-            print(pose_delta.to_list())
             self.manip.move_incremental(pose_delta)
             self.rate.sleep()
 
