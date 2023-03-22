@@ -30,6 +30,8 @@ class ROSManipInterface(ManipInterface):
         return ManipParams.from_dict(params_dict)
 
     def get_jointstate(self) -> ManipJointState:
+        while self.jointstate is None:
+            rospy.logwarn_once("Trying to get jointstate of manip, but it has not been received yet. Waiting.")
         return self.jointstate
 
     def set_jointstate(self, jointstate: ManipJointState):
