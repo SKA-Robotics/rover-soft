@@ -10,10 +10,10 @@ from manip_interface import ManipInterface
 from manip_interface_ros import ROSManipInterface, PosePublishingDecorator, JointstatePublishingDecorator
 from manip_interface_dummy import DummyManipInterface
 from motion_interpolation import InterpolationSettings
-from motion_strategies import CartesianMotion, JointspaceMotion
+from motion_strategies import CartesianMotion, JointspaceMotion, IncrementalMotion
 
 
-class Manip:
+class SiriusManip:
 
     def __init__(self, manip_interface: ManipInterface):
         self.manip_interface = manip_interface
@@ -43,6 +43,11 @@ class Manip:
 
     def get_ik_solver(self):
         return self.solver
+    
+    def move_incremental(self, pose_delta : ManipPose):
+        motion = IncrementalMotion(pose_delta, self.solver)
+        motion.execute(self.manip_interface)
+        
 
 
 class ManipNode:
@@ -50,7 +55,7 @@ class ManipNode:
     def __init__(self):
         rospy.init_node("manip_controller")
         interface = PosePublishingDecorator(ROSManipInterface())
-        self.manip = Manip(interface)
+        self.manip = SiriusManip(interface)
         interface.set_ik_solver(self.manip.get_ik_solver())
         interface.set_topic_name("/received_point")
         rospy.Subscriber("/clicked_point", PointStamped, self.callback, queue_size=10)
