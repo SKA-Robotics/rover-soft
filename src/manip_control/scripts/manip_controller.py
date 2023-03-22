@@ -43,11 +43,10 @@ class SiriusManip:
 
     def get_ik_solver(self):
         return self.solver
-    
-    def move_incremental(self, pose_delta : ManipPose):
+
+    def move_incremental(self, pose_delta: ManipPose):
         motion = IncrementalMotion(pose_delta, self.solver)
         motion.execute(self.manip_interface)
-        
 
 
 class ManipNode:

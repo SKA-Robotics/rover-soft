@@ -4,7 +4,7 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from geometry_msgs.msg import PointStamped
 
-from manip_interface import ManipInterface, ManipParams
+from manip_interface import ManipInterface, ManipParams, ManipInterfaceDecorator
 from ik import ManipJointState
 
 
@@ -62,10 +62,10 @@ class ROSManipInterface(ManipInterface):
         return self._params
 
 
-class PosePublishingDecorator(ManipInterface):
+class PosePublishingDecorator(ManipInterfaceDecorator):
 
     def __init__(self, interface: ManipInterface):
-        self._component = interface
+        super().__init__(interface)
         self.ik_solver = None
         self.pose_publisher = None
 
@@ -74,9 +74,6 @@ class PosePublishingDecorator(ManipInterface):
 
     def set_topic_name(self, topic_name):
         self.pose_publisher = ROSPosePublisher(topic_name)
-
-    def get_jointstate(self) -> ManipJointState:
-        return self._component.get_jointstate()
 
     def set_jointstate(self, jointstate: ManipJointState):
         if self._can_publish():
@@ -90,24 +87,15 @@ class PosePublishingDecorator(ManipInterface):
     def _can_publish(self):
         return self.ik_solver is not None and self.pose_publisher is not None
 
-    def sleep(self, time):
-        return self._component.sleep(time)
 
-    def get_manip_params(self):
-        return self._component.get_manip_params()
-
-
-class JointstatePublishingDecorator(ManipInterface):
+class JointstatePublishingDecorator(ManipInterfaceDecorator):
 
     def __init__(self, interface: ManipInterface):
-        self._component = interface
+        super().__init__(interface)
         self.jointstate_publisher = None
 
     def set_topic_name(self, topic_name):
         self.jointstate_publisher = ROSJointStatePublisher(topic_name)
-
-    def get_jointstate(self) -> ManipJointState:
-        return self._component.get_jointstate()
 
     def set_jointstate(self, jointstate: ManipJointState):
         if self._can_publish():
@@ -120,12 +108,6 @@ class JointstatePublishingDecorator(ManipInterface):
 
     def _can_publish(self):
         return self.jointstate_publisher is not None
-
-    def sleep(self, time):
-        return self._component.sleep(time)
-
-    def get_manip_params(self):
-        return self._component.get_manip_params()
 
 
 class ROSJointStatePublisher:

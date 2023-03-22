@@ -38,3 +38,21 @@ class ManipInterface:
 
     def get_manip_params(self) -> ManipParams:
         pass
+
+
+class ManipInterfaceDecorator(ManipInterface):
+
+    def __init__(self, interface: ManipInterface):
+        self._component = interface
+
+    def get_jointstate(self) -> ManipJointState:
+        return self._component.get_jointstate()
+
+    def set_jointstate(self, jointstate: ManipJointState):
+        return self._component.set_jointstate(jointstate)
+
+    def sleep(self, time):
+        return self._component.sleep(time)
+
+    def get_manip_params(self) -> ManipParams:
+        return self._component.get_manip_params()
