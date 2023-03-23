@@ -49,6 +49,14 @@ class IKSolver:
 class SiriusII_IKSolver(IKSolver):
 
     def get_IK_solution(self, target: ManipPose) -> ManipJointState:
+        try:
+            return self._calculate_IK_solution(target)
+        except ValueError:
+            raise Exception("No IK solution! Possibly out of range")
+        except Exception as e:
+            raise e
+    
+    def _calculate_IK_solution(self, target: ManipPose) -> ManipJointState:
 
         solution = self._initialize_solution()
         limits = self.limits
@@ -62,7 +70,7 @@ class SiriusII_IKSolver(IKSolver):
         # the only joint allowing for movement along y-axis
         solution[0] = math.atan2(y, x)
         if not checkBounds(solution[0], limits[0]):
-            raise Exception("No IK solution!")
+            raise Exception("IK solution outside of joint limits!")
 
         # Project target position to manip plane
         d = math.sqrt(x * x + y * y)
@@ -93,7 +101,7 @@ class SiriusII_IKSolver(IKSolver):
             return ManipJointState.from_list(solution)
 
         # Both of the solutions are wrong. Exception is to be thrown
-        raise Exception("No IK solution!")
+        raise Exception("IK solution outside of joints limits")
 
     def _get_link3_startposition(self, l, d, z, alpha):
         dp = d - l[3] * math.cos(alpha)

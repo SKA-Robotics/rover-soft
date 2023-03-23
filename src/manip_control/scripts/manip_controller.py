@@ -30,14 +30,23 @@ class ManipController:
 
     def run(self):
         while not rospy.is_shutdown():
-            if not self.pending_moves.empty():
-                move = self.pending_moves.get()
-                move[0](move[1])
-                rospy.loginfo("Target pose reached")
-            deltatime = self.rate.sleep_dur.to_sec()
-            pose_delta = self.joystick_receiver.get_pose_delta(deltatime)
-            self.manip.move_incremental(pose_delta)
-            self.rate.sleep()
+            try:
+                self._execute_pending_moves()
+                self._execute_joystick_command()
+                self.rate.sleep()
+            except Exception as e:
+                rospy.logwarn(e)
+
+    def _execute_pending_moves(self):
+        while not self.pending_moves.empty():
+            move = self.pending_moves.get()
+            move[0](move[1])
+            rospy.loginfo("Target pose reached")
+            
+    def _execute_joystick_command(self):
+        deltatime = self.rate.sleep_dur.to_sec()
+        pose_delta = self.joystick_receiver.get_pose_delta(deltatime)
+        self.manip.move_incremental(pose_delta)
 
     def callback(self, data):
         rospy.loginfo("Received request:\n" + str(data.point))
