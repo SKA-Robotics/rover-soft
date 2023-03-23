@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Grid1/Offset1
+        - /RobotModel1
         - /Clicked Point1
       Splitter Ratio: 0.4941176474094391
     Tree Height: 751
@@ -52,7 +53,7 @@ Visualization Manager:
       Plane Cell Count: 4
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 0.3330000042915344
+    - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
       Enabled: true
@@ -97,8 +98,8 @@ Visualization Manager:
           Show Trail: false
         tool:
           Alpha: 1
-          Show Axes: false
-          Show Trail: false
+          Show Axes: true
+          Show Trail: true
           Value: true
       Name: RobotModel
       Robot Description: robot_description
@@ -145,7 +146,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.636399269104004
+      Distance: 1.888526439666748
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -153,17 +154,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.14394256472587585
-        Y: -0.03672357276082039
-        Z: -0.07581524550914764
+        X: 0.011493297293782234
+        Y: -0.02287517860531807
+        Z: -0.0570589154958725
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7853981852531433
+      Pitch: 0.5847991108894348
       Target Frame: <Fixed Frame>
-      Yaw: 0.7853981852531433
+      Yaw: 6.235419750213623
     Saved: ~
 Window Geometry:
   Displays:

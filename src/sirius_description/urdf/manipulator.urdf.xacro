@@ -26,8 +26,8 @@
       <geometry>
         <mesh filename="package://${package}/meshes/manipulator/base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="yellow">
-        <color rgba=".5 .5 0 1" />
+      <material name="grey">
+        <color rgba=".5 .5 .5 1" />
       </material>
     </visual>
     <inertial>
@@ -55,7 +55,6 @@
         <mesh filename="package://${package}/meshes/manipulator/cyl.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="grey">
-        <color rgba=".5 .5 .5 1" />
       </material>
     </visual>
     <inertial>
@@ -98,8 +97,8 @@
       <geometry>
         <mesh filename="package://${package}/meshes/manipulator/arm1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="green">
-        <color rgba="0 1 0 1" />
+      <material name="white">
+        <color rgba="1 1 1 1" />
       </material>
     </visual>
     <inertial>
@@ -147,8 +146,7 @@
       <geometry>
         <mesh filename="package://${package}/meshes/manipulator/arm2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="blue">
-        <color rgba="0 0 1 1" />
+      <material name="grey">
       </material>
     </visual>
     <inertial>
@@ -196,8 +194,7 @@
       <geometry>
         <mesh filename="package://${package}/meshes/manipulator/arm3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="red">
-        <color rgba="1 0 0 1" />
+      <material name="white">
       </material>
     </visual>
     <inertial>
