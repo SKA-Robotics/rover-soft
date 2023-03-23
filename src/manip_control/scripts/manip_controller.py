@@ -22,10 +22,10 @@ class ManipController:
         rospy.init_node("manip_controller")
         interface = ROSManipInterface()
         self.manip = SiriusManip(interface)
-        self.mode = mode.CARTESIAN
+        self.mode = mode.JOINTSPACE
         self.joystick_receiver = JoystickReceiver("/cmd_manip", 0.5)
         self.rate = rospy.Rate(20)
-        self.pending_moves = Queue(64)
+        self.pending_moves = Queue(16)
 
         rospy.Subscriber("/clicked_point", PointStamped, self.callback, queue_size=10)
         rospy.Service("~toggle_mode", Empty, self._handle_toggle_mode)
@@ -57,9 +57,15 @@ class ManipController:
         target.y = data.point.y
         target.z = data.point.z
         if self.mode == mode.CARTESIAN:
-            self.pending_moves.put((self.manip.move_cartesian, target))
+            self._put_into_pending_moves((self.manip.move_cartesian, target))
         else:
-            self.pending_moves.put((self.manip.move_jointspace, target))
+            self._put_into_pending_moves((self.manip.move_jointspace, target))
+    
+    def _put_into_pending_moves(self, move):
+        if self.pending_moves.full():
+            rospy.logwarn("Move queue full. Dropping first element to insert new at the end.")
+            self.pending_moves.get()
+        self.pending_moves.put(move)
     
     def _handle_toggle_mode(self, req):
         self._toggle_mode()
