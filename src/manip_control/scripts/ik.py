@@ -94,13 +94,6 @@ class SiriusII_IKSolver(IKSolver):
         if self._angles_within_constraints(solution):
             return ManipJointState.from_list(solution)
 
-        # If the previous solution did not pass the check, try the second solution
-        dpp, zpp = self._find_middlepoint_solution2(l, dp, zp)
-        solution[1], solution[2], solution[3] = self._calculate_angles(target, dp, zp, dpp, zpp)
-        if self._angles_within_constraints(solution):
-            return ManipJointState.from_list(solution)
-
-        # Both of the solutions are wrong. Exception is to be thrown
         raise Exception("IK solution outside of joints limits")
 
     def _get_link3_startposition(self, l, d, z, alpha):
@@ -119,18 +112,6 @@ class SiriusII_IKSolver(IKSolver):
         angle2 = beta + gamma
         angle3 = alpha - gamma
         return angle1, angle2, angle3
-
-    def _find_middlepoint_solution2(self, l, dp, zp):
-        dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (-dp * math.sqrt(
-            (l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
-            (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp + (l[1] * l[1]) * zp -
-                                                                      (l[2] * l[2]) * zp + zp * zp * zp)) /
-               (dp * dp + zp * zp)) / (dp * 2.0)
-        zpp = (-dp * math.sqrt((l[1] * l[2] * 2.0 - dp * dp + l[1] * l[1] + l[2] * l[2] - zp * zp) *
-                               (l[1] * l[2] * 2.0 + dp * dp - l[1] * l[1] - l[2] * l[2] + zp * zp)) + (dp * dp) * zp +
-               (l[1] * l[1]) * zp - (l[2] * l[2]) * zp + zp * zp * zp) / ((dp * dp) * 2.0 + (zp * zp) * 2.0)
-
-        return dpp, zpp
 
     def _find_middlepoint_solution1(self, l, dp, zp):
         dpp = (dp * dp + l[1] * l[1] - l[2] * l[2] + zp * zp - (zp * (dp * math.sqrt(
