@@ -2,5 +2,6 @@
 	<node name="manip_controller" pkg="manip_control" type="manip_controller.py" output="screen">
 		<rosparam file="$(find manip_control)/config/kinematics.yaml" command="load"/>
 		<rosparam file="$(find manip_control)/config/controller.yaml" command="load"/>
+		<remap from="/cmd_manip_pos" to="/clicked_point"/>
 	</node>
 </launch>

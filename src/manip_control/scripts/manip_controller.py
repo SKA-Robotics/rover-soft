@@ -23,7 +23,8 @@ class ManipController:
         interface = ROSManipInterface()
         self.manip = SiriusManip(interface)
         self.mode = mode.JOINTSPACE
-        self.joystick_receiver = JoystickReceiver("/cmd_manip", 0.5)
+        joystick_timeout = rospy.get_param("~joystick_timeout", 0.5)
+        self.joystick_receiver = JoystickReceiver("/cmd_manip", joystick_timeout)
         self.rate = rospy.Rate(rospy.get_param("~control_modes/incremental/send_rate"))
         self.pending_moves = Queue(rospy.get_param("~queue_size", 16))
 

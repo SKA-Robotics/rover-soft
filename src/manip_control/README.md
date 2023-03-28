@@ -47,6 +47,13 @@ Launches the `manip_controller` node.
     
         How many queued movements shall the controller store. After the limit is reached moves enqueued earlier are dropped in favour of the new ones.
 
+    - `~joystick_timeout`
+        - Type: `float`
+        - Default: `0.5`
+        - Unit: `Seconds`
+
+        Time, after which robot will stop if no new joystick commands are received.
+
     - `~jointstate_topic`
         - Type: `string`
         - Default: `/manipulator/joint_states`
@@ -90,8 +97,9 @@ Launches the `manip_controller` node.
     
     - `~control_modes/mode/interpolation_rate`
         - Type: `float`
+        - Unit: `Hz`
 
-        Time step of the motion interpolation. Directly affects the rate of commands sent to the joint controllers.
+        Rate of the motion interpolation. Directly affects the rate of commands sent to the joint controllers.
     
     - `~control_modes/mode/velocity_weighing`
         - Type: `list` of `float`
@@ -105,3 +113,22 @@ Launches the `manip_controller` node.
 
         The rate at which joint commands shall be sent to joint controllers.
 
+
+    `links` parameters:
+
+    - `~links/lengths`
+        - Type: `list` of `float`
+        - Unit: `Meters`
+
+        Lengths of the links of the manipulator.
+
+    - `~links/names`
+        - Type: `list` of `str`
+
+        Names of the joints of the manipulator.
+    
+    - `~links/limits`
+        - Type: `list` of `list[2]` of `float`
+        - Unit: `radians`
+
+        Upper and lower limits of the joints of the manipulator.
