@@ -24,10 +24,10 @@ class ManipController:
         self.manip = SiriusManip(interface)
         self.mode = mode.JOINTSPACE
         self.joystick_receiver = JoystickReceiver("/cmd_manip", 0.5)
-        self.rate = rospy.Rate(20)
-        self.pending_moves = Queue(16)
+        self.rate = rospy.Rate(rospy.get_param("~control_modes/incremental/send_rate"))
+        self.pending_moves = Queue(rospy.get_param("~queue_size", 16))
 
-        rospy.Subscriber("/clicked_point", PointStamped, self.callback, queue_size=10)
+        rospy.Subscriber("/cmd_manip_pos", PointStamped, self.callback, queue_size=10)
         rospy.Service("~toggle_mode", Empty, self._handle_toggle_mode)
 
     def run(self):

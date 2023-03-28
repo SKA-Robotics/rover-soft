@@ -1,4 +1,5 @@
 jointstate_topic: /manipulator/joint_states
+queue_size: 16
 command_topics:
     base_cyl: manipulator/joint1_position_controller/command
     cyl_arm1: manipulator/joint2_position_controller/command
@@ -18,4 +19,6 @@ control_modes:
     max_error: 0.001
     interpolation_rate: 10.0
     velocity_weighing: [1, 1, 1, 1, 0.05]
+  incremental:
+    send_rate: 20.0
 
