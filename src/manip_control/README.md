@@ -132,3 +132,7 @@ Launches the `manip_controller` node.
         - Unit: `radians`
 
         Upper and lower limits of the joints of the manipulator.
+
+## System structure
+
+![image](docs/system_diagram.svg)
