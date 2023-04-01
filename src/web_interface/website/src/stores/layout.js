@@ -7,9 +7,9 @@ export const useLayoutStore = defineStore('layout', () => {
         {
             overview: {
                 shape: [
-                    { i: 'aaa', x: 0, y: 0, w: 2, h: 2 },
-                    { i: 'bbb', x: 3, y: 0, w: 3, h: 2 },
-                    { i: 'ccc', x: 6, y: 0, w: 3, h: 2 },
+                    { i: 'aaa', x: 0, y: 0, w: 4, h: 4 },
+                    { i: 'bbb', x: 5, y: 0, w: 3, h: 2 },
+                    { i: 'ccc', x: 8, y: 0, w: 3, h: 2 },
                     { i: 'ddd', x: 0, y: 0, w: 2, h: 2 },
                 ],
                 windows: {
