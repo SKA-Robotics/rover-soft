@@ -2,12 +2,14 @@
 from enum import Enum
 from math import tan
 import rospy
+from std_msgs.msg import Float64
 from sensor_msgs.msg import Joy, JointState
 from geometry_msgs.msg import Twist
 
 # used topics names
 ROVER_TOPIC_NAME = "/cmd_vel"
 MANIP_TOPIC_NAME = "/cmd_manip"
+GRIPPER_TOPIC_NAME = "/cmd_grip"
 
 # names to use in messages
 LIMBS_NAMES = [
@@ -43,6 +45,7 @@ class JoystickController:
         self.rover_publisher = rospy.Publisher(ROVER_TOPIC_NAME, Twist, queue_size=10)
         # self.manip_publisher = rospy.Publisher(MANIP_TOPIC_NAME, JointState, queue_size=10)
         self.manip_publisher = rospy.Publisher(MANIP_TOPIC_NAME, Twist, queue_size=10)
+        self.gripper_publisher = rospy.Publisher(GRIPPER_TOPIC_NAME, Float64, queue_size=10)
         rospy.Subscriber(JOY_TOPIC_NAME, Joy, self.joy_listener_callback)
 
         # used in child mode
@@ -147,26 +150,29 @@ class JoystickController:
 
         if self.manip_steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
             manip_message = Twist()
+            PARAMS = self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()]
             manip_message.linear.x = values['cross_horizontal']
             manip_message.linear.y = values['cross_vertical']
             manip_message.linear.z = values['right_stick_vertical']
             manip_message.angular.y = values['left_stick_vertical']  # pitch
             manip_message.angular.x = values['left_stick_horizontal']  # roll
-            # manip_message['clamp'] = (values['left_trigger'] - values['right_trigger'])
-            params = self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()]
+            gripper_message = Float64(values['left_trigger'] - values['right_trigger'])
 
-            manip_message.linear.x *= params['x']['scale_coefficient'] * abs(
-                manip_message.linear.x)**(params['x']['shape_coefficient'] - 1.0)
-            manip_message.linear.y *= params['y']['scale_coefficient'] * abs(
-                manip_message.linear.y)**(params['y']['shape_coefficient'] - 1.0)
-            manip_message.linear.z *= params['z']['scale_coefficient'] * abs(
-                manip_message.linear.z)**(params['z']['shape_coefficient'] - 1.0)
-            manip_message.angular.x *= params['roll']['scale_coefficient'] * abs(
-                manip_message.angular.x)**(params['roll']['shape_coefficient'] - 1.0)
-            manip_message.angular.y *= params['pitch']['scale_coefficient'] * abs(
-                manip_message.angular.y)**(params['pitch']['shape_coefficient'] - 1.0)
-            
+            manip_message.linear.x *= PARAMS['x']['scale_coefficient'] * abs(
+                manip_message.linear.x)**(PARAMS['x']['shape_coefficient'] - 1.0)
+            manip_message.linear.y *= PARAMS['y']['scale_coefficient'] * abs(
+                manip_message.linear.y)**(PARAMS['y']['shape_coefficient'] - 1.0)
+            manip_message.linear.z *= PARAMS['z']['scale_coefficient'] * abs(
+                manip_message.linear.z)**(PARAMS['z']['shape_coefficient'] - 1.0)
+            manip_message.angular.x *= PARAMS['roll']['scale_coefficient'] * abs(
+                manip_message.angular.x)**(PARAMS['roll']['shape_coefficient'] - 1.0)
+            manip_message.angular.y *= PARAMS['pitch']['scale_coefficient'] * abs(
+                manip_message.angular.y)**(PARAMS['pitch']['shape_coefficient'] - 1.0)
+            gripper_message.data *= PARAMS['gripper']['scale_coefficient'] * abs(
+                gripper_message.data)**(PARAMS['gripper']['shape_coefficient'] - 1.0)
+
             self.manip_publisher.publish(manip_message)
+            self.gripper_publisher.publish(gripper_message)
             return
 
         # manip_message = JointState()
@@ -218,7 +224,9 @@ class JoystickController:
             # manip_message.name = LIMBS_NAMES
             # manip_message.effort = [0] * 6
             manip_message = Twist()
+            gripper_message = Float64()
             self.manip_publisher.publish(manip_message)
+            self.gripper_publisher.publish(gripper_message)
 
     class SteeredObject(Enum):
         ROVER = 0

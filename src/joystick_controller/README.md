@@ -118,9 +118,13 @@ Steering can be switched between rover and manipulator using start/back buttons.
 
   Sets linear and angular velocity of rover.
 
-- `/cmd_manip` [sensor_msgs/JointState]
+- `/cmd_manip` [sensor_msgs/JointState] or [geometry_msgs/Twist]
 
-  Sets an effort of individual manipulator limbs.
+  Sets an effort of individual manipulator limbs or velocity in inverse kinemtics mode.
+
+- `/cmd_grip` [std_msgs/Float64]
+
+  Sets an effort of gripper clamp.
 
 ## Steering description
 

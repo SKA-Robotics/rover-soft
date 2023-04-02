@@ -72,6 +72,6 @@ steering_modes:
       pitch:
         scale_coefficient: 1.0
         shape_coefficient: 1.0
-      # claw_clamp:
-      #   scale_coefficient: 1.0
-      #   shape_coefficient: 1.0
+      gripper:
+        scale_coefficient: 1.0
+        shape_coefficient: 1.0
