@@ -45,7 +45,7 @@ class ManipController:
             move = self.pending_moves.get()
             move[0](move[1])
             rospy.loginfo("Target pose reached")
-            
+
     def _execute_joystick_command(self):
         deltatime = self.rate.sleep_dur.to_sec()
         pose_delta = self.joystick_receiver.get_pose_delta(deltatime)
@@ -57,22 +57,25 @@ class ManipController:
         target.x = data.point.x
         target.y = data.point.y
         target.z = data.point.z
+        target.roll = 0
+        target.pitch = 0
+        target.yaw = 0
         if self.mode == mode.CARTESIAN:
             self._put_into_pending_moves((self.manip.move_cartesian, target))
         else:
             self._put_into_pending_moves((self.manip.move_jointspace, target))
-    
+
     def _put_into_pending_moves(self, move):
         if self.pending_moves.full():
             rospy.logwarn("Move queue full. Dropping first element to insert new at the end.")
             self.pending_moves.get()
         self.pending_moves.put(move)
-    
+
     def _handle_toggle_mode(self, req):
         self._toggle_mode()
         rospy.loginfo(f"Switched to {self.mode.name} mode")
         return EmptyResponse()
-    
+
     def _toggle_mode(self):
         if self.mode == mode.CARTESIAN:
             self.mode = mode.JOINTSPACE
