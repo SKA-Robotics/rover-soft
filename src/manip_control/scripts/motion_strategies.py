@@ -2,9 +2,12 @@ from manip_interface import ManipInterface
 from motion_interpolation import InterpolationSettings, MotionInterpolator
 from ik import IKSolver, ManipPose
 
+from abc import ABC, abstractmethod
 
-class MotionStrategy:
 
+class MotionStrategy(ABC):
+
+    @abstractmethod
     def execute(self, manip_interface: ManipInterface):
         pass
 

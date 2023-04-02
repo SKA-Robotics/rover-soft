@@ -1,5 +1,7 @@
 from ik import ManipJointState
 
+from abc import ABC, abstractmethod
+
 
 class ManipParams:
 
@@ -25,17 +27,21 @@ class ManipParams:
         return self._control_modes[name]
 
 
-class ManipInterface:
+class ManipInterface(ABC):
 
+    @abstractmethod
     def get_jointstate(self) -> ManipJointState:
         pass
 
+    @abstractmethod
     def set_jointstate(self, jointstate: ManipJointState):
         pass
 
+    @abstractmethod
     def sleep(self, time):
         pass
 
+    @abstractmethod
     def get_manip_params(self) -> ManipParams:
         pass
 

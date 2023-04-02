@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import math
+from abc import ABC, abstractmethod
 
 
 class ManipPose:
@@ -31,16 +32,18 @@ class ManipJointState:
         return self.position
 
 
-class IKSolver:
+class IKSolver(ABC):
 
     def __init__(self, names, lengths, limits):
         self.joint_names = names
         self.limits = limits
         self.lengths = lengths
 
+    @abstractmethod
     def get_IK_solution(self, target: ManipPose) -> ManipJointState:
         pass
 
+    @abstractmethod
     def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
         pass
 
@@ -55,7 +58,7 @@ class SiriusII_IKSolver(IKSolver):
             raise Exception("No IK solution! Possibly out of range")
         except Exception as e:
             raise e
-    
+
     def _calculate_IK_solution(self, target: ManipPose) -> ManipJointState:
 
         solution = self._initialize_solution()
