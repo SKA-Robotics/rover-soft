@@ -29,9 +29,9 @@ class JoystickController:
         JOY_TOPIC_NAME = rospy.get_param("~joy_message_topic_name", "joy")
 
         # set rover steering and normal modes at begining
-        self.steered_object = self.SteeredObject.rover
-        self.rover_steering_mode = self.RoverSteeringMode.normal
-        self.manip_steering_mode = self.ManipSteeringMode.normal
+        self.steered_object = self.SteeredObject.ROVER
+        self.rover_steering_mode = self.RoverSteeringMode.NORMAL
+        self.manip_steering_mode = self.ManipSteeringMode.NORMAL
 
         # get axes and buttons configuration from the file
         JOYSTICK_TYPE = rospy.get_param("~joystick_type", "XBOX_XS")
@@ -69,11 +69,11 @@ class JoystickController:
         # change currently steered object and stop the previous one
         if VALUES['start_button'] and not VALUES['back_button']:
             self.stop_object()
-            self.steered_object = self.SteeredObject.rover
+            self.steered_object = self.SteeredObject.ROVER
             return
         if VALUES['back_button'] and not VALUES['start_button']:
             self.stop_object()
-            self.steered_object = self.SteeredObject.manip
+            self.steered_object = self.SteeredObject.MANIP
             return
 
         # change steering mode and stop object to avoid unexpected behaviour
@@ -81,18 +81,18 @@ class JoystickController:
             return
 
         # all velocities are scaled in range (-1,1) corresponding to a percentage of maximal speed in both sides
-        if self.steered_object == self.SteeredObject.rover:
+        if self.steered_object == self.SteeredObject.ROVER:
             self.steer_rover(VALUES)
-        elif self.steered_object == self.SteeredObject.manip:
+        elif self.steered_object == self.SteeredObject.MANIP:
             self.steer_manip(VALUES)
 
-    def steer_rover(self, values):
+    def steer_rover(self, values: dict):
         rover_message = Twist()
-        PARAMS = self.MODES_DATA['rover'][self.rover_steering_mode.name]
+        PARAMS = self.MODES_DATA['rover'][self.rover_steering_mode.name.lower()]
         lin_cmd = 0
         ang_cmd = 0
 
-        if self.rover_steering_mode == self.RoverSteeringMode.normal:
+        if self.rover_steering_mode == self.RoverSteeringMode.NORMAL:
             lin_cmd = values['right_stick_vertical']
             ang_cmd = values['right_stick_horizontal']
             lin_cmd *= PARAMS['linear']['scale_coefficient'] * abs(lin_cmd)**(PARAMS['linear']['shape_coefficient'] -
@@ -100,13 +100,13 @@ class JoystickController:
             ang_cmd *= PARAMS['angular']['scale_coefficient'] * abs(ang_cmd)**(PARAMS['angular']['shape_coefficient'] -
                                                                                1.0)
 
-        elif self.rover_steering_mode == self.RoverSteeringMode.tank:
+        elif self.rover_steering_mode == self.RoverSteeringMode.TANK:
             lin_cmd = (values['left_stick_vertical'] + values['right_stick_vertical']) / 2
             ang_cmd = (values['right_stick_vertical'] - values['left_stick_vertical']) / 2
             lin_cmd *= PARAMS['scale_coefficient'] * abs(lin_cmd)**(PARAMS['shape_coefficient'] - 1.0)
             ang_cmd *= PARAMS['scale_coefficient'] * abs(ang_cmd)**(PARAMS['shape_coefficient'] - 1.0)
 
-        elif self.rover_steering_mode == self.RoverSteeringMode.gamer:
+        elif self.rover_steering_mode == self.RoverSteeringMode.GAMER:
             lin_cmd = (values['right_trigger'] - values['left_trigger']) / 2
             turning_angle = values['right_stick_horizontal']  # value of angle is relative (0,1), NOT in rad
             lin_cmd *= PARAMS['linear']['scale_coefficient'] * abs(lin_cmd)**(PARAMS['linear']['shape_coefficient'] -
@@ -123,9 +123,9 @@ class JoystickController:
             rover_message.angular.z = ang_cmd
         self.rover_publisher.publish(rover_message)
 
-    def steer_manip(self, values):
+    def steer_manip(self, values: dict):
         effort = dict()
-        if self.manip_steering_mode == self.ManipSteeringMode.normal:
+        if self.manip_steering_mode == self.ManipSteeringMode.NORMAL:
             effort['arm_rotate'] = -values['left_stick_horizontal']
             effort['arm_lift'] = -values['left_stick_vertical']
             effort['claw_rotate'] = values['right_stick_horizontal']
@@ -134,7 +134,7 @@ class JoystickController:
             # each bumper has range (0,1)
             effort['claw_clamp'] = (values['left_bumper'] - values['right_bumper'])
 
-        elif self.manip_steering_mode == self.ManipSteeringMode.gamer:
+        elif self.manip_steering_mode == self.ManipSteeringMode.GAMER:
             effort['arm_rotate'] = values['right_stick_horizontal']
             effort['arm_lift'] = -values['right_stick_vertical']
             effort['claw_rotate'] = -values['left_stick_horizontal']
@@ -143,7 +143,7 @@ class JoystickController:
             # each bumper has range (0,1)
             effort['claw_clamp'] = (values['left_bumper'] - values['right_bumper'])
 
-        elif self.manip_steering_mode == self.ManipSteeringMode.inverse_kinematics:
+        elif self.manip_steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
             # velocities = dict()
             # velocities['x'] = VALUES['cross_horizontal']
             # velocities['y'] = VALUES['cross_vertical']
@@ -155,7 +155,7 @@ class JoystickController:
             # manip_message.header.stamp = rospy.get_rostime()
             # manip_message.name = list()
             # manip_message.velocity = list()
-            # for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name].items():
+            # for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()].items():
             #     manip_message.name.append(name)
             #     manip_message.velocity.append(params['scale_coefficient'] * velocities(name) *
             #                                   abs(velocities(name))**(params['shape_coefficient'] - 1.0))
@@ -166,46 +166,46 @@ class JoystickController:
         manip_message.header.stamp = rospy.get_rostime()
         manip_message.name = list()
         manip_message.effort = list()
-        for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name].items():
+        for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()].items():
             manip_message.name.append(name)
             manip_message.effort.append(params['scale_coefficient'] * effort[name] *
                                         abs(effort[name])**(params['shape_coefficient'] - 1.0))
         self.manip_publisher.publish(manip_message)
 
-    def change_mode(self, buttons_values):
-        if self.steered_object == self.SteeredObject.rover:
+    def change_mode(self, buttons_values: dict):
+        if self.steered_object == self.SteeredObject.ROVER:
             if buttons_values['A_button']:
                 self.stop_object()
-                self.rover_steering_mode = self.RoverSteeringMode.normal
+                self.rover_steering_mode = self.RoverSteeringMode.NORMAL
                 return True
             if buttons_values['B_button']:
                 self.stop_object()
-                self.rover_steering_mode = self.RoverSteeringMode.tank
+                self.rover_steering_mode = self.RoverSteeringMode.TANK
                 return True
             if buttons_values['X_button']:
                 self.stop_object()
-                self.rover_steering_mode = self.RoverSteeringMode.gamer
+                self.rover_steering_mode = self.RoverSteeringMode.GAMER
                 return True
-        if self.steered_object == self.SteeredObject.manip:
+        if self.steered_object == self.SteeredObject.MANIP:
             if buttons_values['A_button']:
                 self.stop_object()
-                self.manip_steering_mode = self.ManipSteeringMode.normal
+                self.manip_steering_mode = self.ManipSteeringMode.NORMAL
                 return True
             if buttons_values['B_button']:
                 self.stop_object()
-                self.manip_steering_mode = self.ManipSteeringMode.gamer
+                self.manip_steering_mode = self.ManipSteeringMode.GAMER
                 return True
             if buttons_values['X_button']:
                 self.stop_object()
-                self.manip_steering_mode = self.ManipSteeringMode.inverse_kinematics
+                self.manip_steering_mode = self.ManipSteeringMode.INVERSE_KINEMATICS
                 return True
         return False
 
     def stop_object(self):
-        if self.steered_object == self.SteeredObject.rover:
+        if self.steered_object == self.SteeredObject.ROVER:
             rover_message = Twist()
             self.rover_publisher.publish(rover_message)
-        elif self.steered_object == self.SteeredObject.manip:
+        elif self.steered_object == self.SteeredObject.MANIP:
             manip_message = JointState()
             manip_message.header.stamp = rospy.get_rostime()
             manip_message.name = LIMBS_NAMES
@@ -213,33 +213,33 @@ class JoystickController:
             self.manip_publisher.publish(manip_message)
 
     class SteeredObject(Enum):
-        rover = 0
-        manip = 1
+        ROVER = 0
+        MANIP = 1
 
     class RoverSteeringMode(Enum):
-        normal = 0
-        tank = 1
-        gamer = 2
+        NORMAL = 0
+        TANK = 1
+        GAMER = 2
 
     class ManipSteeringMode(Enum):
-        normal = 0
-        gamer = 1
-        inverse_kinematics = 2  # comming soon...
+        NORMAL = 0
+        GAMER = 1
+        INVERSE_KINEMATICS = 2  # comming soon...
 
     # This class simulates dynamic system used for softening joystick's input signal
     class InertiaModel():
 
-        def __init__(self, i1, i2):
-            self.i1 = i1
-            self.i2 = i2
+        def __init__(self, i1: float, i2: float):
+            self.I1 = i1
+            self.I2 = i2
             self.prev_y = 0
             self.prev_dy = 0
 
-        def step(self, u):
-            calc_dy = (u - self.prev_y) * self.i1
+        def step(self, u: float):
+            calc_dy = (u - self.prev_y) * self.I1
             ddy = calc_dy - self.prev_dy
             if (calc_dy > 0 and ddy > 0) or (calc_dy <= 0 and ddy <= 0):
-                dy = calc_dy * self.i2 + self.prev_dy * (1 - self.i2)
+                dy = calc_dy * self.I2 + self.prev_dy * (1 - self.I2)
             else:
                 dy = calc_dy
             self.prev_dy = dy
