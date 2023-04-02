@@ -56,22 +56,22 @@ steering_modes:
       claw_clamp:
         scale_coefficient: 1.0
         shape_coefficient: 1.0
-    # inverse_kinematics:
-    #   x:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   y:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   z:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   theta:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   fi:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   claw_clamp:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
+    inverse_kinematics:
+      x:
+        scale_coefficient: 1.0
+        shape_coefficient: 1.0
+      y:
+        scale_coefficient: 1.0
+        shape_coefficient: 1.0
+      z:
+        scale_coefficient: 1.0
+        shape_coefficient: 1.0
+      roll:
+        scale_coefficient: 1.0
+        shape_coefficient: 1.0
+      pitch:
+        scale_coefficient: 1.0
+        shape_coefficient: 1.0
+      # claw_clamp:
+      #   scale_coefficient: 1.0
+      #   shape_coefficient: 1.0

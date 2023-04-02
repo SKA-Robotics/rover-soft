@@ -41,7 +41,8 @@ class JoystickController:
         self.BUTTONS_ID = JOYSTICK_DATA['buttons']
 
         self.rover_publisher = rospy.Publisher(ROVER_TOPIC_NAME, Twist, queue_size=10)
-        self.manip_publisher = rospy.Publisher(MANIP_TOPIC_NAME, JointState, queue_size=10)
+        # self.manip_publisher = rospy.Publisher(MANIP_TOPIC_NAME, JointState, queue_size=10)
+        self.manip_publisher = rospy.Publisher(MANIP_TOPIC_NAME, Twist, queue_size=10)
         rospy.Subscriber(JOY_TOPIC_NAME, Joy, self.joy_listener_callback)
 
         # used in child mode
@@ -80,7 +81,7 @@ class JoystickController:
         if self.change_mode(VALUES):
             return
 
-        # all velocities are scaled in range (-1,1) corresponding to a percentage of maximal speed in both sides
+        # all values are scaled in range (-1,1) corresponding to a percentage of maximal speed in both sides
         if self.steered_object == self.SteeredObject.ROVER:
             self.steer_rover(VALUES)
         elif self.steered_object == self.SteeredObject.MANIP:
@@ -121,56 +122,62 @@ class JoystickController:
         else:
             rover_message.linear.x = lin_cmd
             rover_message.angular.z = ang_cmd
+
         self.rover_publisher.publish(rover_message)
 
     def steer_manip(self, values: dict):
-        effort = dict()
-        if self.manip_steering_mode == self.ManipSteeringMode.NORMAL:
-            effort['arm_rotate'] = -values['left_stick_horizontal']
-            effort['arm_lift'] = -values['left_stick_vertical']
-            effort['claw_rotate'] = values['right_stick_horizontal']
-            effort['claw_lift'] = -values['right_stick_vertical']
-            effort['arm_tilt'] = -(values['left_trigger'] - values['right_trigger']) / 2
-            # each bumper has range (0,1)
-            effort['claw_clamp'] = (values['left_bumper'] - values['right_bumper'])
+        # effort = dict()
+        # if self.manip_steering_mode == self.ManipSteeringMode.NORMAL:
+        #     effort['arm_rotate'] = -values['left_stick_horizontal']
+        #     effort['arm_lift'] = -values['left_stick_vertical']
+        #     effort['claw_rotate'] = values['right_stick_horizontal']
+        #     effort['claw_lift'] = -values['right_stick_vertical']
+        #     effort['arm_tilt'] = -(values['left_trigger'] - values['right_trigger']) / 2
+        #     # each bumper has range (0,1)
+        #     effort['claw_clamp'] = (values['left_bumper'] - values['right_bumper'])
 
-        elif self.manip_steering_mode == self.ManipSteeringMode.GAMER:
-            effort['arm_rotate'] = values['right_stick_horizontal']
-            effort['arm_lift'] = -values['right_stick_vertical']
-            effort['claw_rotate'] = -values['left_stick_horizontal']
-            effort['claw_lift'] = -values['left_stick_vertical']
-            effort['arm_tilt'] = -values['cross_vertical']
-            # each bumper has range (0,1)
-            effort['claw_clamp'] = (values['left_bumper'] - values['right_bumper'])
+        # elif self.manip_steering_mode == self.ManipSteeringMode.GAMER:
+        #     effort['arm_rotate'] = values['right_stick_horizontal']
+        #     effort['arm_lift'] = -values['right_stick_vertical']
+        #     effort['claw_rotate'] = -values['left_stick_horizontal']
+        #     effort['claw_lift'] = -values['left_stick_vertical']
+        #     effort['arm_tilt'] = -values['cross_vertical']
+        #     # each bumper has range (0,1)
+        #     effort['claw_clamp'] = (values['left_bumper'] - values['right_bumper'])
 
-        elif self.manip_steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
-            # velocities = dict()
-            # velocities['x'] = VALUES['cross_horizontal']
-            # velocities['y'] = VALUES['cross_vertical']
-            # velocities['z'] = VALUES['right_stick_vertical']
-            # velocities['theta'] = VALUES['left_stick_vertical']
-            # velocities['fi'] = VALUES['left_stick_horizontal']
-            # velocities['clamp'] = (VALUES['left_trigger'] - VALUES['right_trigger'])
-            # manip_message = JointState()
-            # manip_message.header.stamp = rospy.get_rostime()
-            # manip_message.name = list()
-            # manip_message.velocity = list()
-            # for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()].items():
-            #     manip_message.name.append(name)
-            #     manip_message.velocity.append(params['scale_coefficient'] * velocities(name) *
-            #                                   abs(velocities(name))**(params['shape_coefficient'] - 1.0))
-            # # publish message
+        if self.manip_steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
+            manip_message = Twist()
+            manip_message.linear.x = values['cross_horizontal']
+            manip_message.linear.y = values['cross_vertical']
+            manip_message.linear.z = values['right_stick_vertical']
+            manip_message.angular.y = values['left_stick_vertical']  # pitch
+            manip_message.angular.x = values['left_stick_horizontal']  # roll
+            # manip_message['clamp'] = (values['left_trigger'] - values['right_trigger'])
+            params = self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()]
+
+            manip_message.linear.x *= params['x']['scale_coefficient'] * abs(
+                manip_message.linear.x)**(params['x']['shape_coefficient'] - 1.0)
+            manip_message.linear.y *= params['y']['scale_coefficient'] * abs(
+                manip_message.linear.y)**(params['y']['shape_coefficient'] - 1.0)
+            manip_message.linear.z *= params['z']['scale_coefficient'] * abs(
+                manip_message.linear.z)**(params['z']['shape_coefficient'] - 1.0)
+            manip_message.angular.x *= params['roll']['scale_coefficient'] * abs(
+                manip_message.angular.x)**(params['roll']['shape_coefficient'] - 1.0)
+            manip_message.angular.y *= params['pitch']['scale_coefficient'] * abs(
+                manip_message.angular.y)**(params['pitch']['shape_coefficient'] - 1.0)
+            
+            self.manip_publisher.publish(manip_message)
             return
 
-        manip_message = JointState()
-        manip_message.header.stamp = rospy.get_rostime()
-        manip_message.name = list()
-        manip_message.effort = list()
-        for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()].items():
-            manip_message.name.append(name)
-            manip_message.effort.append(params['scale_coefficient'] * effort[name] *
-                                        abs(effort[name])**(params['shape_coefficient'] - 1.0))
-        self.manip_publisher.publish(manip_message)
+        # manip_message = JointState()
+        # manip_message.header.stamp = rospy.get_rostime()
+        # manip_message.name = list()
+        # manip_message.effort = list()
+        # for name, params in self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()].items():
+        #     manip_message.name.append(name)
+        #     manip_message.effort.append(params['scale_coefficient'] * effort[name] *
+        #                                 abs(effort[name])**(params['shape_coefficient'] - 1.0))
+        # self.manip_publisher.publish(manip_message)
 
     def change_mode(self, buttons_values: dict):
         if self.steered_object == self.SteeredObject.ROVER:
@@ -206,10 +213,11 @@ class JoystickController:
             rover_message = Twist()
             self.rover_publisher.publish(rover_message)
         elif self.steered_object == self.SteeredObject.MANIP:
-            manip_message = JointState()
-            manip_message.header.stamp = rospy.get_rostime()
-            manip_message.name = LIMBS_NAMES
-            manip_message.effort = [0] * 6
+            # manip_message = JointState()
+            # manip_message.header.stamp = rospy.get_rostime()
+            # manip_message.name = LIMBS_NAMES
+            # manip_message.effort = [0] * 6
+            manip_message = Twist()
             self.manip_publisher.publish(manip_message)
 
     class SteeredObject(Enum):
