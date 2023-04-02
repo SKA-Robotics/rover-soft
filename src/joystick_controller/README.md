@@ -175,7 +175,14 @@ In the gamer mode:
 - Arrow pad up/down - tilt arm
 - Left/right bumper - clamp claw
 
-> *Inverse kinematics coming soon...*
+In the Inverse kinematics mode:
+
+- Arrow pad up/down - move effector forward/back
+- Arrow pad left/right - move effector left/right
+- Right stick up/down - move effector up/down
+- Left stick up/down - tilt effector
+- Left stick left/right - rotate effector
+- Left/right trigger - clamp claw
 
 This mode can be changed dynamically using the buttons on the right:
 
