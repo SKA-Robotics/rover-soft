@@ -9,7 +9,7 @@ class InterpolationSettings:
         self.max_error = max_error
         self.weights = weights
 
-    def from_params(params):
+    def from_params(params: dict):
         interpolation_settings = InterpolationSettings(
             acceleration=params["acceleration"],
             max_velocity=params["max_velocity"],
@@ -92,7 +92,8 @@ class MotionInterpolator:
         self.acceleration_distance += self.velocity * timestep
 
     def _decrement_velocity(self, timestep):
-        self.velocity = self.decceleration_velocity * ((self.distance / self.decceleration_distance))**0.5
+        self.velocity = self.decceleration_velocity * \
+            ((self.distance / self.decceleration_distance))**0.5
 
     def _stop_accelerating(self):
         self.accelerate = False
