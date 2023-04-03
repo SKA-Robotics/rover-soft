@@ -140,16 +140,15 @@ class JoystickController:
                 self.stop_object()
                 self.rover_steering_mode = self.RoverSteeringMode.GAMER
                 return True
-        if self.steered_object == self.SteeredObject.MANIP:
-            return True
-            # if buttons_values['A_button']:
-            #     self.stop_object()
-            #     self.manip_steering_mode = self.ManipSteeringMode.ANOTHER_MODE
-            #     return True
-            # if buttons_values['X_button']:
-            #     self.stop_object()
-            #     self.manip_steering_mode = self.ManipSteeringMode.INVERSE_KINEMATICS
-            #     return True
+        # if self.steered_object == self.SteeredObject.MANIP:
+        #     if buttons_values['A_button']:
+        #         self.stop_object()
+        #         self.manip_steering_mode = self.ManipSteeringMode.ANOTHER_MODE
+        #         return True
+        #     if buttons_values['X_button']:
+        #         self.stop_object()
+        #         self.manip_steering_mode = self.ManipSteeringMode.INVERSE_KINEMATICS
+        #         return True
         return False
 
     def stop_object(self):
