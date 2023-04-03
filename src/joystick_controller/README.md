@@ -118,9 +118,9 @@ Steering can be switched between rover and manipulator using start/back buttons.
 
   Sets linear and angular velocity of rover.
 
-- `/cmd_manip` [sensor_msgs/JointState] or [geometry_msgs/Twist]
+- `/cmd_manip` [geometry_msgs/Twist]
 
-  Sets an effort of individual manipulator limbs or velocity in inverse kinemtics mode.
+  Sets linear velocity in each direction and angular velocity in each axis of effector.
 
 - `/cmd_grip` [std_msgs/Float64]
 
@@ -161,25 +161,7 @@ Child mode can be enabled globally (affects all rover steering modes). It adds i
 
 ### Manipulator steering
 
-In the normal mode:
-
-- Left stick up/down - lift arm
-- Left stick left/right - rotate arm
-- Right stick up/down - lift claw
-- Right stick left/right - rotate claw
-- Left/right trigger - tilt arm
-- Left/right bumper - clamp claw
-
-In the gamer mode:
-
-- Right stick up/down - lift arm
-- Right stick left/right - rotate arm
-- Left stick up/down - lift claw
-- Left stick left/right - rotate claw
-- Arrow pad up/down - tilt arm
-- Left/right bumper - clamp claw
-
-In the Inverse kinematics mode:
+In the inverse kinematics mode:
 
 - Arrow pad up/down - move effector forward/back
 - Arrow pad left/right - move effector left/right
@@ -190,9 +172,8 @@ In the Inverse kinematics mode:
 
 This mode can be changed dynamically using the buttons on the right:
 
-- Button 'A' - normal mode
-- Button 'B' - gamer mode
 - Button 'X' - inverse kinematics
+- *... another mode can be easily added together with assigning a different button*
 
 Configuration parameters of all these modes are included in `./config/steering_modes.yaml`.
 
