@@ -3,7 +3,7 @@ from enum import Enum
 from math import tan
 import rospy
 from std_msgs.msg import Float64
-from sensor_msgs.msg import Joy, JointState
+from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
 
 # used topics names
@@ -86,26 +86,16 @@ class JoystickController:
         ang_cmd = 0
 
         if self.rover_steering_mode == self.RoverSteeringMode.NORMAL:
-            lin_cmd = values['right_stick_vertical']
-            ang_cmd = values['right_stick_horizontal']
-            lin_cmd *= PARAMS['linear']['scale_coefficient'] * abs(lin_cmd)**(PARAMS['linear']['shape_coefficient'] -
-                                                                              1.0)
-            ang_cmd *= PARAMS['angular']['scale_coefficient'] * abs(ang_cmd)**(PARAMS['angular']['shape_coefficient'] -
-                                                                               1.0)
+            lin_cmd = nonlin_scale(values['right_stick_vertical'], PARAMS['linear'])
+            ang_cmd = nonlin_scale(values['right_stick_horizontal'], PARAMS['angular'])
 
         elif self.rover_steering_mode == self.RoverSteeringMode.TANK:
-            lin_cmd = (values['left_stick_vertical'] + values['right_stick_vertical']) / 2
-            ang_cmd = (values['right_stick_vertical'] - values['left_stick_vertical']) / 2
-            lin_cmd *= PARAMS['scale_coefficient'] * abs(lin_cmd)**(PARAMS['shape_coefficient'] - 1.0)
-            ang_cmd *= PARAMS['scale_coefficient'] * abs(ang_cmd)**(PARAMS['shape_coefficient'] - 1.0)
+            lin_cmd = nonlin_scale((values['left_stick_vertical'] + values['right_stick_vertical']) / 2, PARAMS)
+            ang_cmd = nonlin_scale((values['right_stick_vertical'] - values['left_stick_vertical']) / 2, PARAMS)
 
         elif self.rover_steering_mode == self.RoverSteeringMode.GAMER:
-            lin_cmd = (values['right_trigger'] - values['left_trigger']) / 2
-            turning_angle = values['right_stick_horizontal']  # value of angle is relative (0,1), NOT in rad
-            lin_cmd *= PARAMS['linear']['scale_coefficient'] * abs(lin_cmd)**(PARAMS['linear']['shape_coefficient'] -
-                                                                              1.0)
-            turning_angle *= PARAMS['angular']['scale_coefficient'] * abs(turning_angle)**(
-                PARAMS['angular']['shape_coefficient'] - 1.0)
+            lin_cmd = nonlin_scale((values['right_trigger'] - values['left_trigger']) / 2, PARAMS['linear'])
+            turning_angle = nonlin_scale(values['right_stick_horizontal'], PARAMS['angular'])
             ang_cmd = lin_cmd * tan(turning_angle)
 
         if (self.child_mode):
@@ -121,30 +111,18 @@ class JoystickController:
         if self.manip_steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
             manip_message = Twist()
             PARAMS = self.MODES_DATA['manip'][self.manip_steering_mode.name.lower()]
-            manip_message.linear.x = values['cross_horizontal']
-            manip_message.linear.y = values['cross_vertical']
-            manip_message.linear.z = values['right_stick_vertical']
-            manip_message.angular.y = values['left_stick_vertical']  # pitch
-            manip_message.angular.x = values['left_stick_horizontal']  # roll
-            gripper_message = Float64(values['left_trigger'] - values['right_trigger'])
-
-            manip_message.linear.x *= PARAMS['x']['scale_coefficient'] * abs(
-                manip_message.linear.x)**(PARAMS['x']['shape_coefficient'] - 1.0)
-            manip_message.linear.y *= PARAMS['y']['scale_coefficient'] * abs(
-                manip_message.linear.y)**(PARAMS['y']['shape_coefficient'] - 1.0)
-            manip_message.linear.z *= PARAMS['z']['scale_coefficient'] * abs(
-                manip_message.linear.z)**(PARAMS['z']['shape_coefficient'] - 1.0)
-            manip_message.angular.x *= PARAMS['roll']['scale_coefficient'] * abs(
-                manip_message.angular.x)**(PARAMS['roll']['shape_coefficient'] - 1.0)
-            manip_message.angular.y *= PARAMS['pitch']['scale_coefficient'] * abs(
-                manip_message.angular.y)**(PARAMS['pitch']['shape_coefficient'] - 1.0)
-            gripper_message.data *= PARAMS['gripper']['scale_coefficient'] * abs(
-                gripper_message.data)**(PARAMS['gripper']['shape_coefficient'] - 1.0)
+            manip_message.linear.x = nonlin_scale(values['cross_horizontal'], PARAMS['x'])
+            manip_message.linear.y = nonlin_scale(values['cross_vertical'], PARAMS['y'])
+            manip_message.linear.z = nonlin_scale(values['right_stick_vertical'], PARAMS['z'])
+            manip_message.angular.x = nonlin_scale(values['left_stick_horizontal'], PARAMS['roll'])
+            manip_message.angular.y = nonlin_scale(values['left_stick_vertical'], PARAMS['pitch'])
+            clamp = nonlin_scale(values['left_trigger'] - values['right_trigger'], PARAMS['gripper'])
+            gripper_message = Float64(clamp)
 
             self.manip_publisher.publish(manip_message)
             self.gripper_publisher.publish(gripper_message)
             return
-        
+
         # elif self.manip_steering_mode == self.ManipSteeringMode.ANOTHER_MODE:
         #     pass
 
@@ -216,6 +194,10 @@ class JoystickController:
             self.prev_dy = dy
             self.prev_y = self.prev_y + dy
             return self.prev_y
+
+
+def nonlin_scale(value: float, params: dict) -> float:
+    return value * params['scale_coefficient'] * abs(value)**(params['shape_coefficient'] - 1.0)
 
 
 if __name__ == '__main__':
