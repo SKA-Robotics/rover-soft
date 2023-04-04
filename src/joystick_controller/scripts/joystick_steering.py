@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from enum import Enum
 from math import tan
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 import rospy
 from std_msgs.msg import Float64
 from sensor_msgs.msg import Joy
@@ -44,8 +44,10 @@ class JoystickController:
 
     def _joy_listener_callback(self, data: Joy) -> None:
         # convert data to much easier use
-        VALUES = dict((name, data.buttons[id]) for name, id in self.BUTTONS_ID.items())
-        VALUES.update(dict((name, data.axes[id]) for name, id in self.AXES_ID.items()))
+        VALUES = dict((name, data.buttons[id])
+                      for name, id in self.BUTTONS_ID.items())
+        VALUES.update(dict((name, data.axes[id])
+                           for name, id in self.AXES_ID.items()))
 
         # change currently steered object and stop the previous one
         if VALUES['start_button'] and not VALUES['back_button']:
@@ -64,7 +66,7 @@ class JoystickController:
         # all values are scaled in range (-1,1) corresponding to a percentage of maximal speed in both sides
         self.active_object.steer_object(VALUES)
 
-    class SteeringMessageSender:
+    class SteeringMessageSender(ABC):
 
         @abstractmethod
         def steer_object(self, values: dict) -> None:
@@ -88,13 +90,16 @@ class JoystickController:
         def __init__(self, modes_data: dict) -> None:
             self.MODES_DATA = modes_data
             self.steering_mode = self.RoverSteeringMode.NORMAL
-            self.rover_publisher = rospy.Publisher(ROVER_TOPIC_NAME, Twist, queue_size=10)
+            self.rover_publisher = rospy.Publisher(
+                ROVER_TOPIC_NAME, Twist, queue_size=10)
 
             # used in child mode
             self.CHILD_MODE = rospy.get_param("~child_mode", False)
             if self.CHILD_MODE:
-                i1 = min(1.0, max(rospy.get_param("~child_mode_inertia_i1", 0.4444), 0.0))
-                i2 = min(1.0, max(rospy.get_param("~child_mode_inertia_i2", 0.0066), 0.0))
+                i1 = min(1.0, max(rospy.get_param(
+                    "~child_mode_inertia_i1", 0.4444), 0.0))
+                i2 = min(1.0, max(rospy.get_param(
+                    "~child_mode_inertia_i2", 0.0066), 0.0))
                 self.lin_inertia = self.InertiaModel(i1, i2)
                 self.ang_inertia = self.InertiaModel(i1, i2)
                 rospy.loginfo("Child mode enabled")
@@ -106,16 +111,22 @@ class JoystickController:
             ang_cmd = 0
 
             if self.steering_mode == self.RoverSteeringMode.NORMAL:
-                lin_cmd = nonlin_scale(values['right_stick_vertical'], PARAMS['linear'])
-                ang_cmd = nonlin_scale(values['right_stick_horizontal'], PARAMS['angular'])
+                lin_cmd = nonlin_scale(
+                    values['right_stick_vertical'], PARAMS['linear'])
+                ang_cmd = nonlin_scale(
+                    values['right_stick_horizontal'], PARAMS['angular'])
 
             elif self.steering_mode == self.RoverSteeringMode.TANK:
-                lin_cmd = nonlin_scale((values['left_stick_vertical'] + values['right_stick_vertical']) / 2, PARAMS)
-                ang_cmd = nonlin_scale((values['right_stick_vertical'] - values['left_stick_vertical']) / 2, PARAMS)
+                lin_cmd = nonlin_scale(
+                    (values['left_stick_vertical'] + values['right_stick_vertical']) / 2, PARAMS)
+                ang_cmd = nonlin_scale(
+                    (values['right_stick_vertical'] - values['left_stick_vertical']) / 2, PARAMS)
 
             elif self.steering_mode == self.RoverSteeringMode.GAMER:
-                lin_cmd = nonlin_scale((values['right_trigger'] - values['left_trigger']) / 2, PARAMS['linear'])
-                turning_angle = nonlin_scale(values['right_stick_horizontal'], PARAMS['angular'])
+                lin_cmd = nonlin_scale(
+                    (values['right_trigger'] - values['left_trigger']) / 2, PARAMS['linear'])
+                turning_angle = nonlin_scale(
+                    values['right_stick_horizontal'], PARAMS['angular'])
                 ang_cmd = lin_cmd * tan(turning_angle)
 
             if (self.CHILD_MODE):
@@ -175,20 +186,28 @@ class JoystickController:
         def __init__(self, modes_data: dict) -> None:
             self.MODES_DATA = modes_data
             self.steering_mode = self.ManipSteeringMode.INVERSE_KINEMATICS
-            self.manip_publisher = rospy.Publisher(MANIP_TOPIC_NAME, Twist, queue_size=10)
-            self.gripper_publisher = rospy.Publisher(GRIPPER_TOPIC_NAME, Float64, queue_size=10)
+            self.manip_publisher = rospy.Publisher(
+                MANIP_TOPIC_NAME, Twist, queue_size=10)
+            self.gripper_publisher = rospy.Publisher(
+                GRIPPER_TOPIC_NAME, Float64, queue_size=10)
 
         def steer_object(self, values: dict) -> None:
             PARAMS = self.MODES_DATA[self.steering_mode.name.lower()]
 
             if self.steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
                 manip_message = Twist()
-                manip_message.linear.x = nonlin_scale(values['cross_horizontal'], PARAMS['x'])
-                manip_message.linear.y = nonlin_scale(values['cross_vertical'], PARAMS['y'])
-                manip_message.linear.z = nonlin_scale(values['right_stick_vertical'], PARAMS['z'])
-                manip_message.angular.x = nonlin_scale(values['left_stick_horizontal'], PARAMS['roll'])
-                manip_message.angular.y = nonlin_scale(values['left_stick_vertical'], PARAMS['pitch'])
-                clamp = nonlin_scale(values['left_trigger'] - values['right_trigger'], PARAMS['gripper'])
+                manip_message.linear.x = nonlin_scale(
+                    values['right_stick_vertical'], PARAMS['x'])
+                manip_message.linear.y = nonlin_scale(
+                    values['right_stick_horizontal'], PARAMS['y'])
+                manip_message.linear.z = nonlin_scale(
+                    values['left_stick_vertical'], PARAMS['z'])
+                manip_message.angular.x = nonlin_scale(
+                    values['cross_horizontal'], PARAMS['roll'])
+                manip_message.angular.y = nonlin_scale(
+                    values['left_stick_horizontal'], PARAMS['pitch'])
+                clamp = nonlin_scale(
+                    values['left_trigger'] - values['right_trigger'], PARAMS['gripper'])
                 gripper_message = Float64(clamp)
 
                 self.manip_publisher.publish(manip_message)

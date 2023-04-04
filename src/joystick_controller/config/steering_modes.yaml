@@ -20,21 +20,21 @@ steering_modes:
   manip:
     inverse_kinematics:
       x:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
+        scale_coefficient: 0.08
+        shape_coefficient: 3.0
       y:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
+        scale_coefficient: 0.08
+        shape_coefficient: 3.0
       z:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
+        scale_coefficient: 0.08
+        shape_coefficient: 3.0
       roll:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
+        scale_coefficient: 0.6
+        shape_coefficient: 2.0
       pitch:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
+        scale_coefficient: 0.2
+        shape_coefficient: 2.0
       gripper:
-        scale_coefficient: 1.0
+        scale_coefficient: 0.1
         shape_coefficient: 1.0
     # another_mode:
