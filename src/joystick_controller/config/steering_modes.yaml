@@ -2,7 +2,7 @@ steering_modes:
   rover:
     normal:
       linear:
-        scale_coefficient: 0.08 # max velocity/effort in range (0,1)
+        scale_coefficient: 0.08 # max velocity in [m/s] or [rad/s]
         shape_coefficient: 3.0 # 1.0 - linear characteristics, 2.0 - square-antisymmetric, etc.
       angular:
         scale_coefficient: 0.11
@@ -18,60 +18,23 @@ steering_modes:
         scale_coefficient: 0.8 # in rad, used only in 'gamer' mode
         shape_coefficient: 1.0
   manip:
-    normal:
-      arm_rotate:
-        scale_coefficient: 1.0
+    inverse_kinematics:
+      x:
+        scale_coefficient: 0.08
+        shape_coefficient: 3.0
+      y:
+        scale_coefficient: 0.08
+        shape_coefficient: 3.0
+      z:
+        scale_coefficient: 0.08
+        shape_coefficient: 3.0
+      roll:
+        scale_coefficient: 0.6
+        shape_coefficient: 2.0
+      pitch:
+        scale_coefficient: 0.2
+        shape_coefficient: 2.0
+      gripper:
+        scale_coefficient: 0.1
         shape_coefficient: 1.0
-      arm_lift:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      claw_rotate:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      claw_lift:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      arm_tilt:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      claw_clamp:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-    gamer:
-      arm_rotate:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      arm_lift:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      claw_rotate:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      claw_lift:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      arm_tilt:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-      claw_clamp:
-        scale_coefficient: 1.0
-        shape_coefficient: 1.0
-    # inverse_kinematics:
-    #   x:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   y:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   z:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   theta:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   fi:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
-    #   claw_clamp:
-    #     scale_coefficient: 1.0
-    #     shape_coefficient: 1.0
+    # another_mode:
