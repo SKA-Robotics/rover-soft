@@ -87,6 +87,8 @@ const draw = () => {
 
     drawMap()
     drawPosition()
+
+    drawGrid()
 }
 
 const drawMap = () => {
@@ -117,6 +119,41 @@ const drawPosition = () => {
         Math.PI * 2
     )
     ctx.fill()
+    ctx.stroke()
+}
+
+const drawGrid = () => {
+    let x = (imageUnit.value.width * 3) / 2
+    let h = (imageUnit.value.height * 3) / 2
+
+    let ctx = map.value.getContext('2d')
+    ctx.lineWidth = 0.02
+
+    ctx.beginPath()
+    for (var i = -x; i <= x; i++) {
+        ctx.moveTo(
+            i + imageUnit.value.height / 2,
+            -h + imageUnit.value.width / 2
+        )
+        ctx.lineTo(
+            i + imageUnit.value.height / 2,
+            h + imageUnit.value.width / 2
+        )
+    }
+
+    for (var j = -h; j <= h; j++) {
+        ctx.moveTo(
+            -x + imageUnit.value.width / 2,
+            j + imageUnit.value.height / 2
+        )
+        ctx.lineTo(
+            x + imageUnit.value.width / 2,
+            j + imageUnit.value.height / 2
+        )
+    }
+
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)'
+
     ctx.stroke()
 }
 
