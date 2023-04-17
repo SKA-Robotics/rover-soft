@@ -1,68 +1,137 @@
 <template>
     <div class="cameras">
-        <div>
-        </div>
-        <div id="mjpeg" class="viewport"></div>
+        <TopicList
+            :topics="sources"
+            :layout="layout"
+            @changeLayout="layout = $event"
+        />
+        <DragManager
+            :host="wsUrl"
+            :peers="peers"
+            :layout="layout"
+            @changeLayout="layout = $event"
+        />
     </div>
 </template>
 <script>
-    export default {
-        name: "Cameras",
-        
-        props: {
-            'ws_address': String,
-            'ros': Object,
-        },
+import DragManager from '@/components/cameras/DragManager.vue'
+import TopicList from '@/components/cameras/TopicList.vue'
+export default {
+    components: { DragManager, TopicList },
+    name: 'Cameras',
 
-        data () {
-          return {
-          port: 8082,
-          Ros: this.ros,
-          };
-        },
+    props: {
+        ws_address: String,
+    },
 
-        computed: {
-          video_address() {
-          return this.ws_address.slice(5, -5);
-          },
-        },
+    data() {
+        return {
+            layout: {
+                streams: [],
+                variant: 0,
+            },
+            wsConn: null,
+            peers: {},
+            wsPort: '8443',
+            wsServer: window.location.hostname,
+        }
+    },
 
-        mounted() {
-          // If ROS got disconnected, return to home
-          if (this.ros==null) {
-            this.$router.push({
-              name: "Home",
-            });
-          }
+    methods: {
+        connect() {
+            console.log('Connecting listener')
+            this.wsConn = new WebSocket(this.wsUrl)
+            this.wsConn.addEventListener('open', (event) => {
+                this.wsConn.send(
+                    JSON.stringify({
+                        type: 'setPeerStatus',
+                        roles: ['listener'],
+                    })
+                )
+            })
+            this.wsConn.addEventListener('error', this.serverError)
+            this.wsConn.addEventListener('message', this.serverMessage)
+            this.wsConn.addEventListener('close', this.serverClose)
+        },
+        serverMessage(event) {
+            console.log('Received ' + event.data)
+            const msg = JSON.parse(event.data)
 
-          // Read vidoe server port
-          // Create a Param object for the port
-          var portParam = new window.ROSLIB.Param({
-            ros : this.Ros,
-            name :  '/web_video_server/port'
-          });
+            if (msg.type == 'welcome') {
+                console.info(`Got welcomed with ID ${msg.peer_id}`)
+                this.wsConn.send(
+                    JSON.stringify({
+                        type: 'list',
+                    })
+                )
+            } else if (msg.type == 'list') {
+                this.peers = {}
+                msg.producers.forEach(({ id, meta }) => {
+                    this.$set(this.peers, meta['display-name'], id)
+                })
+            } else if (msg.type == 'peerStatusChanged') {
+                if (msg.roles.includes('producer')) {
+                    this.$set(this.peers, msg.meta['display-name'], msg.peerId)
+                } else if (msg.roles.length === 0) {
+                    this.$delete(this.peers, msg.meta['display-name'])
+                }
+            }
+            console.log(msg)
+        },
+        clearConnection() {
+            this.wsConn.removeEventListener('error', this.serverError)
+            this.wsConn.removeEventListener('message', this.serverMessage)
+            this.wsConn.removeEventListener('close', this.serverClose)
+            this.wsConn = null
+        },
+        serverClose(event) {
+            this.clearConnection()
+            this.peers = {}
+            console.log('Close')
+            window.setTimeout(this.connect, 1000)
+        },
+        serverError(event) {
+            this.clearConnection()
+            this.peers = {}
+            console.log('Error', event)
+            window.setTimeout(this.connect, 1000)
+        },
+    },
 
-          // Get the number of the port
-          portParam.get(this.setPort);
+    computed: {
+        webSocketHostname() {
+            return this.ws_address
+                ? new URL(this.ws_address).hostname
+                : window.location.hostname
         },
-        methods: {
-          setPort(value) {
-            this.port = value;
-            new window.MJPEGCANVAS.MultiStreamViewer({
-            divID : 'mjpeg',
-            host : this.video_address,
-            port : this.port,
-            width : 640,
-            height : 480,
-            topics : [ '/sirius/camera/image_raw', '/sirius/camera/image_raw',
-              '/sirius/camera/image_raw' ],
-            labels : [ 'View1', 'View2', 'View3' ]
-            });
-          },
+        sources() {
+            return Object.keys(this.peers)
         },
-        beforeDestroy() {
-          // Reloading page when going back
-          window.location.reload();
+        wsUrl() {
+            return `ws://${this.wsServer}:${this.wsPort}`
         },
-    };
+    },
+
+    mounted() {
+        this.connect()
+    },
+    beforeDestroy() {
+        this.clearConnection()
+        // Reloading page when going back
+        window.location.reload()
+    },
+}
 </script>
+<style scoped>
+.cameras {
+    height: 100vh;
+    padding: 10px;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
+    overflow: hidden;
+}
+</style>

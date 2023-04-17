@@ -1,0 +1,16 @@
+<launch>
+	<arg name="message_rate" default="20"/> <!-- in Hz -->
+	<arg name="ID_0" default="0"/>
+	<arg name="ID_1" default="1"/>
+		
+	<include file="$(find joystick_controller)/launch/single_joystick_steering.launch">
+		<arg name="message_rate" value="$(arg message_rate)"/>
+		<arg name="ID" value="$(arg ID_0)"/>
+		<arg name="joystick_type" value="XBOX_XS"/>
+	</include>
+	<include file="$(find joystick_controller)/launch/single_joystick_steering.launch">
+		<arg name="message_rate" value="$(arg message_rate)"/>
+		<arg name="ID" value="$(arg ID_1)"/>
+		<arg name="joystick_type" value="XBOX_XS"/>
+	</include>
+</launch>

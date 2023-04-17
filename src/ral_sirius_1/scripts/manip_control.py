@@ -1,21 +1,18 @@
 #!/bin/python3
 import rospy
 import serial
-from sensor_msgs.msg import JointState
-
-UART_PREFIX = 128
-UART_SUFFIX = 192
+from sirius_msgs.msg import JointState
+from sensor_msgs.msg import JointState as SensorJointState
 
 CMD_MANIP_TOPIC = '/cmd_manip'
-DEFAULT_SPEED = 60
 
 LIMB_IDS = {
-    'arm_rotate': 0,
-    'claw_clamp': 1,
-    'claw_rotate': 2,
-    'claw_lift': 3,
-    'arm_tilt': 4,
-    'arm_lift': 5,
+    'arm_rotate': "/roboclaw_driver/130/motor1/set_joint_state",
+    'claw_clamp': "/roboclaw_driver/130/motor2/set_joint_state",
+    'claw_rotate': "/roboclaw_driver/131/motor1/set_joint_state",
+    'claw_lift': "/roboclaw_driver/131/motor2/set_joint_state",
+    'arm_tilt': "/roboclaw_driver/132/motor1/set_joint_state",
+    'arm_lift': "/roboclaw_driver/132/motor2/set_joint_state",
 }
 
 
@@ -24,40 +21,43 @@ class ManipulatorController:
     def __init__(self):
         rospy.init_node('manip_control', log_level=rospy.DEBUG)
 
-        self.speeds = [DEFAULT_SPEED] * len(LIMB_IDS)
-        for (limb_name, limb_id) in LIMB_IDS.items():
-            self.speeds[limb_id] = rospy.get_param('~speeds/' + limb_name, default=DEFAULT_SPEED)
+        rospy.Subscriber(CMD_MANIP_TOPIC, SensorJointState, self.cmd_manip_callback, queue_size=1, buff_size=2**24)
 
-        self.port_name = rospy.get_param('~device', default='/dev/ttyUSB0')
-        self.baudrate = rospy.get_param('~baudrate', default=9600)
-        try:
-            self.serial_port = serial.Serial(self.port_name, self.baudrate)
-        except serial.SerialException as e:
-            rospy.logerr(f'Failed to open serial port: {self.port_name}')
-            raise
+        self.publishers = {
+            'arm_rotate': rospy.Publisher(LIMB_IDS['arm_rotate'], JointState, queue_size=10),
+            'claw_clamp': rospy.Publisher(LIMB_IDS['claw_clamp'], JointState, queue_size=10),
+            'claw_rotate': rospy.Publisher(LIMB_IDS['claw_rotate'], JointState, queue_size=10),
+            'claw_lift': rospy.Publisher(LIMB_IDS['claw_lift'], JointState, queue_size=10),
+            'arm_tilt': rospy.Publisher(LIMB_IDS['arm_tilt'], JointState, queue_size=10),
+            'arm_lift': rospy.Publisher(LIMB_IDS['arm_lift'], JointState, queue_size=10),
+        }
 
-        rospy.Subscriber(CMD_MANIP_TOPIC, JointState, self.cmd_manip_callback, queue_size=1, buff_size=2**24)
-
-    def __del__(self):
-        self.serial_port.close()
+        self.latest_msg = None
+        self.rate = 10
 
     def run(self):
-        rospy.spin()
+        rate = rospy.Rate(self.rate)
+        while not rospy.is_shutdown():
+            if self.latest_msg is not None:
+                self.publish_latest_msg()
+            rate.sleep()
 
     def cmd_manip_callback(self, msg: JointState):
-        for i, joint_name in enumerate(msg.name):
+        self.latest_msg = msg
+
+    def publish_latest_msg(self):
+        for i, joint_name in enumerate(self.latest_msg.name):
             try:
-                limb_id = LIMB_IDS[joint_name]
-                effort = msg.effort[i] * self.speeds[limb_id]
-                self.send_uart(limb_id, int(effort))
+                #limb_id = LIMB_IDS[joint_name]
+                message = JointState(velocity=[],
+                                     position=[],
+                                     acceleration=[],
+                                     effort=[],
+                                     duty=[self.latest_msg.effort[i] * 100])
+                message.header.stamp = rospy.get_rostime()
+                self.publishers[joint_name].publish(message)
             except KeyError:
                 rospy.logerr(f'{CMD_MANIP_TOPIC} received invalid limb \'{joint_name}\'')
-
-    def send_uart(self, limb_id: int, value: int):
-        data = ' '.join(str(x) for x in [UART_PREFIX, limb_id, value, UART_SUFFIX]) + '\n'
-        rospy.logdebug(f'Sending to {self.port_name}: \'{data.strip()}\'')
-        self.serial_port.write(bytes(data, 'utf8'))
-        self.serial_port.flush()
 
 
 if __name__ == '__main__':

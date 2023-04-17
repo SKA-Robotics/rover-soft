@@ -11,20 +11,22 @@
              /sirius/controller/wheels_right_state
              /sirius/controller/wheels
     "/>
-    
-    <node name="roboclaw_wheels_left" pkg="roboclaw_driver" type="driver.py" output="screen">
-        <remap from="/roboclaw_wheels_left/motor1/joint_state" to="/wheels_left/roboclaw/motor1/joint_state"/>
-        <remap from="/roboclaw_wheels_left/motor1/set_joint_state" to="/wheels_left/roboclaw/motor1/set_joint_state"/>
-        <remap from="/roboclaw_wheels_left/motor2/joint_state" to="/wheels_left/roboclaw/motor2/joint_state"/>
-        <remap from="/roboclaw_wheels_left/motor2/set_joint_state" to="/wheels_left/roboclaw/motor2/set_joint_state"/>
-        <remap from="/roboclaw_wheels_left/loop_rate" to="/sirius/controller/wheels/publish_rate"/>
+   
+    <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
+        <remap from="/roboclaw_driver/128/motor1/joint_state" to="/wheels_left/roboclaw/motor1/joint_state"/>
+        <remap from="/roboclaw_driver/128/motor1/set_joint_state" to="/wheels_left/roboclaw/motor1/set_joint_state"/>
+        <remap from="/roboclaw_driver/128/motor2/joint_state" to="/wheels_left/roboclaw/motor2/joint_state"/>
+        <remap from="/roboclaw_driver/128/motor2/set_joint_state" to="/wheels_left/roboclaw/motor2/set_joint_state"/>
+        <remap from="/roboclaw_driver/128/loop_rate" to="/sirius/controller/wheels/publish_rate"/>
+        <remap from="/roboclaw_driver/129/motor1/joint_state" to="/wheels_right/roboclaw/motor1/joint_state"/>
+        <remap from="/roboclaw_driver/129/motor1/set_joint_state" to="/wheels_right/roboclaw/motor1/set_joint_state"/>
+        <remap from="/roboclaw_driver/129/motor2/joint_state" to="/wheels_right/roboclaw/motor2/joint_state"/>
+        <remap from="/roboclaw_driver/129/motor2/set_joint_state" to="/wheels_right/roboclaw/motor2/set_joint_state"/>
+        <remap from="/roboclaw_driver/129/loop_rate" to="/sirius/controller/wheels/publish_rate"/>
     </node>
-    
-    <node name="roboclaw_wheels_right" pkg="roboclaw_driver" type="driver.py" output="screen">
-        <remap from="/roboclaw_wheels_right/motor1/joint_state" to="/wheels_right/roboclaw/motor1/joint_state"/>
-        <remap from="/roboclaw_wheels_right/motor1/set_joint_state" to="/wheels_right/roboclaw/motor1/set_joint_state"/>
-        <remap from="/roboclaw_wheels_right/motor2/joint_state" to="/wheels_right/roboclaw/motor2/joint_state"/>
-        <remap from="/roboclaw_wheels_right/motor2/set_joint_state" to="/wheels_right/roboclaw/motor2/set_joint_state"/>
-        <remap from="/roboclaw_wheels_right/loop_rate" to="/sirius/controller/wheels/publish_rate"/>
-    </node>
+
+    <node name="manip_control" pkg="ral_sirius_1" type="manip_control.py" output="screen"/>
+    <node pkg="ral_sirius_1" type="manip_arduino_node.py" name="manip_arduino_node" output="screen"/>
+    <include file="$(find joystick_controller)/launch/single_joy_steering.launch"/>
+    <include file="$(find web_interface)/launch/servers.launch"/>
 </launch>

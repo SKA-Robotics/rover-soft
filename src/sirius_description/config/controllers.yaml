@@ -13,13 +13,13 @@ sirius:
     controller:
       wheels_left_state:
         type: joint_state_controller/JointStateController
-        publish_rate: 20
+        publish_rate: 5
         joints:
           - left_front_wheel_joint
           - left_back_wheel_joint
       wheels_right_state:
         type: joint_state_controller/JointStateController
-        publish_rate: 20
+        publish_rate: 5
         joints:
           - right_front_wheel_joint
           - right_back_wheel_joint
@@ -31,21 +31,50 @@ sirius:
         right_wheel : 
           - 'right_front_wheel_joint'
           - 'right_back_wheel_joint'
-        publish_rate: 20               # default: 50
+        publish_rate: 5               # default: 50
         pose_covariance_diagonal : [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
         twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
-        wheel_separation : 0.6
+        wheel_separation : 0.69
         wheel_radius : 0.1
+        cmd_vel_timeout: 1.0
         linear:
           x:
             has_velocity_limits: true
-            max_velocity: 0.5
+            max_velocity: 0.4
             has_acceleration_limits: true
-            max_acceleration: 1.5
+            max_acceleration: 1.25
         angular:
           z:
             has_velocity_limits: true
-            max_velocity: 1.047
+            max_velocity: 0.30
             has_acceleration_limits: true
             max_acceleration: 3.14
+
+manipulator:
+    # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 20 # default: 50  
+
+  # Position Controllers ---------------------------------------
+  joint1_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: base_cyl
+    pid: {p: 20, i: 1.0, d: 0.5, antiwindup: True, i_clamp: 100.0}
+  joint2_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: cyl_arm1
+    pid: {p: 29.0, i: 7.5, d: 1.5, antiwindup: True, i_clamp: 100.0}
+  joint3_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: arm1_arm2
+    pid: {p: 21.0, i: 6.0, d: 0.9, antiwindup: True, i_clamp: 100.0}
+  joint4_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: arm2_arm3
+    pid: {p: 2.0, i: 1.5, d: 0.05, antiwindup: True, i_clamp: 100.0}
+  joint5_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: arm3_tool
+    pid: {p: 0.01, i: 0.001, d: 0.01, antiwindup: True, i_clamp: 100.0}
 
