@@ -101,7 +101,7 @@
           <distortionT2>0</distortionT2>
           <CxPrime>640</CxPrime>
           <Cx>640</Cx>
-          <Cy>360/Cy>
+          <Cy>360</Cy>
           <hackBaseline>0.0</hackBaseline>
         </plugin>
       </sensor>
@@ -141,7 +141,7 @@
           <baseline>0.12</baseline>
           <CxPrime>640</CxPrime>
           <Cx>640</Cx>
-          <Cy>360/Cy>
+          <Cy>360</Cy>
           <hackBaseline>0.0</hackBaseline>
         </plugin>
       </sensor>
@@ -190,7 +190,7 @@
           <distortionT2>0</distortionT2>
           <CxPrime>640</CxPrime>
           <Cx>640</Cx>
-          <Cy>360/Cy>
+          <Cy>360</Cy>
           <hackBaseline>0.0</hackBaseline>
         </plugin>
       </sensor>
@@ -224,7 +224,7 @@
           <frameName>${prefix}_right_camera_optical_frame</frameName>
           <CxPrime>640</CxPrime>
           <Cx>640</Cx>
-          <Cy>360/Cy>
+          <Cy>360</Cy>
           <hackBaseline>0</hackBaseline>
         </plugin>
       </sensor>
