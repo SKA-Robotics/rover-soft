@@ -72,7 +72,7 @@
           <image>
             <width>1280</width>
             <height>800</height>
-            <format>R8G8B8</format>
+            <format>L8</format>
           </image>
           <clip>
             <near>0.02</near>
@@ -95,7 +95,7 @@
         </camera>
         <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
           <cameraName>/${prefix}_camera/left_raw</cameraName>
-          <imageTopicName>image_raw_color</imageTopicName>
+          <imageTopicName>image_raw_gray</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${prefix}_left_camera_optical_frame</frameName>
           <distortionK1>-0.043693598</distortionK1>
@@ -120,7 +120,7 @@
           <image>
             <width>1280</width>
             <height>800</height>
-            <format>R8G8B8</format>
+            <format>L8</format>
           </image>
           <clip>
             <near>0.02</near>
@@ -134,8 +134,8 @@
         </camera>
         <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
           <cameraName>/${prefix}_camera</cameraName>
-          <imageTopicName>left_rect/image_raw_color</imageTopicName>
-          <cameraInfoTopicName>left_rect/camera_info</cameraInfoTopicName>
+          <imageTopicName>left/image_rect_gray</imageTopicName>
+          <cameraInfoTopicName>left/camera_info</cameraInfoTopicName>
           <depthImageTopicName>depth/depth_registered</depthImageTopicName>
           <depthImageInfoTopicName>depth/camera_info</depthImageInfoTopicName>
           <pointCloudTopicName>point_cloud/cloud_registered</pointCloudTopicName>
@@ -163,7 +163,7 @@
           <image>
             <width>1280</width>
             <height>800</height>
-            <format>R8G8B8</format>
+            <format>L8</format>
           </image>
           <clip>
             <near>0.02</near>
@@ -185,7 +185,7 @@
         </camera>
         <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
           <cameraName>/${prefix}_camera/right_raw</cameraName>
-          <imageTopicName>image_raw_color</imageTopicName>
+          <imageTopicName>image_raw_gray</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${prefix}_right_camera_optical_frame</frameName>
           <distortionK1>-0.040993299</distortionK1>
@@ -210,7 +210,7 @@
           <image>
             <width>1280</width>
             <height>800</height>
-            <format>R8G8B8</format>
+            <format>L8</format>
           </image>
           <clip>
             <near>0.02</near>
@@ -224,7 +224,7 @@
         </camera>
         <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
           <cameraName>/${prefix}_camera/right</cameraName>
-          <imageTopicName>image_rect_color</imageTopicName>
+          <imageTopicName>image_rect_gray</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${prefix}_right_camera_optical_frame</frameName>
           <CxPrime>658.8206787109375</CxPrime>
