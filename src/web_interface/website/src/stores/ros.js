@@ -3,7 +3,8 @@ import { computed, ref, watchEffect } from 'vue'
 import { Ros } from 'roslib'
 
 export const useRosStore = defineStore('ros', () => {
-    const address = ref('sirius.local')
+    // set 'sirius.local' for release or your Linux/WSL adress for develop
+    const address = ref('192.168.72.112')
     const port = ref(8081)
     const url = computed(() =>
         new URL(`ws://${address.value}:${port.value}`).toString()
@@ -63,6 +64,21 @@ export const useRosStore = defineStore('ros', () => {
         connect()
     })
 
+    const topicsList = ref([])
+    const topicsSearcher = ref(null)
+
+    function searchTopics() {
+        ws.value.getTopics((result) => {
+            topicsList.value = result.topics
+        })
+        if (!topicsSearcher.value)
+            topicsSearcher.value = setInterval(() => {
+                ws.value.getTopics((result) => {
+                    topicsList.value = result.topics
+                })
+            }, 5000)
+    }
+
     return {
         ws,
         url,
@@ -70,5 +86,8 @@ export const useRosStore = defineStore('ros', () => {
 
         setPort,
         setAddress,
+
+        topicsList,
+        searchTopics,
     }
 })
