@@ -1,0 +1,198 @@
+:root {
+    --control-primary: #001c3b;
+    --control-primary-medium: #102f53;
+    --control-primary-light: #84a5cc;
+    --control-secondary-dark: #33283b;
+    --control-secondary: #6f617a;
+    --control-secondary-light: #c3b4cf;
+    --control-secondary-medium: #8e7e9b;
+}
+
+.control {
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: var(--control-primary);
+}
+
+div.control {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin: 10px 5px;
+    width: calc(100% - 5px);
+    height: calc(100% - 10px);
+}
+
+div.control button {
+    background-color: var(--control-secondary);
+    border: 2px solid var(--control-secondary);
+    border-radius: 6px;
+    color: white;
+    padding: 6px 12px;
+    margin: 4px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    transition-duration: 0.3s;
+}
+
+div.control button:hover {
+    background-color: var(--control-secondary-medium);
+    color: white;
+}
+
+div.control .slider-container {
+    /* width: 100%;
+    padding-top: 40px; */
+    height: 40px;
+    width: 80%;
+    display: inline-flex;
+    padding: 5px;
+}
+
+div.control .slider-container .col1 {
+    display: flex;
+    width: auto;
+    text-align: right;
+    vertical-align: middle;
+    flex-grow: 1;
+}
+
+div.control .slider-container .col2 {
+    display: flex;
+    min-width: 8.5em;
+    text-align: left;
+    vertical-align: middle;
+}
+
+div.control .slider-container .col3 {
+    display: flex;
+    min-width: 3em;
+    justify-content: right;
+    vertical-align: middle;
+}
+
+div.control label.slider-label {
+    color: var(--control-primary);
+    font-size: 17px;
+}
+
+div.control .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    /* width: 50%; */
+    height: 8px;
+    border-radius: 16px;
+    background: var(--control-secondary);
+    outline: none;
+    margin-right: 22px;
+    width: 90%;
+}
+
+div.control .slider:focus {
+    background: var(--control-secondary-light);
+    height: 12px;
+}
+
+div.control .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 32px;
+    border-radius: 19px;
+    border: 4px solid var(--control-secondary);
+    background: var(--control-secondary-medium);
+    cursor: pointer;
+}
+
+div.control .slider::-moz-range-thumb {
+    width: 16px;
+    height: 32px;
+    border-radius: 19px;
+    background: var(--control-secondary-medium);
+    border: 4px solid var(--control-secondary);
+    cursor: pointer;
+}
+
+div.control div.keyboard-box {
+    padding: 10px;
+    text-align: center;
+    background: #eee;
+    margin: 15px;
+    display: inline-block;
+    align-items: center;
+    border-radius: 15px;
+}
+
+div.control div.keyboard-box p {
+    margin: 0;
+}
+
+div.control div.keyboard-box p button {
+    margin: 8px;
+    width: 80px;
+    height: 80px;
+    font-size: 40px;
+}
+
+div.control div.keyboard-box p button.pressed {
+    background-color: var(--control-secondary-light);
+}
+
+div.control .mode-switch {
+    background-color: var(--v-morelowy-base);
+    border: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 20%;
+    opacity: 20%;
+}
+
+div.control .mode-switch:hover {
+    background-color: var(--v-morelowy-lighten1);
+    opacity: 30%;
+}
+
+div.control .mode-switch.active {
+    background-color: var(--v-miętowy-base);
+    opacity: 90%;
+}
+
+div.control .mode-switch.active:hover {
+    background-color: var(--v-miętowy-lighten1);
+    opacity: 100%;
+}
+
+div.control div.top-wrapper {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 80%;
+}
+
+div.control div.mode-switch-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    background-color: #eee;
+    border-radius: 25px;
+    padding: 5px;
+    margin: 15px;
+}
+
+div.control div.description {
+    position: absolute;
+    top: 30px;
+    right: 15px;
+}
+
+div.control div.description button {
+    background: none;
+    border: none;
+    border-radius: 100%;
+}
