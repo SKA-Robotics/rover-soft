@@ -13,7 +13,7 @@ const moveOffset = ref({
     y: 0,
 })
 
-const overlaySize = ref(5)
+const overlaySize = ref(50)
 
 const scale = ref(null)
 const angle = ref(0)
@@ -22,7 +22,7 @@ const viewCenterUnit = ref({
     y: 0,
 })
 
-const direction = ref(90)
+const direction = ref(0)
 const directionTriangle = computed(() => {
     return {
         x1: (-0.6 * overlaySize.value) / scale.value,
@@ -140,17 +140,29 @@ const drawDirection = () => {
     ctx.strokeStyle = 'black'
     ctx.fillStyle = 'black'
 
-    let r1 = Math.sqrt(
-        Math.pow(directionTriangle.value.x1, 2) +
-            Math.pow(directionTriangle.value.y1, 2)
+    const r1 = Math.hypot(
+        directionTriangle.value.x1,
+        directionTriangle.value.y1
     )
-    let r2 = Math.sqrt(
-        Math.pow(directionTriangle.value.x2, 2) +
-            Math.pow(directionTriangle.value.y2, 2)
+    const r2 = Math.hypot(
+        directionTriangle.value.x2,
+        directionTriangle.value.y2
     )
-    let r3 = Math.sqrt(
-        Math.pow(directionTriangle.value.x3, 2) +
-            Math.pow(directionTriangle.value.y3, 2)
+    const r3 = Math.hypot(
+        directionTriangle.value.x3,
+        directionTriangle.value.y3
+    )
+    const phi1 = Math.atan2(
+        directionTriangle.value.x1,
+        directionTriangle.value.y1
+    )
+    const phi2 = Math.atan2(
+        directionTriangle.value.x2,
+        directionTriangle.value.y2
+    )
+    const phi3 = Math.atan2(
+        directionTriangle.value.x3,
+        directionTriangle.value.y3
     )
 
     console.log(
@@ -162,28 +174,23 @@ const drawDirection = () => {
 
     ctx.moveTo(
         currentPosUnit.value.x +
-            r1 * Math.cos((direction.value * Math.PI) / 180),
+            r1 * Math.cos((direction.value * Math.PI) / 180 + phi1),
         currentPosUnit.value.y +
-            r1 * Math.sin((direction.value * Math.PI) / 180)
+            r1 * Math.sin((direction.value * Math.PI) / 180 + phi1)
     )
     ctx.lineTo(
         currentPosUnit.value.x +
-            r2 * Math.cos((direction.value * Math.PI) / 180),
+            r2 * Math.cos((direction.value * Math.PI) / 180 + phi2),
         currentPosUnit.value.y +
-            r2 * Math.sin((direction.value * Math.PI) / 180)
+            r2 * Math.sin((direction.value * Math.PI) / 180 + phi2)
     )
     ctx.lineTo(
         currentPosUnit.value.x +
-            r3 * Math.cos((direction.value * Math.PI) / 180),
+            r3 * Math.cos((direction.value * Math.PI) / 180 + phi3),
         currentPosUnit.value.y +
-            r3 * Math.sin((direction.value * Math.PI) / 180)
+            r3 * Math.sin((direction.value * Math.PI) / 180 + phi3)
     )
-    ctx.lineTo(
-        currentPosUnit.value.x +
-            r1 * Math.cos((direction.value * Math.PI) / 180),
-        currentPosUnit.value.y +
-            r1 * Math.sin((direction.value * Math.PI) / 180)
-    )
+    ctx.closePath()
 
     ctx.fill()
     ctx.stroke()
