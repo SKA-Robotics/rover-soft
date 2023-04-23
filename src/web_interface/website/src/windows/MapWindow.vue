@@ -22,6 +22,17 @@ const viewCenterUnit = ref({
     y: 0,
 })
 
+const direction = ref(90)
+const directionTriangle = computed(() => {
+    return {
+        x1: (-0.6 * overlaySize.value) / scale.value,
+        y1: (0 * overlaySize.value) / scale.value,
+        x2: (0 * overlaySize.value) / scale.value,
+        y2: (-1.8 * overlaySize.value) / scale.value,
+        x3: (0.6 * overlaySize.value) / scale.value,
+        y3: (0 * overlaySize.value) / scale.value,
+    }
+})
 const imageUnit = ref({
     x: 0,
     y: 0,
@@ -120,7 +131,121 @@ const drawPosition = () => {
     )
     ctx.fill()
     ctx.stroke()
+    drawDirection()
 }
+
+const drawDirection = () => {
+    let ctx = map.value.getContext('2d')
+    ctx.beginPath()
+    ctx.strokeStyle = 'black'
+    ctx.fillStyle = 'black'
+
+    let r1 = Math.sqrt(
+        Math.pow(directionTriangle.value.x1, 2) +
+            Math.pow(directionTriangle.value.y1, 2)
+    )
+    let r2 = Math.sqrt(
+        Math.pow(directionTriangle.value.x2, 2) +
+            Math.pow(directionTriangle.value.y2, 2)
+    )
+    let r3 = Math.sqrt(
+        Math.pow(directionTriangle.value.x3, 2) +
+            Math.pow(directionTriangle.value.y3, 2)
+    )
+
+    console.log(
+        currentPosUnit.value.y +
+            r1 * Math.sin((direction.value * Math.PI) / 180)
+    )
+
+    //przez wektor r dlugosc r nie rozroznia x1 od x3 i y1 od y3
+
+    ctx.moveTo(
+        currentPosUnit.value.x +
+            r1 * Math.cos((direction.value * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r1 * Math.sin((direction.value * Math.PI) / 180)
+    )
+    ctx.lineTo(
+        currentPosUnit.value.x +
+            r2 * Math.cos((direction.value * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r2 * Math.sin((direction.value * Math.PI) / 180)
+    )
+    ctx.lineTo(
+        currentPosUnit.value.x +
+            r3 * Math.cos((direction.value * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r3 * Math.sin((direction.value * Math.PI) / 180)
+    )
+    ctx.lineTo(
+        currentPosUnit.value.x +
+            r1 * Math.cos((direction.value * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r1 * Math.sin((direction.value * Math.PI) / 180)
+    )
+
+    ctx.fill()
+    ctx.stroke()
+}
+/*
+const drawDirection = () => {
+    let x1 = currentPosUnit.value.x + directionTriangle.value.x1
+    let y1 = currentPosUnit.value.y + directionTriangle.value.y1
+    let x2 = currentPosUnit.value.x + directionTriangle.value.x2
+    let y2 = currentPosUnit.value.y + directionTriangle.value.y2
+    let x3 = currentPosUnit.value.x + directionTriangle.value.x3
+    let y3 = currentPosUnit.value.y + directionTriangle.value.y3
+
+    let r1 = Math.sqrt(
+        Math.pow(directionTriangle.value.x1, 2) +
+            Math.pow(directionTriangle.value.y1, 2)
+    )
+    let r2 = Math.sqrt(
+        Math.pow(directionTriangle.value.x2, 2) +
+            Math.pow(directionTriangle.value.y2, 2)
+    )
+    let r3 = Math.sqrt(
+        Math.pow(directionTriangle.value.x3, 2) +
+            Math.pow(directionTriangle.value.y3, 2)
+    )
+
+    let ctx = map.value.getContext('2d')
+    ctx.beginPath()
+    ctx.strokeStyle = 'green'
+    ctx.fillStyle = 'green'
+    ctx.lineWidth = overlaySize.value / scale.value
+
+    ctx.lineTo(
+        currentPosUnit.value.x +
+            r1 * Math.cos(((direction.value + Math.PI / 4) * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r1 * Math.sin(((direction.value + Math.PI / 4) * Math.PI) / 180)
+    )
+    ctx.lineTo(
+        currentPosUnit.value.x +
+            r2 * Math.cos((direction.value * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r2 * Math.sin((direction.value * Math.PI) / 180)
+    )
+    ctx.lineTo(
+        currentPosUnit.value.x +
+            r3 * Math.cos(((direction.value - Math.PI / 4) * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r3 * Math.sin(((direction.value - Math.PI / 4) * Math.PI) / 180)
+    )
+    ctx.lineTo(
+        currentPosUnit.value.x +
+            r1 * Math.cos((direction.value * Math.PI) / 180),
+        currentPosUnit.value.y +
+            r1 * Math.sin((direction.value * Math.PI) / 180)
+    )
+
+    console.log(r1 * Math.cos((direction.value * Math.PI) / 180))
+
+    ctx.fill()
+    ctx.stroke()
+}*/
 
 const drawGrid = () => {
     let x = (imageUnit.value.width * 3) / 2
@@ -156,8 +281,6 @@ const drawGrid = () => {
 
     ctx.stroke()
 }
-
-//TODO: drawGrid
 
 const zoom = (e) => {
     if (e.deltaY > 0) {
