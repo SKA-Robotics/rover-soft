@@ -17,7 +17,7 @@ cam0:
   distortion_model: equidistant
   intrinsics: [574.8975263974625, 574.435756683178, 632.0006541642256, 347.5452660175513]
   resolution: [1280, 720]
-  rostopic: /oak_d_w/left_raw/image_raw
+  rostopic: /front_camera/left_raw/image_raw_grey
   timeshift_cam_imu: -0.011304282478534742
 cam1:
   T_cam_imu:
@@ -46,5 +46,5 @@ cam1:
   distortion_model: equidistant
   intrinsics: [574.0425091568196, 573.629827184158, 631.677817523376, 325.5681676926967]
   resolution: [1280, 720]
-  rostopic: /oak_d_w/right/image_raw
+  rostopic: /front_camera/right_raw/image_raw_grey
   timeshift_cam_imu: -0.010929218507649656
