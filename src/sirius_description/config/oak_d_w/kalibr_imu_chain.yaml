@@ -6,10 +6,10 @@ imu0:
     - [0.0, 1.0, 0.0, 0.0]
     - [0.0, 0.0, 1.0, 0.0]
     - [0.0, 0.0, 0.0, 1.0]
-  accelerometer_noise_density: 0.01886
-  accelerometer_random_walk: 0.01
-  gyroscope_noise_density: 0.003074532925199
-  gyroscope_random_walk: 2.0e-04
+  accelerometer_noise_density: 0.005886
+  accelerometer_random_walk: 0.005
+  gyroscope_noise_density: 0.00174532925199
+  gyroscope_random_walk: 1.0e-05
   model: calibrated
   rostopic: /oak_d_w/imu
   time_offset: 0.0

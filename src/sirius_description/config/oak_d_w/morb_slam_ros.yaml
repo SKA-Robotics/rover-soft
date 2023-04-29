@@ -72,10 +72,10 @@ IMU.T_b_c1: !!opencv-matrix
       0.,          0.,          0.,          1.        ]
 
 # IMU noise
-IMU.NoiseGyro: 0.003532925199
-IMU.NoiseAcc:  3.
-IMU.GyroWalk: 2.0e-04
-IMU.AccWalk:  2.
+IMU.NoiseAcc:  0.005886
+IMU.AccWalk:  0.005
+IMU.NoiseGyro: 0.00174532925199
+IMU.GyroWalk: 1.0e-05
 IMU.Frequency: 200.0
 IMU.InsertKFsWhenLost: 0
 #--------------------------------------------------------------------------------------------
