@@ -11,7 +11,7 @@ onMounted(() => {
 </script>
 <template>
     <v-app>
-        <LoadingScreen />
+        <!-- <LoadingScreen /> -->
         <RouterView />
     </v-app>
 </template>

@@ -106,7 +106,7 @@ var JoyStick = function (container, parameters, callback) {
                 ? true
                 : parameters.autoReturnToCenter
 
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
     callback = callback || function (StickStatus) {}
 
     // Create Canvas element and add it in the Container object
@@ -136,10 +136,10 @@ var JoyStick = function (container, parameters, callback) {
     var centerX = canvas.width / 2
     var centerY = canvas.height / 2
     var directionHorizontalLimitPos = canvas.width / 10
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     var directionHorizontalLimitNeg = directionHorizontalLimitPos * -1
     var directionVerticalLimitPos = canvas.height / 10
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     var directionVerticalLimitNeg = directionVerticalLimitPos * -1
     // Used to save current position of stick
     var movedX = centerX
@@ -215,7 +215,7 @@ var JoyStick = function (container, parameters, callback) {
     /**
      * @desc Events for manage touch
      */
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     function onTouchStart(event) {
         pressed = 1
     }
@@ -247,7 +247,7 @@ var JoyStick = function (container, parameters, callback) {
         }
     }
 
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     function onTouchEnd(event) {
         pressed = 0
         // If required reset position store variable
@@ -272,7 +272,7 @@ var JoyStick = function (container, parameters, callback) {
     /**
      * @desc Events for manage mouse
      */
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     function onMouseDown(event) {
         pressed = 1
     }
@@ -309,7 +309,7 @@ var JoyStick = function (container, parameters, callback) {
         }
     }
 
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     function onMouseUp(event) {
         pressed = 0
         // If required reset position store variable
