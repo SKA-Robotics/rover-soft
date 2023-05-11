@@ -45,10 +45,12 @@ let importantPoints = [
     {
         x: 1,
         y: 2,
+        name: 'test1',
     },
     {
         x: 3,
         y: 0,
+        name: 'next',
     },
 ]
 
@@ -237,6 +239,8 @@ const drawGrid = () => {
 const drawImportantPoints = () => {
     let ctx = map.value.getContext('2d')
     ctx.beginPath()
+    ctx.font = '0.2px Comic Sans MS'
+    ctx.textAlign = 'center'
     ctx.strokeStyle = 'purple'
     ctx.fillStyle = 'purple'
     ctx.lineWidth = overlaySize.value / scale.value
@@ -251,6 +255,7 @@ const drawImportantPoints = () => {
             Math.PI * 2
         )
         ctx.fill()
+        ctx.fillText(point.name, point.x, point.y - 0.2)
         ctx.stroke()
     })
     ctx.closePath()
