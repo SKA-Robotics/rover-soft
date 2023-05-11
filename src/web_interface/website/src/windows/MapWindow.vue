@@ -13,7 +13,7 @@ const moveOffset = ref({
     y: 0,
 })
 
-const overlaySize = ref(50)
+const overlaySize = ref(6)
 
 const scale = ref(null)
 const angle = ref(0)
@@ -23,16 +23,51 @@ const viewCenterUnit = ref({
 })
 
 const direction = ref(0)
-const directionTriangle = computed(() => {
-    return {
-        x1: (-0.6 * overlaySize.value) / scale.value,
-        y1: (0 * overlaySize.value) / scale.value,
-        x2: (0 * overlaySize.value) / scale.value,
-        y2: (-1.8 * overlaySize.value) / scale.value,
-        x3: (0.6 * overlaySize.value) / scale.value,
-        y3: (0 * overlaySize.value) / scale.value,
-    }
+
+const dirTriangle = computed(() => {
+    return [
+        {
+            x: (-0.6 * overlaySize.value) / scale.value,
+            y: (0 * overlaySize.value) / scale.value,
+        },
+        {
+            x: (0 * overlaySize.value) / scale.value,
+            y: (-1.8 * overlaySize.value) / scale.value,
+        },
+        {
+            x: (0.6 * overlaySize.value) / scale.value,
+            y: (0 * overlaySize.value) / scale.value,
+        },
+    ]
 })
+
+const importantPoints = computed(() => {
+    return [
+        {
+            x: 1,
+            y: 2,
+        },
+        {
+            x: 3,
+            y: 0,
+        },
+    ]
+})
+
+const roverPath = computed(() => {
+    return [
+        //TODO: f ktora currpos wbije tu
+        {
+            x: 0,
+            y: 0,
+        },
+        {
+            x: 3,
+            y: 2,
+        },
+    ]
+})
+
 const imageUnit = ref({
     x: 0,
     y: 0,
@@ -100,6 +135,9 @@ const draw = () => {
     drawPosition()
 
     drawGrid()
+
+    drawRoverPath()
+    drawImportantPoints()
 }
 
 const drawMap = () => {
@@ -131,128 +169,31 @@ const drawPosition = () => {
     )
     ctx.fill()
     ctx.stroke()
-    drawDirection()
+    drawDir()
 }
 
-const drawDirection = () => {
+const drawDir = () => {
     let ctx = map.value.getContext('2d')
     ctx.beginPath()
-    ctx.strokeStyle = 'black'
-    ctx.fillStyle = 'black'
+    ctx.strokeStyle = 'red'
+    ctx.fillStyle = 'red'
 
-    const r1 = Math.hypot(
-        directionTriangle.value.x1,
-        directionTriangle.value.y1
-    )
-    const r2 = Math.hypot(
-        directionTriangle.value.x2,
-        directionTriangle.value.y2
-    )
-    const r3 = Math.hypot(
-        directionTriangle.value.x3,
-        directionTriangle.value.y3
-    )
-    const phi1 = Math.atan2(
-        directionTriangle.value.x1,
-        directionTriangle.value.y1
-    )
-    const phi2 = Math.atan2(
-        directionTriangle.value.x2,
-        directionTriangle.value.y2
-    )
-    const phi3 = Math.atan2(
-        directionTriangle.value.x3,
-        directionTriangle.value.y3
-    )
+    dirTriangle.value.forEach((point) => {
+        const r = Math.hypot(point.x, point.y)
+        const phi = Math.atan2(point.x, point.y)
 
-    console.log(
-        currentPosUnit.value.y +
-            r1 * Math.sin((direction.value * Math.PI) / 180)
-    )
-
-    //przez wektor r dlugosc r nie rozroznia x1 od x3 i y1 od y3
-
-    ctx.moveTo(
-        currentPosUnit.value.x +
-            r1 * Math.cos((direction.value * Math.PI) / 180 + phi1),
-        currentPosUnit.value.y +
-            r1 * Math.sin((direction.value * Math.PI) / 180 + phi1)
-    )
-    ctx.lineTo(
-        currentPosUnit.value.x +
-            r2 * Math.cos((direction.value * Math.PI) / 180 + phi2),
-        currentPosUnit.value.y +
-            r2 * Math.sin((direction.value * Math.PI) / 180 + phi2)
-    )
-    ctx.lineTo(
-        currentPosUnit.value.x +
-            r3 * Math.cos((direction.value * Math.PI) / 180 + phi3),
-        currentPosUnit.value.y +
-            r3 * Math.sin((direction.value * Math.PI) / 180 + phi3)
-    )
+        ctx.lineTo(
+            currentPosUnit.value.x +
+                r * Math.cos(((direction.value + 90) * Math.PI) / 180 + phi),
+            currentPosUnit.value.y +
+                r * Math.sin(((direction.value + 90) * Math.PI) / 180 + phi)
+        )
+    })
     ctx.closePath()
 
     ctx.fill()
     ctx.stroke()
 }
-/*
-const drawDirection = () => {
-    let x1 = currentPosUnit.value.x + directionTriangle.value.x1
-    let y1 = currentPosUnit.value.y + directionTriangle.value.y1
-    let x2 = currentPosUnit.value.x + directionTriangle.value.x2
-    let y2 = currentPosUnit.value.y + directionTriangle.value.y2
-    let x3 = currentPosUnit.value.x + directionTriangle.value.x3
-    let y3 = currentPosUnit.value.y + directionTriangle.value.y3
-
-    let r1 = Math.sqrt(
-        Math.pow(directionTriangle.value.x1, 2) +
-            Math.pow(directionTriangle.value.y1, 2)
-    )
-    let r2 = Math.sqrt(
-        Math.pow(directionTriangle.value.x2, 2) +
-            Math.pow(directionTriangle.value.y2, 2)
-    )
-    let r3 = Math.sqrt(
-        Math.pow(directionTriangle.value.x3, 2) +
-            Math.pow(directionTriangle.value.y3, 2)
-    )
-
-    let ctx = map.value.getContext('2d')
-    ctx.beginPath()
-    ctx.strokeStyle = 'green'
-    ctx.fillStyle = 'green'
-    ctx.lineWidth = overlaySize.value / scale.value
-
-    ctx.lineTo(
-        currentPosUnit.value.x +
-            r1 * Math.cos(((direction.value + Math.PI / 4) * Math.PI) / 180),
-        currentPosUnit.value.y +
-            r1 * Math.sin(((direction.value + Math.PI / 4) * Math.PI) / 180)
-    )
-    ctx.lineTo(
-        currentPosUnit.value.x +
-            r2 * Math.cos((direction.value * Math.PI) / 180),
-        currentPosUnit.value.y +
-            r2 * Math.sin((direction.value * Math.PI) / 180)
-    )
-    ctx.lineTo(
-        currentPosUnit.value.x +
-            r3 * Math.cos(((direction.value - Math.PI / 4) * Math.PI) / 180),
-        currentPosUnit.value.y +
-            r3 * Math.sin(((direction.value - Math.PI / 4) * Math.PI) / 180)
-    )
-    ctx.lineTo(
-        currentPosUnit.value.x +
-            r1 * Math.cos((direction.value * Math.PI) / 180),
-        currentPosUnit.value.y +
-            r1 * Math.sin((direction.value * Math.PI) / 180)
-    )
-
-    console.log(r1 * Math.cos((direction.value * Math.PI) / 180))
-
-    ctx.fill()
-    ctx.stroke()
-}*/
 
 const drawGrid = () => {
     let x = (imageUnit.value.width * 3) / 2
@@ -287,6 +228,44 @@ const drawGrid = () => {
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)'
 
     ctx.stroke()
+}
+
+const drawImportantPoints = () => {
+    let ctx = map.value.getContext('2d')
+    ctx.beginPath()
+    ctx.strokeStyle = 'purple'
+    ctx.fillStyle = 'purple'
+    ctx.lineWidth = overlaySize.value / scale.value
+
+    importantPoints.value.forEach((point) => {
+        ctx.moveTo(point.x, point.y)
+        ctx.arc(
+            point.x,
+            point.y,
+            overlaySize.value / scale.value,
+            0,
+            Math.PI * 2
+        )
+        ctx.fill()
+        ctx.stroke()
+    })
+    ctx.closePath()
+}
+
+const drawRoverPath = () => {
+    let ctx = map.value.getContext('2d')
+    ctx.beginPath()
+    ctx.strokeStyle = 'red'
+    ctx.fillStyle = 'red'
+    ctx.lineWidth = (0.5 * overlaySize.value) / scale.value
+
+    roverPath.value.forEach((point) => {
+        ctx.lineTo(point.x, point.y)
+        ctx.stroke()
+    })
+    ctx.lineTo(currentPosUnit.value.x, currentPosUnit.value.y)
+    ctx.stroke()
+    ctx.closePath()
 }
 
 const zoom = (e) => {
