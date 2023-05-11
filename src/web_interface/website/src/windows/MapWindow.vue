@@ -41,32 +41,27 @@ const dirTriangle = computed(() => {
     ]
 })
 
-const importantPoints = computed(() => {
-    return [
-        {
-            x: 1,
-            y: 2,
-        },
-        {
-            x: 3,
-            y: 0,
-        },
-    ]
-})
+let importantPoints = [
+    {
+        x: 1,
+        y: 2,
+    },
+    {
+        x: 3,
+        y: 0,
+    },
+]
 
-const roverPath = computed(() => {
-    return [
-        //TODO: f ktora currpos wbije tu
-        {
-            x: 0,
-            y: 0,
-        },
-        {
-            x: 3,
-            y: 2,
-        },
-    ]
-})
+let roverPath = [
+    {
+        x: 0,
+        y: 0,
+    },
+    {
+        x: 3,
+        y: 2,
+    },
+]
 
 const imageUnit = ref({
     x: 0,
@@ -108,6 +103,14 @@ onMounted(() => {
 onBeforeUnmount(() => {
     clearInterval(interval.value)
 })
+
+const addPathPoint = ({ x, y }) => {
+    roverPath.push({ x, y })
+}
+
+/*const addImportantPoint = ({ x, y }) => {
+    importantPoints.push({ x, y })
+}*/
 
 //TODO: add a button to reset
 const resetView = () => {
@@ -170,6 +173,7 @@ const drawPosition = () => {
     ctx.fill()
     ctx.stroke()
     drawDir()
+    addPathPoint(currentPosUnit.value)
 }
 
 const drawDir = () => {
@@ -237,7 +241,7 @@ const drawImportantPoints = () => {
     ctx.fillStyle = 'purple'
     ctx.lineWidth = overlaySize.value / scale.value
 
-    importantPoints.value.forEach((point) => {
+    importantPoints.forEach((point) => {
         ctx.moveTo(point.x, point.y)
         ctx.arc(
             point.x,
@@ -259,7 +263,7 @@ const drawRoverPath = () => {
     ctx.fillStyle = 'red'
     ctx.lineWidth = (0.5 * overlaySize.value) / scale.value
 
-    roverPath.value.forEach((point) => {
+    roverPath.forEach((point) => {
         ctx.lineTo(point.x, point.y)
         ctx.stroke()
     })
