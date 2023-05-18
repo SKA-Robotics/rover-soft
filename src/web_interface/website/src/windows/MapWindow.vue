@@ -22,6 +22,8 @@ const viewCenterUnit = ref({
     y: 0,
 })
 
+const roverInCenterMode = ref(false)
+
 const direction = ref(0)
 
 const dirTriangle = computed(() => {
@@ -75,6 +77,10 @@ const currentPosUnit = ref({
     x: 1,
     y: 1,
 })
+const previousPosUnit = ref({
+    x: 0,
+    y: 0,
+})
 
 const windowCenterPixel = computed(() => {
     return {
@@ -105,10 +111,27 @@ onMounted(() => {
 onBeforeUnmount(() => {
     clearInterval(interval.value)
 })
-
-const addPathPoint = ({ x, y }) => {
-    roverPath.push({ x, y })
+/*
+const changeViewMode = () => {
+    if (roverInCenterMode.value) roverInCenterMode.value = false
+    else roverInCenterMode.value = true
 }
+*/
+const addPathPoint = ({ x, y }) => {
+    if (!hasMoved) roverPath.push({ x, y })
+
+    previousPosUnit.value.x = x
+    previousPosUnit.value.y = y
+}
+
+const hasMoved = computed(() => {
+    if (
+        previousPosUnit.value.x == currentPosUnit.value.x &&
+        previousPosUnit.value.y == currentPosUnit.value.y
+    )
+        return false
+    else return true
+})
 
 /*const addImportantPoint = ({ x, y }) => {
     importantPoints.push({ x, y })
@@ -126,7 +149,10 @@ const transform = () => {
     ctx.translate(windowCenterPixel.value.x, windowCenterPixel.value.y)
     ctx.scale(scale.value, scale.value)
     ctx.rotate((angle.value * Math.PI) / 180)
-    ctx.translate(-viewCenterUnit.value.x, -viewCenterUnit.value.y)
+
+    if (roverInCenterMode.value)
+        ctx.translate(-currentPosUnit.value.x, -currentPosUnit.value.y)
+    else ctx.translate(-viewCenterUnit.value.x, -viewCenterUnit.value.y)
 }
 
 const draw = () => {
@@ -175,6 +201,7 @@ const drawPosition = () => {
     ctx.fill()
     ctx.stroke()
     drawDir()
+
     addPathPoint(currentPosUnit.value)
 }
 
@@ -334,5 +361,9 @@ const mouseUp = () => {
             :height="props.windowDimensions.height"
             ref="map"
         ></canvas>
+        <input
+            type="button"
+            value="test"
+        />
     </div>
 </template>
