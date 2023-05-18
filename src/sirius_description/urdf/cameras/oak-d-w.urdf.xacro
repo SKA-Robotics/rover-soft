@@ -3,7 +3,7 @@
 
   <xacro:property name="optical_offset_x" value="-0.01" />
 
-  <xacro:macro name="oak-d-w" params="prefix:=oak-d-w package:=^ cameras:=^ cameras_inertial:=^ stereo_fps:=^|30 imu_frequency:=^|200 calibration:=^|${xacro.load_yaml('$(find sirius_description)/config/oak_d_w/kalibr_imucam_chain.yaml')}">
+  <xacro:macro name="oak-d-w" params="prefix:=oak-d-w package:=^ cameras:=^ cameras_inertial:=^ stereo_fps:=^|30 imu_frequency:=^|200 calibration:=^|${xacro.load_yaml('$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml')}">
 
     <xacro:property name="baseline" value="${sqrt(calibration.cam1.T_cn_cnm1[0][3]**2 + calibration.cam1.T_cn_cnm1[1][3]**2 + calibration.cam1.T_cn_cnm1[2][3]**2)}"/>
 
@@ -24,6 +24,7 @@
         <inertia ixx="${cameras_inertial['oak-d-w_inertia']['ixx']}" ixy="${cameras_inertial['oak-d-w_inertia']['ixy']}" ixz="${cameras_inertial['oak-d-w_inertia']['ixz']}" iyy="${cameras_inertial['oak-d-w_inertia']['iyy']}" iyz="${cameras_inertial['oak-d-w_inertia']['iyz']}" izz="${cameras_inertial['oak-d-w_inertia']['izz']}"/>
       </inertial>
     </link>
+    <link name="${prefix}_rgb_camera_optical_frame"/>
 
     <link name="${prefix}_left_camera_frame" />
     <link name="${prefix}_left_camera_optical_frame"/>
@@ -32,6 +33,12 @@
     <link name="${prefix}_right_camera_optical_frame"/>
     <link name="${prefix}_imu_frame"/>
 
+
+    <joint name="${prefix}_rgb_camera_optical_joint" type="fixed">
+      <origin xyz="${optical_offset_x} 0 0" rpy="-${pi/2} 0.0 -${pi/2}"/>
+      <parent link="${prefix}_camera_center"/>
+      <child link="${prefix}_rgb_camera_optical_frame"/>
+    </joint>
 
     <joint name="${prefix}_left_camera_joint" type="fixed">
       <parent link="${prefix}_camera_center"/>
@@ -56,19 +63,19 @@
     </joint>
     <joint name="${prefix}_imu_frame_joint" type="fixed">
       <!-- IMU frame offset copied from ZED2 camera -->
-      <origin xyz="-0.002 -0.023 -0.002" rpy="0.0014025 -0.0000012 -0.0016915"/>
+      <origin xyz="${calibration.cam0.T_imu_cam[0][3]} ${calibration.cam0.T_imu_cam[1][3]} ${calibration.cam0.T_imu_cam[2][3]}" rpy="${atan2(calibration.cam0.T_imu_cam[2][1],calibration.cam0.T_imu_cam[2][2])} ${atan2(-calibration.cam0.T_imu_cam[2][0],sqrt(calibration.cam0.T_imu_cam[2][1]**2 + calibration.cam0.T_imu_cam[2][2]**2))} ${atan2(calibration.cam0.T_imu_cam[1][0],calibration.cam0.T_imu_cam[0][0])}"/>
       <parent link="${prefix}_left_camera_frame"/>
       <child link="${prefix}_imu_frame"/>
     </joint>
 
     <!-- Left/Depth camera -->
-    <gazebo reference="${prefix}_left_camera_frame">
-       <sensor type="depth" name="${prefix}_camera_depth">
-        <!-- Rectified images, Depth images, Point Clouds -->
+    <gazebo reference="${prefix}_camera_center">
+      <sensor type="multicamera" name="${prefix}_stereo_camera">
         <always_on>true</always_on>
         <update_rate>${stereo_fps}</update_rate>
         <visualize>false</visualize> 
-        <camera name="/${prefix}_camera/depth">
+        <camera name="/${prefix}_camera/left">
+          <pose>0 ${baseline/2} 0 0 0 0</pose>
           <image>
             <width>${calibration.cam0.resolution[0]}</width>
             <height>${calibration.cam0.resolution[1]}</height>
@@ -94,36 +101,11 @@
             <scale_to_hfov>false</scale_to_hfov>
           </lens>
         </camera>
-        <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
-          <cameraName>/${prefix}_camera</cameraName>
-          <imageTopicName>left/image_rect_gray</imageTopicName>
-          <cameraInfoTopicName>left/camera_info</cameraInfoTopicName>
-          <depthImageTopicName>depth/depth_registered</depthImageTopicName>
-          <depthImageInfoTopicName>depth/camera_info</depthImageInfoTopicName>
-          <pointCloudTopicName>point_cloud/cloud_registered</pointCloudTopicName>
-          <pointCloudCutoff>0.35</pointCloudCutoff>
-          <pointCloudCutoffMax>35.0</pointCloudCutoffMax>
-          <frameName>${prefix}_left_camera_optical_frame</frameName>
-          <baseline>${baseline}</baseline>
-          <CxPrime>${calibration.cam0.intrinsics[2]}</CxPrime>
-          <Cx>${calibration.cam0.intrinsics[2]}</Cx>
-          <Cy>${calibration.cam0.intrinsics[3]}</Cy>
-          <hackBaseline>0.0</hackBaseline>
-        </plugin>
-      </sensor> 
-    </gazebo>
-
-    <!-- Right camera -->
-    <gazebo reference="${prefix}_right_camera_frame">
-      <sensor type="camera" name="${prefix}_right_camera_rect">
-        <!-- Rectified images -->
-        <always_on>true</always_on>
-        <update_rate>${stereo_fps}</update_rate>
-        <visualize>false</visualize> 
         <camera name="/${prefix}_camera/right">
+          <pose>0 -${baseline/2} 0 0 0 0</pose>
           <image>
-            <width>${calibration.cam1.resolution[0]}</width>
-            <height>${calibration.cam1.resolution[1]}</height>
+            <width>${calibration.cam0.resolution[0]}</width>
+            <height>${calibration.cam0.resolution[1]}</height>
             <format>L8</format>
           </image>
           <clip>
@@ -137,24 +119,24 @@
           </noise>
           <lens>            
             <intrinsics>
-            <fx>${calibration.cam1.intrinsics[0]}</fx>
-            <fy>${calibration.cam1.intrinsics[1]}</fy>
-            <cx>${calibration.cam1.intrinsics[2]}</cx>
-            <cy>${calibration.cam1.intrinsics[3]}</cy>
+            <fx>${calibration.cam0.intrinsics[0]}</fx>
+            <fy>${calibration.cam0.intrinsics[1]}</fy>
+            <cx>${calibration.cam0.intrinsics[2]}</cx>
+            <cy>${calibration.cam0.intrinsics[3]}</cy>
             <s>0</s>
             </intrinsics>
             <scale_to_hfov>false</scale_to_hfov>
           </lens>
         </camera>
-        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-          <cameraName>/${prefix}_camera/right</cameraName>
+        <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${stereo_fps}</updateRate>
+          <cameraName>/${prefix}_camera</cameraName>
           <imageTopicName>image_rect_gray</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>${prefix}_right_camera_optical_frame</frameName>
-          <CxPrime>${calibration.cam1.intrinsics[2]}</CxPrime>
-          <Cx>${calibration.cam1.intrinsics[2]}</Cx>
-          <Cy>${calibration.cam1.intrinsics[3]}</Cy>
-          <hackBaseline>${baseline}</hackBaseline>
+          <frameName>${prefix}_left_camera_optical_frame</frameName>
+          <rightFrameName>${prefix}_right_camera_optical_frame</rightFrameName>
+          <hackBaseline>${baseline}</hackBaseline>  
         </plugin>
       </sensor>
     </gazebo>
@@ -167,7 +149,7 @@
           <topicName>/${prefix}_camera/imu/data</topicName>
           <frameName>${prefix}_imu_frame</frameName>
           <updateRateHZ>${imu_frequency}</updateRateHZ>
-          <gaussianNoise>0.01</gaussianNoise>
+          <gaussianNoise>0.0</gaussianNoise>
           <initialOrientationAsReference>false</initialOrientationAsReference>
           <xyzOffset>0 0.0 0.0</xyzOffset>
           <rpyOffset>0.0 0.0 0.0</rpyOffset>

@@ -2,24 +2,18 @@
 File.version: "1.0"
 Camera.type: "Rectified"
 
-# Left Camera calibration and distortion parameters (OpenCV)
+# Camera calibration and distortion parameters (OpenCV)
 Camera1.fx: 574.8975263974625
 Camera1.fy: 574.435756683178
 Camera1.cx: 632.0006541642256
 Camera1.cy: 347.5452660175513
-
-# Right Camera calibration and distortion parameters (OpenCV)
-Camera2.fx: 574.0425091568196
-Camera2.fy: 573.629827184158
-Camera2.cx: 631.677817523376
-Camera2.cy: 325.5681676926967
 
 # Camera resolution
 Camera.width: 1280
 Camera.height: 720
 
 # Camera frames per second
-Camera.fps: 5
+Camera.fps: 30
 
 # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
 Camera.RGB: 1
