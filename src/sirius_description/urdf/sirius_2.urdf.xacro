@@ -2,17 +2,24 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sirius_2">
   <xacro:property name="package" value="sirius_description" />
   <xacro:property name="params" value="${xacro.load_yaml('sirius_2.yaml')}" /> 
+  <xacro:arg name="calibration_path" default=""/>
+  <xacro:property name="calibration_path" value="$(arg calibration_path)" /> 
+  <xacro:if value="${calibration_path != ''}">
+    <xacro:property name="calibration" value="${xacro.load_yaml(calibration_path)}" /> 
+  </xacro:if>
+  <xacro:arg name="stereo_fps" default="30"/>
+  <xacro:property name="stereo_fps" value="$(arg stereo_fps)" /> 
+  <xacro:arg name="imu_frequency" default="200.0"/>
+  <xacro:property name="imu_frequency" value="$(arg imu_frequency)" /> 
   <xacro:property name="collisions" value="${xacro.load_yaml('sirius_2/sirius_2_collisions.yaml')}" /> 
   <xacro:property name="inertial" value="${xacro.load_yaml('sirius_2/sirius_2_inertial.yaml')}" /> 
   <xacro:property name="cameras" value="${xacro.load_yaml('cameras/cameras.yaml')}" />  
   <xacro:property name="cameras_inertial" value="${xacro.load_yaml('cameras/cameras_inertial.yaml')}" /> 
-
   <xacro:include filename="materials.urdf.xacro" />
   <xacro:include filename="sirius_2/indicator_light.urdf.xacro" />
   <xacro:include filename="sirius_2/platform.urdf.xacro" />
 
   <xacro:include filename="cameras/hp_4310.urdf.xacro" />
-  <xacro:include filename="cameras/zed2i.urdf.xacro" />
   <xacro:include filename="cameras/oak-d-w.urdf.xacro" />
 
   <xacro:property name="link_prefix" value=""/>
@@ -70,8 +77,7 @@
   <xacro:hp_4310 prefix="back_mast" material="black">
     <xacro:black/>
   </xacro:hp_4310>
-  <xacro:zed2i prefix="front"/>
-  <xacro:oak-d-w prefix="back"/>
+  <xacro:oak-d-w prefix="front"/>
 
 
   <xacro:drive_system prefix="right_front" />
@@ -137,11 +143,6 @@
     <parent link="main_platform"/>
     <child link="front_camera_center"/>
     <origin xyz="${params['front_camera_xyz']}" rpy="${params['front_camera_rpy']}"/>
-  </joint>
-  <joint name="base_to_back_camera" type="fixed">
-    <parent link="main_platform"/>
-    <child link="back_camera_center"/>
-    <origin xyz="${params['back_camera_xyz']}" rpy="${params['back_camera_rpy']}"/>
   </joint>
 
   <gazebo>
