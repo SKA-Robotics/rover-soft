@@ -73,14 +73,11 @@ auto addMonoPipeline(dai::Pipeline& pipeline, int fps, dai::node::MonoCamera::Pr
                      std::string name, dai::CameraBoardSocket socket)
 {
   auto monoCamera = pipeline.create<dai::node::MonoCamera>();
-  // auto xOut = pipeline.create<dai::node::XLinkOut>();
-  // xOut->setStreamName(name);
 
   monoCamera->setResolution(resolution);
   monoCamera->setBoardSocket(socket);
   monoCamera->setFps(fps);
 
-  // monoCamera->out.link(xOut->input);
   return monoCamera;
 }
 void addRGBPipeline(dai::Pipeline& pipeline, int fps, dai::node::ColorCamera::Properties::SensorResolution resolution,
@@ -100,9 +97,6 @@ auto addDepthPipeline(dai::Pipeline& pipeline, int fps, dai::node::ColorCamera::
                     std::string name, dai::CameraBoardSocket socket)
 {
   auto stereo = pipeline.create<dai::node::StereoDepth>();
-  // auto xOut = pipeline.create<dai::node::XLinkOut>();
-  // xOut->setStreamName(name);
-
 
   stereo->initialConfig.setConfidenceThreshold(200);        // Known to be best
   stereo->setRectifyEdgeFillColor(0);                              // black, to better see the cutout
@@ -111,7 +105,7 @@ auto addDepthPipeline(dai::Pipeline& pipeline, int fps, dai::node::ColorCamera::
   stereo->setExtendedDisparity(false);
   stereo->setSubpixel(true);
   stereo->setRectifyEdgeFillColor(0);
-  // stereo->depth.link(xOut->input);
+  
   return stereo;
 }
 void addIMUPipeline(dai::Pipeline& pipeline, int fps, std::string name)
