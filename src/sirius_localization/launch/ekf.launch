@@ -1,0 +1,15 @@
+<launch>
+
+  <include file="$(find sirius_localization)/launch/complementary_filter.launch">
+  </include>
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+    <rosparam command="load" file="$(find sirius_localization)/config/ekf.yaml" />
+
+    <!--  Placeholder for output topic remapping
+    <remap from="odometry/filtered" to=""/>
+    <remap from="accel/filtered" to=""/>
+    -->
+
+  </node>
+</launch>
