@@ -14,6 +14,7 @@
 #include <depthai_bridge/BridgePublisher.hpp>
 #include <depthai_bridge/ImageConverter.hpp>
 #include <depthai_bridge/ImuConverter.hpp>
+#include <depthai_ros_msgs/ImuWithMagneticField.h>
 
 #include "depthai/depthai.hpp"
 
@@ -114,7 +115,8 @@ void addIMUPipeline(dai::Pipeline& pipeline, int fps, std::string name)
   auto xOut = pipeline.create<dai::node::XLinkOut>();
   xOut->setStreamName(name);
 
-  imu->enableIMUSensor({ dai::IMUSensor::ACCELEROMETER, dai::IMUSensor::GYROSCOPE_CALIBRATED }, fps);
+  imu->enableIMUSensor({ dai::IMUSensor::ACCELEROMETER, dai::IMUSensor::GYROSCOPE_CALIBRATED, dai::IMUSensor::ROTATION_VECTOR }, fps);
+  imu->enableIMUSensor(dai::IMUSensor::MAGNETOMETER_CALIBRATED, 100);
   imu->setBatchReportThreshold(5);
   imu->setMaxBatchReports(20);
 
@@ -196,6 +198,22 @@ std::shared_ptr<dai::Device> connect(ros::NodeHandle& nh, dai::Pipeline& pipelin
   std::cout << "Device USB status: " << usbStrings[static_cast<int32_t>(device->getUsbSpeed())] << std::endl;
   return device;
 }
+
+void imuMagQCB(const std::string& /*name*/, const std::shared_ptr<dai::ADatatype>& data,dai::rosBridge::ImuConverter& imuConverter,const ros::Publisher& rosImuPub,const ros::Publisher& magPub) {
+    auto imuData = std::dynamic_pointer_cast<dai::IMUData>(data);
+    std::deque<depthai_ros_msgs::ImuWithMagneticField> deq;
+    imuConverter.toRosDaiMsg(imuData, deq);
+    while(deq.size() > 0) {
+        auto currMsg = deq.front();
+        sensor_msgs::Imu imu = currMsg.imu;
+        sensor_msgs::MagneticField field = currMsg.field;
+        imu.header = currMsg.header;
+        field.header = currMsg.header;
+        rosImuPub.publish(imu);
+        magPub.publish(field);
+        deq.pop_front();
+    }
+}
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "oak-d_w");
@@ -203,7 +221,7 @@ int main(int argc, char** argv)
 
   std::string tf, mxId, monoResolution = "720p", rgbResolution = "1080p";
   int badParams = 0, fps = 30, imu_frequency = 400;
-  double angularVelCovariance, linearAccelCovariance;
+  double angularVelCovariance, linearAccelCovariance, rotationCovariance, magneticCovariance;
 
   badParams += !nh.getParam("mxId", mxId);
   badParams += !nh.getParam("tf", tf);
@@ -213,6 +231,8 @@ int main(int argc, char** argv)
   badParams += !nh.getParam("rgbResolution", rgbResolution);
   badParams += !nh.getParam("angularVelCovariance", angularVelCovariance);
   badParams += !nh.getParam("linearAccelCovariance", linearAccelCovariance);
+  badParams += !nh.getParam("rotationCovariance", rotationCovariance);
+  badParams += !nh.getParam("magneticCovariance", magneticCovariance);
 
   if (badParams > 0)
   {
@@ -231,7 +251,7 @@ int main(int argc, char** argv)
   dai::rosBridge::ImageConverter rightconverter(tf + "_right_camera_optical_frame", true);
   dai::rosBridge::ImageConverter rgbConverter(tf + "_rgb_camera_optical_frame", false);
   dai::rosBridge::ImuConverter imuConverter(tf + "_imu_frame", dai::ros::ImuSyncMethod::COPY,
-                                            linearAccelCovariance, angularVelCovariance);
+                                            linearAccelCovariance, angularVelCovariance,rotationCovariance,magneticCovariance,true);
 
   auto leftCameraInfo =
       converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::LEFT, width, height);
@@ -255,8 +275,11 @@ int main(int argc, char** argv)
   dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> rgbPublish(
       imgQueue, nh, std::string("rgb/image_raw_rgb"), [&](auto in, auto& out) { rgbConverter.toRosMsg(in, out); }, 30,
       rgbCameraInfo, "rgb");
-  dai::rosBridge::BridgePublisher<sensor_msgs::Imu, dai::IMUData> imuPublish(
-      imuQueue, nh, std::string("imu/data"), [&](auto in, auto& out) { imuConverter.toRosMsg(in, out); }, 100, "", "imu");
+  auto rosImuPub = nh.advertise<sensor_msgs::Imu>("imu/data", 10);
+  auto magPub = nh.advertise<sensor_msgs::MagneticField>("imu/mag", 10);
+            
+  // dai::rosBridge::BridgePublisher<sensor_msgs::Imu, dai::IMUData> imuPublish(
+  //     imuQueue, nh, std::string("imu/data"), [&](auto in, auto& out) { imuConverter.toRosMsg(in, out); }, 100, "", "imu");
   dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> depthPublish(
             depthQueue,
             nh,
@@ -273,7 +296,7 @@ int main(int argc, char** argv)
   rightPublish.addPublisherCallback();
   leftPublish.addPublisherCallback();
   rgbPublish.addPublisherCallback();
-  imuPublish.addPublisherCallback();
+  imuQueue->addCallback([&imuConverter,&rosImuPub,&magPub](const auto& name, const auto& data){imuMagQCB(name,data,imuConverter,rosImuPub,magPub);});
   depthPublish.addPublisherCallback();
 
   ros::spin();
