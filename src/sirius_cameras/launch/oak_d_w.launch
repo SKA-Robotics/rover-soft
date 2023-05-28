@@ -10,8 +10,8 @@
     <arg name="monoResolution"        default="720p"/> 
     <arg name="rgbResolution"        default="1080p"/> 
     <arg name="angularVelCovariance"  default="0"   />
-    <arg name="linearAccelCovariance" default="0"   />
-    <arg name="rotationCovariance"  default="0"   />
+    <arg name="linearAccelCovariance" default="0.4"   /> <!-- Variance in m/s^2-->
+    <arg name="rotationCovariance"  default="$(eval pi/6)"   /> <!-- Variance in radians-->
     <arg name="magneticCovariance" default="0"   />
 
 

@@ -9,6 +9,7 @@
     <param name="use_mag" value="true"/>
     <param name="gain_acc" value="0.01"/>
     <param name="gain_mag" value="0.01"/>
+    <param name="orientation_stddev" value="$(eval sqrt(pi/6))"/> <!-- standard deviation in radians -->
     <remap from="imu/data_raw" to="/$(arg imu_name)/imu/data"/>
     <remap from="imu/mag" to="/$(arg imu_name)/imu/mag"/>
 
