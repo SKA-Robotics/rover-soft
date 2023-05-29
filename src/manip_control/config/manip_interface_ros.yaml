@@ -1,0 +1,10 @@
+jointstate_topic: /manipulator/joint_states
+
+motor_topics:
+  base_cyl: /motor1_jointstate
+  cyl_arm1: /motor2_jointstate
+  arm1_arm2: /motor3_jointstate
+  arm2_arm3: /motor4_jointstate
+  arm3_tool: /motor5_jointstate
+
+publish_rate: 20.0
