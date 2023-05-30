@@ -12,7 +12,7 @@ wheels_right:
 odrive_driver: 
   drivers: ['wheels_left','wheels_right']
   wheels_left: 
-    serial_number: '306A36543431'
+    serial_number: '208536885753'
     motor0: 
       reverse_motor: True
       transmission: 43
@@ -20,7 +20,7 @@ odrive_driver:
       reverse_motor: True
       transmission: 43  
   wheels_right: 
-    serial_number: '208536885753'
+    serial_number: '306A36543431'
     motor0: 
       reverse_motor: False
       transmission: 43
