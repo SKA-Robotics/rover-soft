@@ -27,8 +27,7 @@
     <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
     </node>
 
-    <node name="manip_control" pkg="ral_sirius_1" type="manip_control.py" output="screen"/>
-    <node pkg="ral_sirius_1" type="manip_arduino_node.py" name="manip_arduino_node" output="screen"/>
-    <include file="$(find joy_tank_steering)/launch/single_joy_steering.launch"/>
+    <include file="$(find manip_control)/launch/manip_control.launch"/>
+    <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
     <include file="$(find web_interface)/launch/servers.launch"/>
 </launch>
