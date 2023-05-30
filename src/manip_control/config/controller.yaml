@@ -1,11 +1,11 @@
 jointstate_topic: /manipulator/joint_states
 queue_size: 16
 command_topics:
-    base_cyl: manipulator/joint1_position_controller/command
-    cyl_arm1: manipulator/joint2_position_controller/command
-    arm1_arm2: manipulator/joint3_position_controller/command
-    arm2_arm3: manipulator/joint4_position_controller/command
-    arm3_tool: manipulator/joint5_position_controller/command
+    base_cyl: roboclaw_driver/128/motor1/set_joint_stated
+    cyl_arm1: roboclaw_driver/129/motor1/set_joint_stated
+    arm1_arm2: roboclaw_driver/129/motor2/set_joint_stated
+    arm2_arm3: roboclaw_driver/130/motor1/set_joint_stated
+    arm3_tool: roboclaw_driver/130/motor2/set_joint_stated
 control_modes:
   cartesian:
     max_velocity: 0.05
@@ -20,5 +20,5 @@ control_modes:
     interpolation_rate: 10.0
     velocity_weighing: [1, 1, 1, 1, 0.05]
   incremental:
-    send_rate: 20.0
+    send_rate: 10.0
 

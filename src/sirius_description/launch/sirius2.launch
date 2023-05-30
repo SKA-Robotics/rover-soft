@@ -1,6 +1,7 @@
 <launch>
     <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
     <rosparam file="$(find sirius_description)/config/odrive.yaml" command="load"/> 
+    <rosparam file="$(find manip_control)/config/roboclaws.yaml" command="load"/> 
 
     <remap from="/sirius/controller/wheels/cmd_vel" to="/cmd_vel" />
 
@@ -27,6 +28,7 @@
     </node>
 
     <include file="$(find manip_control)/launch/manip_control.launch"/>
+    <include file="$(find sirius_description)/launch/manipulator_rviz.launch"/>
     <!-- <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
     <include file="$(find web_interface)/launch/servers.launch"/> -->
 </launch>

@@ -60,7 +60,6 @@ class ROSManipInterface(ManipInterface):
     def _make_message(self, value):
         msg = SiriusJointState()
         msg.header.stamp= rospy.Time.now()
-        msg.header.frame_id = "base_link"
         msg.position = [value]
         return msg
         
@@ -139,7 +138,6 @@ class ROSPosePublisher:
     def publish(self, pose):
         msg = PointStamped()
         msg.header.stamp = rospy.Time.now()
-        msg.header.frame_id = "base_link"
         msg.point.x = pose.x
         msg.point.y = pose.y
         msg.point.z = pose.z

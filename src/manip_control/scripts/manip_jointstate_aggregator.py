@@ -8,7 +8,7 @@ class Node:
         rospy.init_node("manip_jointstate_aggregator")
         self._joint_values = {}
         self._subscribers = []
-        motors, joints, output_topic, self._rate = self._read_params()
+        motors, joints, output_topic, self._rate, self._home_offsets = self._read_params()
         self._publisher = rospy.Publisher(output_topic, JointState, queue_size=10)
         for motor, joint in zip(motors, joints):
             self._add_subscriber(motor, joint)
@@ -23,7 +23,8 @@ class Node:
         joints = motor_topics.keys()
         output_topic = rospy.get_param("~jointstate_topic")
         rate = rospy.get_param("~publish_rate")
-        return motors, joints, output_topic, rate
+        home_offsets = rospy.get_param("~home_offsets")
+        return motors, joints, output_topic, rate, home_offsets
     
     def _start_cycle(self, rate):
         duration = rospy.Duration(1 / rate)
@@ -36,7 +37,7 @@ class Node:
     
     def _make_callback(self, joint_name):
         def set_joint(msg):
-            joint_value = msg.position[0]
+            joint_value = msg.position[0] + self._home_offsets[joint_name]
             self._joint_values[joint_name] = joint_value
         return set_joint
     
@@ -47,7 +48,6 @@ class Node:
     def _generate_message(self):
         msg = JointState()
         msg.header.stamp = rospy.Time.now()
-        msg.header.frame_id = "base_link"
         msg.name = []
         msg.position = []
         for joint_name in self._joint_values.keys():
