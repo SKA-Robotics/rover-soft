@@ -17,6 +17,7 @@ class ROSManipInterface(ManipInterface):
         self._params = self._load_ROSparams()
         self._initialize_subscriber()
         self._initialize_publishers()
+        self._offsets = rospy.get_param("~home_offsets")
 
     def _initialize_subscriber(self):
         self.jointstate_topic = rospy.get_param("~jointstate_topic", "/manipulator/joint_states")
@@ -36,13 +37,21 @@ class ROSManipInterface(ManipInterface):
 
     def set_jointstate(self, jointstate: ManipJointState):
         self.jointstate = jointstate
+        jointstate = self._remove_offset(jointstate)
         jointstate_cmd = JointStateConverter.manip_to_ros(jointstate, self._params.joint_names())
         self._distribute_joint_commands(jointstate_cmd)
 
     def _update_jointstate(self, msg):
         self.actual_jointstate = JointStateConverter.ros_to_manip(msg, self._params.joint_names())
+        self.actual_jointstate = self._add_offset(self.actual_jointstate)
         if self.jointstate is None:
             self.jointstate = self.actual_jointstate
+    
+    def _remove_offset(self, jointstate: ManipJointState) -> ManipJointState:
+        return ManipJointState.from_list([position - offset for position, offset in zip(jointstate.to_list(), self._offsets)])
+
+    def _add_offset(self, jointstate: ManipJointState) -> ManipJointState:
+        return ManipJointState.from_list([position + offset for position, offset in zip(jointstate.to_list(), self._offsets)])
 
     def _initialize_publishers(self):
         self.publishers = {}
