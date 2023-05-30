@@ -15,19 +15,15 @@ odrive_driver:
     serial_number: '306A36543431'
     motor0: 
       reverse_motor: True
-      transmission: 0.0138814559112
-#      transmission: 0.02325581395
+      transmission: 43
     motor1: 
       reverse_motor: True
-      transmission: 0.0138814559112
-#      transmission: 0.02325581395  
+      transmission: 43  
   wheels_right: 
     serial_number: '208536885753'
     motor0: 
       reverse_motor: False
-      transmission: 0.0138814559112      
-#      transmission: 0.02325581395
+      transmission: 43
     motor1:
       reverse_motor: False
-      transmission: 0.0138814559112
-#      transmission: 0.02325581395
+      transmission: 43
