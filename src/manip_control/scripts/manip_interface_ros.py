@@ -59,10 +59,9 @@ class ROSManipInterface(ManipInterface):
     
     def _make_message(self, value):
         msg = SiriusJointState()
-        msg.header.timestamp = rospy.Time.now()
+        msg.header.stamp= rospy.Time.now()
         msg.header.frame_id = "base_link"
-        msg.name[0] = "joint"
-        msg.position[0] = value
+        msg.position = [value]
         return msg
         
 
@@ -168,6 +167,4 @@ class JointStateConverter:
             index = jointstate.name.index(name)
             filtered_jointstate.name.append(name)
             filtered_jointstate.position.append(jointstate.position[index])
-            filtered_jointstate.velocity.append(jointstate.velocity[index])
-            filtered_jointstate.effort.append(jointstate.effort[index])
         return filtered_jointstate

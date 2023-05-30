@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 import rospy
 from sensor_msgs.msg import JointState
-
+from sirius_msgs.msg import JointState as SiriusJointState
 
 class Node:
     def __init__(self):
         rospy.init_node("manip_jointstate_aggregator")
         self._joint_values = {}
+        self._subscribers = []
         motors, joints, output_topic, self._rate = self._read_params()
         self._publisher = rospy.Publisher(output_topic, JointState, queue_size=10)
         for motor, joint in zip(motors, joints):
@@ -30,7 +31,8 @@ class Node:
         rospy.Timer(duration, callback)
     
     def _add_subscriber(self, motor, joint):
-        rospy.Subscriber(motor, JointState, self._make_callback(joint))
+        callback = self._make_callback(joint)
+        self._subscribers.append(rospy.Subscriber(motor, SiriusJointState, callback))
     
     def _make_callback(self, joint_name):
         def set_joint(msg):
