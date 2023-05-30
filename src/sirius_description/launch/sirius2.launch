@@ -27,8 +27,8 @@
     <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
     </node>
 
-    <include file="$(find manip_control)/launch/manip_control.launch"/>
+    <!-- <include file="$(find manip_control)/launch/manip_control.launch"/> -->
     <include file="$(find sirius_description)/launch/manipulator_rviz.launch"/>
-    <!-- <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
-    <include file="$(find web_interface)/launch/servers.launch"/> -->
+    <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
+    <!-- <include file="$(find web_interface)/launch/servers.launch"/> -->
 </launch>
