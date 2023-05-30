@@ -4,3 +4,6 @@
 [submodule "src/external/morb_slam_ros"]
 	path = src/external/morb_slam_ros
 	url = https://github.com/Wihmajster/morb_slam_ros.git
+[submodule "src/external/depthai-ros"]
+	path = src/external/depthai-ros
+	url = https://github.com/luxonis/depthai-ros.git
