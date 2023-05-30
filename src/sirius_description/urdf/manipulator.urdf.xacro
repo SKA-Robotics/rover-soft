@@ -15,7 +15,7 @@
 
   <xacro:property name="arm1_home_angle" value="-0.7853981633974483"/>
   <xacro:property name="arm2_home_angle" value="2.356194490192345"/>
-  <xacro:property name="arm3_home_angle" value="0.7853981633974483"/>
+  <xacro:property name="arm3_home_angle" value="0.5"/>
 
 
   <link name="root_link">
