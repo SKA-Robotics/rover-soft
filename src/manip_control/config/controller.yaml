@@ -28,5 +28,5 @@ control_modes:
     interpolation_rate: 10.0
     velocity_weighing: [1, 1, 1, 1, 0.05]
   incremental:
-    send_rate: 10.0
+    send_rate: 20.0
 

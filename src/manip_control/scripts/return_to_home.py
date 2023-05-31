@@ -7,6 +7,7 @@ topics = {
     "cyl_arm1": "roboclaw_driver/129/motor1/set_joint_state",
     "arm1_arm2": "roboclaw_driver/129/motor2/set_joint_state",
     "arm2_arm3": "roboclaw_driver/130/motor1/set_joint_state",
+    "arm3_tool": "roboclaw_driver/130/motor2/set_joint_state",
 }
 
 publishers = [rospy.Publisher(topic, JointState, queue_size=10) for topic in topics.values()]

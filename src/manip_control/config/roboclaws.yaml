@@ -25,5 +25,5 @@ roboclaw_driver:
       torque_constant: 1.2986
     motor2:
       command_timeout: 800
-      ticks_per_revolution: 4096
+      ticks_per_revolution: 1024
       torque_constant: 1.2986
