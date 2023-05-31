@@ -49,6 +49,7 @@ add_message_files(
   FILES
   JointState.msg
   BatteryState.msg
+  FlagState.msg
 )
 
 ## Generate services in the 'srv' folder
