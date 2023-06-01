@@ -1,5 +1,4 @@
 <launch>
     <include file="$(find sirius_localization)/launch/madgwick_filter.launch"/>
     <include file="$(find sirius_localization)/launch/odom_sensor_fusion.launch"/>
-    <include file="$(find sirius_localization)/launch/gnss.launch"/>
 </launch>
