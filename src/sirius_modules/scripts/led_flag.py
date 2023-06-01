@@ -26,5 +26,4 @@ def send_to_bus(msg: FlagState):
 rospy.init_node("led_flag")
 rospy.Subscriber("~state", FlagState, send_to_bus, queue_size=10)
 rospy.spin()
-can.close()
 
