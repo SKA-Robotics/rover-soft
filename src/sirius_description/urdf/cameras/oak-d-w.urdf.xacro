@@ -139,6 +139,54 @@
           <hackBaseline>${baseline}</hackBaseline>  
         </plugin>
       </sensor>
+       <sensor type="depth" name="${prefix}_camera_depth">
+        <!-- Rectified images, Depth images, Point Clouds -->
+        <always_on>true</always_on>
+        <update_rate>${stereo_fps}</update_rate>
+        <visualize>false</visualize> 
+        <camera name="/${prefix}_camera/depth">
+          <image>
+            <width>${calibration.cam0.resolution[0]}</width>
+            <height>${calibration.cam0.resolution[1]}</height>
+            <format>L8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+          <lens>            
+            <intrinsics>
+            <fx>${calibration.cam0.intrinsics[0]}</fx>
+            <fy>${calibration.cam0.intrinsics[1]}</fy>
+            <cx>${calibration.cam0.intrinsics[2]}</cx>
+            <cy>${calibration.cam0.intrinsics[3]}</cy>
+            <s>0</s>
+            </intrinsics>
+            <scale_to_hfov>false</scale_to_hfov>
+          </lens>
+        </camera>
+        <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
+          <cameraName>/${prefix}_camera</cameraName>
+          <imageTopicName>thrash/image_rect_gray</imageTopicName>
+          <cameraInfoTopicName>thrash/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/depth_registered</depthImageTopicName>
+          <depthImageInfoTopicName>depth/camera_info</depthImageInfoTopicName>
+          <pointCloudTopicName>point_cloud/cloud_registered</pointCloudTopicName>
+          <pointCloudCutoff>0.35</pointCloudCutoff>
+          <pointCloudCutoffMax>35.0</pointCloudCutoffMax>
+          <frameName>${prefix}_left_camera_optical_frame</frameName>
+          <baseline>${baseline}</baseline>
+          <CxPrime>${calibration.cam0.intrinsics[2]}</CxPrime>
+          <Cx>${calibration.cam0.intrinsics[2]}</Cx>
+          <Cy>${calibration.cam0.intrinsics[3]}</Cy>
+          <hackBaseline>0.0</hackBaseline>
+        </plugin>
+      </sensor> 
     </gazebo>
 
     <!-- IMU -->
