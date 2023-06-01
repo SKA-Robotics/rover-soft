@@ -13,7 +13,7 @@
   <depend>rospy</depend>
   <depend>sensor_msgs</depend>
   <depend>python3-serial</depend>
-  <depend>python-can</depend>
+  <depend>socketcan_bridge</depend>
 
   <export>
   </export>
