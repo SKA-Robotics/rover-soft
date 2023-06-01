@@ -5,10 +5,10 @@
   <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_fusion" output="screen">
     <param name="use_mag" value="true"/>
     <param name="orientation_stddev" value="$(eval sqrt(pi/6))"/> <!-- standard deviation in radians -->
-    <param name="mag_bias_x" value="-0.204578"/>
-    <param name="mag_bias_y" value="-1.36432"/>
-    <param name="mag_bias_z" value="0.253052"/>
-    <param name="publish_tf" value="true"/>
+    <param name="mag_bias_x" value="-69.7037"/>
+    <param name="mag_bias_y" value="-4.11937"/>
+    <param name="mag_bias_z" value="-76.8054"/>
+    <param name="publish_tf" value="false"/>
     <param name="remove_gravity_vector" value="true"/>
     <remap from="imu/data_raw" to="/$(arg imu_name)/imu/data"/>
     <remap from="imu/mag" to="/$(arg imu_name)/imu/mag"/>
