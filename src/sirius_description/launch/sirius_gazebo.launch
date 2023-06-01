@@ -9,6 +9,8 @@
     <arg name="imu_frequency"         default="200.0" />
     <arg name="stereo_fps"            default="30"  />
 
+    <param name="use_sim_time" command="$(arg use_sim_time)" />
+
     <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml' stereo_fps:=$(arg stereo_fps) imu_frequency:='$(arg imu_frequency)'" />
 
     <arg name="rviz" default="true"/>
