@@ -278,8 +278,6 @@ int main(int argc, char** argv)
   auto rosImuPub = nh.advertise<sensor_msgs::Imu>("imu/data", 10);
   auto magPub = nh.advertise<sensor_msgs::MagneticField>("imu/mag", 10);
             
-  // dai::rosBridge::BridgePublisher<sensor_msgs::Imu, dai::IMUData> imuPublish(
-  //     imuQueue, nh, std::string("imu/data"), [&](auto in, auto& out) { imuConverter.toRosMsg(in, out); }, 100, "", "imu");
   dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> depthPublish(
             depthQueue,
             nh,
