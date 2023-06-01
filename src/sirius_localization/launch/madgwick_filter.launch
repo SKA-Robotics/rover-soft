@@ -10,7 +10,7 @@
     <param name="mag_bias_y" value="-4.11937"/>
     <param name="mag_bias_z" value="-76.8054"/>
     <param name="publish_tf" value="false"/>
-    <param name="remove_gravity_vector" value="true"/>
+    <param name="remove_gravity_vector" value="false"/>
     <remap from="imu/data_raw" to="/$(arg imu_name)/imu/data"/>
     <remap from="imu/mag" to="/$(arg imu_name)/imu/mag"/>
 
