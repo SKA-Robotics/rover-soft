@@ -1,11 +1,5 @@
 <launch>
   <rosparam command="load" file="$(find sirius_localization)/config/odom_sensor_fusion.yaml" ns="odom_sensor_fusion"/>
   <node pkg="robot_localization" type="ekf_localization_node" name="odom_sensor_fusion">
-
-      <!-- Placeholder for output topic remapping
-    <remap from="odometry/filtered" to=""/>
-    <remap from="accel/filtered" to=""/> -->
-    
-
   </node>
 </launch>
