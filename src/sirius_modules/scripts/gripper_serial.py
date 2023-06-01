@@ -4,7 +4,7 @@ import can_utils as can
 import serial
 from std_msgs.msg import Float64
 
-PORT_NAME = "/dev/ttyACM0"
+PORT_NAME = "/dev/ttyACM8"
 
 # ARBITRATION_ID = 0x42
 # CAN_SEND_TOPIC = "/sent_messages"
@@ -34,7 +34,9 @@ class Node():
         self._gripper_position = min(GRIPPER_MAX, max(GRIPPER_MIN, self._gripper_position))
 
     def send_command_to_bus(self):
-        self._serial.write(chr(self._gripper_position))
+        msg = bytes(chr(int(self._gripper_position)), encoding="utf-8")
+        print(msg)
+        self._serial.write(msg)
         # m = can.make_message(ARBITRATION_ID, [int(self._gripper_position)])
         # self._publisher.publish(m)
 
