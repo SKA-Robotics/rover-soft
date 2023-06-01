@@ -4,7 +4,8 @@ from sirius_msgs.msg import BatteryState
 import serial
 
 PUBLISH_PERIOD = 15
-PORT_NAME = "/dev/ttyACM21"
+PORT_NAME = "/dev/serial/by-id/usb-Arduino_LLC_PowerMan-if00"
+
 BAUDRATE = 115200
 
 class Node:
