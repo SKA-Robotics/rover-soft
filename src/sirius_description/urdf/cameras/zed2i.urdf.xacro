@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-
+<!-- https://support.stereolabs.com/hc/en-us/articles/360007395634-What-is-the-camera-focal-length-and-field-of-view- -->
   <xacro:property name="baseline" value="0.12"/>
   <xacro:property name="optical_offset_x" value="-0.01" />
 
@@ -53,8 +53,7 @@
       <child link="${prefix}_right_camera_optical_frame"/>
     </joint>
     <joint name="${prefix}_imu_frame_joint" type="fixed">
-      <!-- IMU frame offset copied from an actual ZED2 camera -->
-      <origin xyz="-0.002 -0.023 -0.002" rpy="0.0014025 -0.0000012 -0.0016915"/>
+      <origin xyz="-0.002 -0.023 -0.002" rpy="0 0 0"/>
       <parent link="${prefix}_left_camera_frame"/>
       <child link="${prefix}_imu_frame"/>
     </joint>
@@ -67,7 +66,7 @@
         <update_rate>15.0</update_rate>
         <visualize>false</visualize> 
         <camera name="/${prefix}_camera/left_raw">
-          <horizontal_fov>${110 * pi/180}</horizontal_fov>
+          <horizontal_fov>${104 * pi/180}</horizontal_fov>
           <image>
             <width>1280</width>
             <height>720</height>
@@ -83,12 +82,11 @@
             <stddev>0.007</stddev>
           </noise>
           <distortion>
-            <!-- Values copied from an actual ZED2 camera -->
-            <k1>-0.043693598</k1>
-            <k2>0.0146164996</k2>
-            <p1>-0.006573319</p1>
-            <p2>-0.000216900</p2>
-            <k3>0.000084328</k3>
+            <!-- Radial-tangential model -->
+            <k1>0</k1> <!-- k1 in kalibr-->
+            <k2>0</k2> <!-- k2 in kalibr-->
+            <p1>0</p1> <!-- r1 in kalibr-->
+            <p2>0</p2> <!-- r2 in kalibr-->
             <center>0.5 0.5</center>
           </distortion>
         </camera>
@@ -97,14 +95,13 @@
           <imageTopicName>image_raw_color</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${prefix}_left_camera_optical_frame</frameName>
-          <distortionK1>-0.043693598</distortionK1>
-          <distortionK2>0.0146164996</distortionK2>
-          <distortionT1>-0.006573319</distortionT1>
-          <distortionT2>-0.000216900</distortionT2>
-          <distortionK3>0.000084328</distortionK3>
-          <CxPrime>648.5</CxPrime>
-          <Cx>648.5</Cx>
-          <Cy>366.8340148925781</Cy>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>640</CxPrime>
+          <Cx>640</Cx>
+          <Cy>360</Cy>
           <hackBaseline>0.0</hackBaseline>
         </plugin>
       </sensor>
@@ -115,7 +112,7 @@
         <update_rate>15.0</update_rate>
         <visualize>false</visualize> 
         <camera name="/${prefix}_camera/depth">
-          <horizontal_fov>${110 * pi/180}</horizontal_fov>
+          <horizontal_fov>${104 * pi/180}</horizontal_fov>
           <image>
             <width>1280</width>
             <height>720</height>
@@ -142,9 +139,9 @@
           <pointCloudCutoffMax>20.0</pointCloudCutoffMax>
           <frameName>${prefix}_left_camera_optical_frame</frameName>
           <baseline>0.12</baseline>
-          <CxPrime>658.8206787109375</CxPrime>
-          <Cx>658.8206787109375</Cx>
-          <Cy>372.25787353515625</Cy>
+          <CxPrime>640</CxPrime>
+          <Cx>640</Cx>
+          <Cy>360</Cy>
           <hackBaseline>0.0</hackBaseline>
         </plugin>
       </sensor>
@@ -158,7 +155,7 @@
         <update_rate>15.0</update_rate>
         <visualize>false</visualize> 
         <camera name="/${prefix}_camera/right_raw">
-          <horizontal_fov>${110 * pi/180}</horizontal_fov>
+          <horizontal_fov>${104 * pi/180}</horizontal_fov>
           <image>
             <width>1280</width>
             <height>720</height>
@@ -174,11 +171,11 @@
             <stddev>0.007</stddev>
           </noise>
           <distortion>
-            <k1>-0.040993299</k1>
-            <k2>0.009593590</k2>
-            <p1>-0.004429849</p1>
-            <p2>0.000192024</p2>
-            <k3>-0.000320880</k3>
+            <!-- Radial-tangential model -->
+            <k1>0</k1> <!-- k1 in kalibr-->
+            <k2>0</k2> <!-- k2 in kalibr-->
+            <p1>0</p1> <!-- r1 in kalibr-->
+            <p2>0</p2> <!-- r2 in kalibr-->
             <center>0.5 0.5</center>
           </distortion>
         </camera>
@@ -187,15 +184,14 @@
           <imageTopicName>image_raw_color</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${prefix}_right_camera_optical_frame</frameName>
-          <distortionK1>-0.040993299</distortionK1>
-          <distortionK2>0.009593590</distortionK2>
-          <distortionT1>-0.004429849</distortionT1>
-          <distortionT2>0.000192024</distortionT2>
-          <distortionK3>-0.000320880</distortionK3>
-          <CxPrime>659.3049926757812</CxPrime>
-          <Cx>659.3049926757812</Cx>
-          <Cy>371.39849853515625</Cy>
-          <hackBaseline>0.12</hackBaseline>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>640</CxPrime>
+          <Cx>640</Cx>
+          <Cy>360</Cy>
+          <hackBaseline>0.0</hackBaseline>
         </plugin>
       </sensor>
 
@@ -205,7 +201,7 @@
         <update_rate>15.0</update_rate>
         <visualize>false</visualize> 
         <camera name="/${prefix}_camera/right">
-          <horizontal_fov>${110 * pi/180}</horizontal_fov>
+          <horizontal_fov>${104 * pi/180}</horizontal_fov>
           <image>
             <width>1280</width>
             <height>720</height>
@@ -226,17 +222,17 @@
           <imageTopicName>image_rect_color</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${prefix}_right_camera_optical_frame</frameName>
-          <CxPrime>658.8206787109375</CxPrime>
-          <Cx>658.8206787109375</Cx>
-          <Cy>372.25787353515625</Cy>
-          <hackBaseline>0.12</hackBaseline>
+          <CxPrime>640</CxPrime>
+          <Cx>640</Cx>
+          <Cy>360</Cy>
+          <hackBaseline>0</hackBaseline>
         </plugin>
       </sensor>
     </gazebo>
 
     <!-- IMU -->
     <gazebo reference="${prefix}_imu_frame">
-      <sensor type="imu" name="zed2_imu_sensor">
+      <sensor type="imu" name="imu_sensor">
         <update_rate>100</update_rate>
         <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
           <topicName>/${prefix}_camera/imu/data</topicName>
@@ -246,6 +242,38 @@
           <initialOrientationAsReference>false</initialOrientationAsReference>
           <xyzOffset>0 0.0 0.0</xyzOffset>
           <rpyOffset>0.0 0.0 0.0</rpyOffset>
+        </plugin>
+      </sensor>
+    </gazebo>
+    <!-- MAGNETOMETER -->
+    <gazebo reference="${prefix}_imu_frame">
+      <sensor type="magnetometer" name="magnetometer_sensor">
+        <always_on>true</always_on>
+        <update_rate>50</update_rate>
+        <magnetometer>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>5e-7</stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>5e-7</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>5e-7</stddev>
+            </noise>
+          </z>
+        </magnetometer>
+        <plugin filename="libgazebo_ros_magnetometer_sensor.so" name="magnetometer_plugin">
+          <topicName>/${prefix}_camera/imu/mag</topicName>
+          <frameName>${prefix}_imu_frame</frameName>
+          <updateRateHZ>50.0</updateRateHZ>
         </plugin>
       </sensor>
     </gazebo>
