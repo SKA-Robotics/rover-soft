@@ -1,33 +1,29 @@
 #define PWM_PIN 9
 
+#include <Servo.h>
+
+Servo myservo;  
 void setup() {
-  pinMode(PWM_PIN, OUTPUT);
   Serial.begin(9600);
 }
 
-int state = 0;
-int command = 0;
-int temp = 0;
+
+int value = 100;
+int timeoutCount = 0;
 
 void loop() {
-  int byte;
   while (Serial.available()) {
-    byte = Serial.read();
-    switch(state) {
-      case 0:
-        if (byte == 128) state = 1;
-        break;
-      case 1:
-        temp = byte;
-        state = 2;
-        break;
-      case 2:
-        if (byte == 192) command = temp;
-        state = 0;
-        break;
-    }
+    value = Serial.read();
+
+    myservo.attach(PWM_PIN, 0, 255);
+    myservo.write(value);
+    timeoutCount = 0;
   }
 
-  analogWrite(PWM_PIN, command);
+  if (timeoutCount > 50) {
+    myservo.detach();
+  }
+
   delay(10);
+  timeoutCount++;
 }
