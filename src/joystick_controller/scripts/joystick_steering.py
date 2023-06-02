@@ -197,17 +197,17 @@ class JoystickController:
             if self.steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
                 manip_message = Twist()
                 manip_message.linear.x = nonlin_scale(
-                    values['right_stick_vertical'], PARAMS['x'])
+                    values['left_stick_vertical'], PARAMS['x'])
                 manip_message.linear.y = nonlin_scale(
                     values['right_stick_horizontal'], PARAMS['y'])
                 manip_message.linear.z = nonlin_scale(
-                    values['left_stick_vertical'], PARAMS['z'])
+                    values['right_stick_vertical'], PARAMS['z'])
                 manip_message.angular.x = nonlin_scale(
-                    values['cross_horizontal'], PARAMS['roll'])
+                    values['left_stick_horizontal'], PARAMS['roll'])
                 manip_message.angular.y = nonlin_scale(
-                    values['left_stick_horizontal'], PARAMS['pitch'])
+                    values['left_trigger'] - values['right_trigger'], PARAMS['pitch'])
                 clamp = nonlin_scale(
-                    values['left_trigger'] - values['right_trigger'], PARAMS['gripper'])
+                    values['cross_vertical'], PARAMS['gripper'])
                 gripper_message = Float64(clamp)
 
                 self.manip_publisher.publish(manip_message)
