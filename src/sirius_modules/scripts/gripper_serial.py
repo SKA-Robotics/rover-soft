@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import rospy
-import can_utils as can
 import serial
 from std_msgs.msg import Float64
 
