@@ -94,10 +94,10 @@ class ScienceHardware:
         self._serial.write(msg)
     
     def raise_manip(self):
-        rospy.logwarn("Raise manip")
+        rospy.logwarn("Please raise manip")
 
     def lower_manip(self):
-        rospy.logwarn("Lower manip")
+        rospy.logwarn("Please lower manip")
     
     def sleep(self, time: float):
         rospy.sleep(time)
@@ -191,10 +191,12 @@ class Node:
     def raise_manip(self) -> None:
         rospy.loginfo(f"Raising manipulator...")
         self.hardware.raise_manip()
+        self.user.wait_for_user_ack()
     
     def lower_manip(self) -> None:
         rospy.loginfo(f"Lowering manipulator...")
         self.hardware.lower_manip()
+        self.user.wait_for_user_ack()
 
     def open_dispenser(self) -> None:
         rospy.loginfo(f"Dispenser opened.")
@@ -237,5 +239,4 @@ class Node:
 
 
 if __name__=="__main__":
-    # Node().run(0)
-    Node().test()
+    Node().run(0)
