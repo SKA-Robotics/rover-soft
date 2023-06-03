@@ -58,7 +58,7 @@ class ManipController:
         target.y = data.point.y
         target.z = data.point.z
         target.roll = 0
-        target.pitch = 0
+        target.pitch = 0.8
         target.yaw = 0
         if self.mode == mode.CARTESIAN:
             self._put_into_pending_moves((self.manip.move_cartesian, target))

@@ -1,46 +1,38 @@
 #!/usr/bin/python3
-import serial
 import rospy
-import traceback
-from sensor_msgs.msg import Joy
+import serial
+from std_msgs.msg import Float64
+
+PORT_NAME = "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
+
+PUBLISH_RATE = 10
+GRIPPER_SPEED = 25
+GRIPPER_MIN = 0
+GRIPPER_START = 100
+GRIPPER_MAX = 255
 
 
-class GripperController:
-
-    def __init__(self, portname, baudrate):
-        self.sub = rospy.Subscriber('/joy', Joy, self.joy_callback)
-        self.angle = 0.5
-        self.speed = 0.03
-        try:
-            self.serial = serial.Serial(portname, baudrate)
-        except serial.SerialException as e:
-            rospy.logerr("Could not open serial port %s: %s" % (portname, traceback.format_exc()))
-            exit(1)
-
+class Node():
+    def __init__(self):
+        rospy.init_node("cripper")
+        self._gripper_position = GRIPPER_START
+        self._serial = serial.Serial(PORT_NAME, 9600)
+        self._rate = rospy.Rate(PUBLISH_RATE)
+        rospy.Subscriber("/cmd_grip", Float64, self.update_gripper_command, queue_size=10)
+    
     def run(self):
         while not rospy.is_shutdown():
-            if (self.serial.in_waiting):
-                print(self.serial.readline())
+            self.send_command_to_bus()
+            self._rate.sleep()
 
-    def joy_callback(self, msg):
-        self.angle = clamp(self.angle + msg.axes[-1] * self.speed, -1, 1)
-        rospy.loginfo(self.angle)
-        command = int((self.angle + 1.0) * 123) + 1
-        rospy.loginfo(command)
-        self.serial.write([128, clamp(command, 1, 254), 192])
+    def update_gripper_command(self, msg):
+        self._gripper_position += msg.data * GRIPPER_SPEED
+        self._gripper_position = min(GRIPPER_MAX, max(GRIPPER_MIN, self._gripper_position))
 
-    def __del__(self):
-        self.serial.close()
+    def send_command_to_bus(self):
+        msg = bytes(chr(int(self._gripper_position)), encoding="utf-8")
+        print(msg)
+        self._serial.write(msg)
 
-
-def clamp(value, min_value, max_value):
-    return max(min_value, min(max_value, value))
-
-
-if __name__ == '__main__':
-    try:
-        rospy.init_node('gripper')
-        driver = GripperController(rospy.get_param("~port_name", "/dev/ttyACM0"), rospy.get_param("~baudrate", 9600))
-        driver.run()
-    except rospy.ROSInterruptException:
-        pass
+if __name__ == "__main__":
+    Node().run()

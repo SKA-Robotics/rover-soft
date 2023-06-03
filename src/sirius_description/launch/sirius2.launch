@@ -27,5 +27,4 @@
     <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
     </node>
 
-    <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
 </launch>

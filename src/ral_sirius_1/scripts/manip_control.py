@@ -4,15 +4,15 @@ import serial
 from sirius_msgs.msg import JointState
 from sensor_msgs.msg import JointState as SensorJointState
 
-CMD_MANIP_TOPIC = '/cmd_manip'
+CMD_MANIP_TOPIC = '/cmd_manip_jointstate'
 
 LIMB_IDS = {
-    'arm_rotate': "/roboclaw_driver/130/motor1/set_joint_state",
-    'claw_clamp': "/roboclaw_driver/130/motor2/set_joint_state",
-    'claw_rotate': "/roboclaw_driver/131/motor1/set_joint_state",
-    'claw_lift': "/roboclaw_driver/131/motor2/set_joint_state",
-    'arm_tilt': "/roboclaw_driver/132/motor1/set_joint_state",
-    'arm_lift': "/roboclaw_driver/132/motor2/set_joint_state",
+    'arm_rotate': "/roboclaw_driver/128/motor1/set_joint_state",
+    'claw_clamp': "/roboclaw_driver/128/motor2/set_joint_state",
+    'claw_rotate': "/roboclaw_driver/130/motor2/set_joint_state",
+    'claw_lift': "/roboclaw_driver/130/motor1/set_joint_state",
+    'arm_tilt': "/roboclaw_driver/129/motor2/set_joint_state",
+    'arm_lift': "/roboclaw_driver/129/motor1/set_joint_state",
 }
 
 
