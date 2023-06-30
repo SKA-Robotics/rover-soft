@@ -22,3 +22,5 @@ suspension_angle: 0.59
 suspension_length: 0.31
 suspension_width: 0.091
 suspension_x_shift: 0.015
+gnss_height: 0.0584
+gnss_radius: 0.075

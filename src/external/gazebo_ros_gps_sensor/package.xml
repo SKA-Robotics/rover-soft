@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>gazebo_ros_gps_sensor</name>
+  <version>0.1.0</version>
+  <description>A gps plugin for gazebo to bridge gps sensor to ROS.</description>
+
+  <maintainer email="gabriel@gabrielb.com">Gabriel Brzeziński</maintainer>
+  <license>MIT</license>
+
+  <!-- Dependencies needed to compile this package. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>gazebo_dev</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>gazebo</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+</package>

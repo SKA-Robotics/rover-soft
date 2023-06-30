@@ -17,6 +17,7 @@
   <xacro:property name="cameras_inertial" value="${xacro.load_yaml('cameras/cameras_inertial.yaml')}" /> 
   <xacro:include filename="materials.urdf.xacro" />
   <xacro:include filename="sirius_2/indicator_light.urdf.xacro" />
+  <xacro:include filename="sirius_2/gnss.urdf.xacro" />
   <xacro:include filename="sirius_2/platform.urdf.xacro" />
 
   <xacro:include filename="cameras/hp_4310.urdf.xacro" />
@@ -70,6 +71,10 @@
   <xacro:indicator_light prefix="blue" material="blue_t">
     <xacro:blue_t/>
   </xacro:indicator_light>
+
+  <xacro:gnss material="light_gray">
+    <xacro:light_gray/>
+  </xacro:gnss>
 
   <xacro:hp_4310 prefix="front_mast" material="black">
     <xacro:black/>
@@ -127,6 +132,12 @@
     <parent link="main_platform"/>
     <child link="blue_indicator_light"/>
     <origin xyz="${params['blue_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
+  </joint>
+
+  <joint name="base_to_gnss" type="fixed">
+    <parent link="base_link"/>
+    <child link="gnss"/>
+    <origin xyz="${params['gnss_xyz']}" rpy="0 0 0"/>
   </joint>
 
   <joint name="base_to_front_mast_camera" type="fixed">

@@ -4,8 +4,8 @@
 
     <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
     <rosparam file="$(find sirius_description)/config/odrive.yaml" command="load"/>   
-    <rosparam file="$(find sirius_description)/config/sensor_fusion.yaml" command="load" ns="odom_sensor_fusion"/> 
-    <rosparam file="$(find sirius_description)/config/sensor_fusion.yaml" command="load" ns="map_sensor_fusion"/>  
+    <rosparam file="$(find sirius_description)/config/sensor_fusion_odom.yaml" command="load" ns="odom_sensor_fusion"/> 
+    <rosparam file="$(find sirius_description)/config/sensor_fusion_odom.yaml" command="load" ns="map_sensor_fusion"/>  
 
     <remap from="/sirius/controller/wheels/cmd_vel" to="/cmd_vel" />
 
