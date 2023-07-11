@@ -16,8 +16,8 @@ jobs:
 
     steps:
       - name: lowercase image name
-      run: |
-        echo "MAIN_IMAGE=${MAIN_IMAGE,,}" >>${GITHUB_ENV}
+        run: |
+          echo "MAIN_IMAGE=${MAIN_IMAGE,,}" >>${GITHUB_ENV}
 
       - name: Checkout
         uses: actions/checkout@v2
