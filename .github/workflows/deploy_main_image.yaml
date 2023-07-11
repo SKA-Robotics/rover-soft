@@ -35,7 +35,7 @@ jobs:
         with:
           file: ci/Dockerfile.stable
           push: true
-          tags: ${{ $MAIN_IMAGE }}
-          platforms: ${{ $PLATFORM }}
-          cache-from: ${{ $MAIN_IMAGE }}
+          tags: ${{ env.MAIN_IMAGE }}
+          platforms: ${{ env.PLATFORM }}
+          cache-from: ${{ env.MAIN_IMAGE }}
           build-args: BUILDKIT_INLINE_CACHE=1
