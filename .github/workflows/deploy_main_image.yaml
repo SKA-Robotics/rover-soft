@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'ci'
 jobs:
   deploy-main-image:
     name: Build and deploy main docker image
