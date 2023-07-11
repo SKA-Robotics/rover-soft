@@ -5,13 +5,12 @@ on:
   push:
     branches:
       - 'main'
-      - 'ci'
 jobs:
   deploy-main-image:
     name: Build and deploy main docker image
     runs-on: ubuntu-latest
     env:
-      PLATFORM: linux/amd64
+      PLATFORM: linux/amd64,linux/arm64
       MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/rover-soft:stable
 
     steps:
