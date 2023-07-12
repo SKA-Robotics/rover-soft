@@ -1,47 +1,23 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_ros_gps_sensor)
 
-# Compile as C++17
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++17" COMPILER_SUPPORTS_CXX17)
-check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX17)
-  set(CMAKE_CXX_FLAGS "-std=c++17")
-elseif(COMPILER_SUPPORTS_CXX0X)
-  set(CMAKE_CXX_FLAGS "-std=c++0x")
-else()
-  message(
-    FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++17 support.")
-endif()
+# Compile as C++14
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Find catkin macros and libraries if COMPONENTS list like find_package(catkin
-# REQUIRED COMPONENTS xyz) is used, also find other catkin packages
+# Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS gazebo_ros roscpp std_msgs sensor_msgs)
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 # Find gazebo
-if(POLICY CMP0054)
-  cmake_policy(SET CMP0054 NEW)
-endif()
-# Find gazebo
 find_package(gazebo REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 include_directories(${GAZEBO_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
-# ##############################################################################
-# Declare ROS dynamic reconfigure parameters ##
-# ##############################################################################
+# Declare ROS dynamic reconfigure parameters
 
-# ##############################################################################
-# catkin specific configuration ##
-# ##############################################################################
-# The catkin_package macro generates cmake config files for your package Declare
-# things to be passed to dependent projects INCLUDE_DIRS: uncomment this if your
-# package contains header files LIBRARIES: libraries you create in this project
-# that dependent projects also need CATKIN_DEPENDS: catkin_packages dependent
-# projects also need DEPENDS: system dependencies of this project that dependent
-# projects also need
+# Catkin specific configuration
 catkin_package(
   CATKIN_DEPENDS
   roscpp
@@ -49,22 +25,16 @@ catkin_package(
   sensor_msgs
   INCLUDE_DIRS
   include
-  LIBRARIES)
+  LIBRARIES
+  gazebo_ros_gps_sensor)
 
-# ##############################################################################
-# Build ##
-# ##############################################################################
+# Build
 
 add_library(gazebo_ros_gps_sensor src/gazebo_ros_gps_sensor.cpp)
 target_link_libraries(gazebo_ros_gps_sensor ${GAZEBO_LIBRARIES}
                       ${catkin_LIBRARIES})
 
-# ##############################################################################
-# Install ##
-# ##############################################################################
-
-# all install targets should use catkin DESTINATION variables See
-# http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+# Install
 
 install(
   DIRECTORY include/${PROJECT_NAME}/

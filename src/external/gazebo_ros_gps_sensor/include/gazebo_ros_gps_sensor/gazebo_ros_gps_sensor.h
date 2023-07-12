@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * This code is based on the Gazebo ROS Magnetometer Sensor plugin. 
+ * Original code repository: https://github.com/Darkproduct/gazebo_ros_magnetometer_sensor
+ *
+ * Modified versions of the original code are licensed under the same
+ * Apache License, Version 2.0.
 */
 
 #ifndef GAZEBO_ROS_GPS_SENSOR_H
@@ -32,61 +37,35 @@ namespace gazebo
   {
     class GpsSensor;
   }
-  /**
-  @anchor GazeboRosGpsSensor
-  \ref GazeboRosGpsSensor is a plugin to simulate a gps sensor. Some things to note:
-  - inheritance from SensorPlugin,
-  - measurements are given by gazebo GpsSensor instead of being computed by the ros plugin
-  */
-  /** @brief Gazebo Ros gps sensor plugin. */
+
   class GazeboRosGpsSensor : public SensorPlugin
   {
   public:
-    /// \brief Constructor.
     GazeboRosGpsSensor();
-    /// \brief Destructor.
     virtual ~GazeboRosGpsSensor();
-    /// \brief Load the sensor.
-    /// \param sensor_ pointer to the sensor.
-    /// \param sdf_ pointer to the sdf config file.
     virtual void Load(sensors::SensorPtr sensor_, sdf::ElementPtr sdf_);
 
   protected:
-    /// \brief Update the sensor.
-    virtual void UpdateChild(const gazebo::common::UpdateInfo &/*_info*/);
+    virtual void UpdateChild(const gazebo::common::UpdateInfo& info);
 
   private:
-    /// \brief Load the parameters from the sdf file.
     bool LoadParameters();
     
-    /// \brief Ros NodeHandle pointer.
     ros::NodeHandle* node;
-    /// \brief Ros Publisher for gps data.
     ros::Publisher gps_data_publisher;
     ros::Publisher gps_velocity_data_publisher;
-    /// \brief Ros gps message.
     sensor_msgs::NavSatFix gps_msg;
     geometry_msgs::Vector3Stamped gps_velocity_msg;
-
-    /// \brief last time on which the data was published.
     common::Time last_time;
-    /// \brief Pointer to the update event connection.
     gazebo::event::ConnectionPtr connection;
-    /// \brief Pointer to the sensor.
     sensors::GpsSensor* sensor;
-    /// \brief Pointer to the sdf config file.
     sdf::ElementPtr sdf;
 
-    //loaded parameters
-    /// \brief The data is published on the topic named: /robot_namespace/topic_name.
     std::string robot_namespace;
-    /// \brief The data is published on the topic named: /robot_namespace/topic_name.
     std::string topic_name;
-    /// \brief Name of the link of the IMU.
     std::string body_name;
-    /// \brief Sensor update rate.
     double update_rate;
   };
 }
 
-#endif //GAZEBO_ROS_GPS_SENSOR_H
+#endif // GAZEBO_ROS_GPS_SENSOR_H
