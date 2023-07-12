@@ -23,6 +23,7 @@
 #include <gazebo_ros_gps_sensor/gazebo_ros_gps_sensor.h>
 #include <gazebo/common/Events.hh>
 #include <gazebo/physics/physics.hh>
+#include <cmath>
 
 GZ_REGISTER_SENSOR_PLUGIN(gazebo::GazeboRosGpsSensor)
 
@@ -165,7 +166,39 @@ namespace gazebo
       update_rate = 1.0;
       ROS_WARN_STREAM("missing <updateRateHZ>, set to default: " << update_rate);
     }
+    // Load spherical_coordinates parameters
+    if (sdf->HasElement("spherical_coordinates"))
+    {
+      // Set Gazebo world origin to the spherical_coordinates values
+      gazebo::physics::WorldPtr world = gazebo::physics::get_world(sensor->WorldName());
+      if (world){
+        sdf::ElementPtr spherical_coordinates = sdf->GetElement("spherical_coordinates");
 
+        if (spherical_coordinates->HasElement("latitude_deg")){
+          auto latitude = spherical_coordinates->Get<double>("latitude_deg") * M_PI / 180;
+          world->SphericalCoords()->SetLatitudeReference(latitude);
+          ROS_INFO_STREAM("Latitude: " << latitude);
+        }
+
+        if (spherical_coordinates->HasElement("longitude_deg")){
+          auto longitude = spherical_coordinates->Get<double>("longitude_deg") * M_PI / 180;
+          world->SphericalCoords()->SetLongitudeReference(longitude);
+          ROS_INFO_STREAM("Longitude: " << longitude);
+        }
+
+        if (spherical_coordinates->HasElement("elevation")){
+          auto elevation = spherical_coordinates->Get<double>("elevation");
+          world->SphericalCoords()->SetElevationReference(elevation);
+          ROS_INFO_STREAM("Elevation: " << elevation);
+        }
+        
+        if (spherical_coordinates->HasElement("heading_deg")){
+          auto heading = spherical_coordinates->Get<double>("heading_deg") * M_PI / 180;
+          world->SphericalCoords()->SetHeadingOffset(heading);
+          ROS_INFO_STREAM("Heading: " << heading);
+        }
+      }
+    }
     return true;
   }
 }

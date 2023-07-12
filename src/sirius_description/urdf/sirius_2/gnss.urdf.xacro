@@ -62,6 +62,12 @@
         <topicName>/gps/fix</topicName>
         <frameName>gnss</frameName>
         <updateRateHZ>20.0</updateRateHZ>
+        <spherical_coordinates>
+          <latitude_deg>50.87816930685754</latitude_deg>
+          <longitude_deg>20.64235537910024</longitude_deg>
+          <elevation>268</elevation>
+          <heading_deg>-45</heading_deg>
+        </spherical_coordinates>
       </plugin>
     </sensor>
   </gazebo>
