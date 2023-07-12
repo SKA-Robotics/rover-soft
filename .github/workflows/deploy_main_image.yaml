@@ -14,6 +14,8 @@ jobs:
       MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/rover-soft:stable
 
     steps:
+      # github.repository_owner can contain uppercase chars, 
+      # but docker repository address must be all lowercase
       - name: lowercase image name
         run: |
           echo "MAIN_IMAGE=${MAIN_IMAGE,,}" >>${GITHUB_ENV}
