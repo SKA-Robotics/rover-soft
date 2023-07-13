@@ -14,7 +14,6 @@ GRIPPER_TOPIC_NAME = "/cmd_grip"
 
 
 class JoystickController:
-
     def __init__(self) -> None:
         ID = rospy.get_param("~ID", "0")
         NAME = "joystick_steering_node_" + ID
@@ -25,12 +24,12 @@ class JoystickController:
         JOYSTICK_TYPE = rospy.get_param("~joystick_type", "XBOX_XS")
         JOYSTICK_DATA = rospy.get_param(f"~{JOYSTICK_TYPE}", None)
         MODES_DATA = rospy.get_param("~steering_modes", None)
-        self.AXES_ID: dict = JOYSTICK_DATA['axes']
-        self.BUTTONS_ID: dict = JOYSTICK_DATA['buttons']
+        self.AXES_ID: dict = JOYSTICK_DATA["axes"]
+        self.BUTTONS_ID: dict = JOYSTICK_DATA["buttons"]
 
         # set rover steering and normal modes at begining
-        self.rover = self.RoverSender(MODES_DATA['rover'])
-        self.manip = self.ManipSender(MODES_DATA['manip'])
+        self.rover = self.RoverSender(MODES_DATA["rover"])
+        self.manip = self.ManipSender(MODES_DATA["manip"])
         self.active_object = self.rover
 
         rospy.Subscriber(JOY_TOPIC_NAME, Joy, self._joy_listener_callback)
@@ -44,17 +43,15 @@ class JoystickController:
 
     def _joy_listener_callback(self, data: Joy) -> None:
         # convert data to much easier use
-        VALUES = dict((name, data.buttons[id])
-                      for name, id in self.BUTTONS_ID.items())
-        VALUES.update(dict((name, data.axes[id])
-                           for name, id in self.AXES_ID.items()))
+        VALUES = dict((name, data.buttons[id]) for name, id in self.BUTTONS_ID.items())
+        VALUES.update(dict((name, data.axes[id]) for name, id in self.AXES_ID.items()))
 
         # change currently steered object and stop the previous one
-        if VALUES['start_button'] and not VALUES['back_button']:
+        if VALUES["start_button"] and not VALUES["back_button"]:
             self.active_object.stop_object()
             self.active_object = self.rover
             return
-        if VALUES['back_button'] and not VALUES['start_button']:
+        if VALUES["back_button"] and not VALUES["start_button"]:
             self.active_object.stop_object()
             self.active_object = self.manip
             return
@@ -67,7 +64,6 @@ class JoystickController:
         self.active_object.steer_object(VALUES)
 
     class SteeringMessageSender(ABC):
-
         @abstractmethod
         def steer_object(self, values: dict) -> None:
             pass
@@ -81,7 +77,6 @@ class JoystickController:
             pass
 
     class RoverSender(SteeringMessageSender):
-
         class RoverSteeringMode(Enum):
             NORMAL = 0
             TANK = 1
@@ -91,15 +86,18 @@ class JoystickController:
             self.MODES_DATA = modes_data
             self.steering_mode = self.RoverSteeringMode.NORMAL
             self.rover_publisher = rospy.Publisher(
-                ROVER_TOPIC_NAME, Twist, queue_size=10)
+                ROVER_TOPIC_NAME, Twist, queue_size=10
+            )
 
             # used in child mode
             self.CHILD_MODE = rospy.get_param("~child_mode", False)
             if self.CHILD_MODE:
-                i1 = min(1.0, max(rospy.get_param(
-                    "~child_mode_inertia_i1", 0.4444), 0.0))
-                i2 = min(1.0, max(rospy.get_param(
-                    "~child_mode_inertia_i2", 0.0066), 0.0))
+                i1 = min(
+                    1.0, max(rospy.get_param("~child_mode_inertia_i1", 0.4444), 0.0)
+                )
+                i2 = min(
+                    1.0, max(rospy.get_param("~child_mode_inertia_i2", 0.0066), 0.0)
+                )
                 self.lin_inertia = self.InertiaModel(i1, i2)
                 self.ang_inertia = self.InertiaModel(i1, i2)
                 rospy.loginfo("Child mode enabled")
@@ -111,25 +109,34 @@ class JoystickController:
             ang_cmd = 0
 
             if self.steering_mode == self.RoverSteeringMode.NORMAL:
-                lin_cmd = nonlin_scale(
-                    values['right_stick_vertical'], PARAMS['linear'])
+                lin_cmd = nonlin_scale(values["right_stick_vertical"], PARAMS["linear"])
                 ang_cmd = nonlin_scale(
-                    values['right_stick_horizontal'], PARAMS['angular'])
+                    values["right_stick_horizontal"], PARAMS["angular"]
+                )
 
             elif self.steering_mode == self.RoverSteeringMode.TANK:
                 lin_cmd = nonlin_scale(
-                    (values['left_stick_vertical'] + values['right_stick_vertical']) / 2, PARAMS)
+                    (values["left_stick_vertical"] + values["right_stick_vertical"])
+                    / 2,
+                    PARAMS,
+                )
                 ang_cmd = nonlin_scale(
-                    (values['right_stick_vertical'] - values['left_stick_vertical']) / 2, PARAMS)
+                    (values["right_stick_vertical"] - values["left_stick_vertical"])
+                    / 2,
+                    PARAMS,
+                )
 
             elif self.steering_mode == self.RoverSteeringMode.GAMER:
                 lin_cmd = nonlin_scale(
-                    (values['right_trigger'] - values['left_trigger']) / 2, PARAMS['linear'])
+                    (values["right_trigger"] - values["left_trigger"]) / 2,
+                    PARAMS["linear"],
+                )
                 turning_angle = nonlin_scale(
-                    values['right_stick_horizontal'], PARAMS['angular'])
+                    values["right_stick_horizontal"], PARAMS["angular"]
+                )
                 ang_cmd = lin_cmd * tan(turning_angle)
 
-            if (self.CHILD_MODE):
+            if self.CHILD_MODE:
                 rover_message.linear.x = self.lin_inertia.step(lin_cmd)
                 rover_message.angular.z = self.ang_inertia.step(ang_cmd)
             else:
@@ -139,15 +146,15 @@ class JoystickController:
             self.rover_publisher.publish(rover_message)
 
         def change_mode(self, buttons_values: dict) -> None:
-            if buttons_values['A_button']:
+            if buttons_values["A_button"]:
                 self.stop_object()
                 self.steering_mode = self.RoverSteeringMode.NORMAL
                 return True
-            if buttons_values['B_button']:
+            if buttons_values["B_button"]:
                 self.stop_object()
                 self.steering_mode = self.RoverSteeringMode.TANK
                 return True
-            if buttons_values['X_button']:
+            if buttons_values["X_button"]:
                 self.stop_object()
                 self.steering_mode = self.RoverSteeringMode.GAMER
                 return True
@@ -159,7 +166,6 @@ class JoystickController:
 
         # This class simulates dynamic system used for softening joystick's input signal
         class InertiaModel:
-
             def __init__(self, i1: float, i2: float) -> None:
                 self.I1 = i1
                 self.I2 = i2
@@ -178,7 +184,6 @@ class JoystickController:
                 return self.prev_y
 
     class ManipSender(SteeringMessageSender):
-
         class ManipSteeringMode(Enum):
             INVERSE_KINEMATICS = 0
             # ANOTHER_MODE = 1
@@ -187,9 +192,11 @@ class JoystickController:
             self.MODES_DATA = modes_data
             self.steering_mode = self.ManipSteeringMode.INVERSE_KINEMATICS
             self.manip_publisher = rospy.Publisher(
-                MANIP_TOPIC_NAME, Twist, queue_size=10)
+                MANIP_TOPIC_NAME, Twist, queue_size=10
+            )
             self.gripper_publisher = rospy.Publisher(
-                GRIPPER_TOPIC_NAME, Float64, queue_size=10)
+                GRIPPER_TOPIC_NAME, Float64, queue_size=10
+            )
 
         def steer_object(self, values: dict) -> None:
             PARAMS = self.MODES_DATA[self.steering_mode.name.lower()]
@@ -197,17 +204,21 @@ class JoystickController:
             if self.steering_mode == self.ManipSteeringMode.INVERSE_KINEMATICS:
                 manip_message = Twist()
                 manip_message.linear.x = nonlin_scale(
-                    values['left_stick_vertical'], PARAMS['x'])
+                    values["left_stick_vertical"], PARAMS["x"]
+                )
                 manip_message.linear.y = nonlin_scale(
-                    values['right_stick_horizontal'], PARAMS['y'])
+                    values["right_stick_horizontal"], PARAMS["y"]
+                )
                 manip_message.linear.z = nonlin_scale(
-                    values['right_stick_vertical'], PARAMS['z'])
+                    values["right_stick_vertical"], PARAMS["z"]
+                )
                 manip_message.angular.x = nonlin_scale(
-                    values['left_stick_horizontal'], PARAMS['roll'])
+                    values["left_stick_horizontal"], PARAMS["roll"]
+                )
                 manip_message.angular.y = nonlin_scale(
-                    values['left_trigger'] - values['right_trigger'], PARAMS['pitch'])
-                clamp = nonlin_scale(
-                    values['cross_vertical'], PARAMS['gripper'])
+                    values["left_trigger"] - values["right_trigger"], PARAMS["pitch"]
+                )
+                clamp = nonlin_scale(values["cross_vertical"], PARAMS["gripper"])
                 gripper_message = Float64(clamp)
 
                 self.manip_publisher.publish(manip_message)
@@ -235,10 +246,14 @@ class JoystickController:
 
 
 def nonlin_scale(value: float, params: dict) -> float:
-    return value * params['scale_coefficient'] * abs(value)**(params['shape_coefficient'] - 1.0)
+    return (
+        value
+        * params["scale_coefficient"]
+        * abs(value) ** (params["shape_coefficient"] - 1.0)
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         JoystickController().run()
     except rospy.ROSInterruptException:

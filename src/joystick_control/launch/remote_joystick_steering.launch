@@ -1,0 +1,17 @@
+<launch>
+	<arg name="message_rate" default="20"/> <!-- in Hz -->
+	<arg name="ID" default="0"/>
+	<arg name="joystick_type" default="XBOX_XS"/>
+		
+	<node name="joy_multiplexer" pkg="joystick_control" type="joy_multiplexer.py" output="screen">
+        <!-- Input config -->
+		<param name="joystick_type" value="$(arg joystick_type)"/>
+		<rosparam file="$(find joystick_control)/config/joysticks.yaml" command="load"/>
+
+        <!-- Output config -->
+		<rosparam file="$(find joystick_control)/config/steering_modes.yaml" command="load"/>
+	</node>
+    
+    <node pkg="rosservice" type="rosservice" name="add_direct_joy_1" args="call --wait /joy_multiplexer/add_joy joy_0" />
+    <!-- <node pkg="rosservice" type="rosservice" name="select_direct_joy_1" args="call -wait /joy_multiplexer/select_joy joy_0" /> -->
+</launch>

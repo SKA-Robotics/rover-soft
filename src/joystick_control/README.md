@@ -1,4 +1,4 @@
-# joystick_controller package
+# joystick_control package
 
 This package allows steering the rover and the manipulator using one or more joystick controllers.
 
@@ -11,7 +11,7 @@ Steering can be switched between rover and manipulator using start/back buttons.
 - `single_joystick_steering.launch`
 
   ```bash
-  $ roslaunch joystick_controller single_joystick_steering.launch
+  $ roslaunch joystick_control single_joystick_steering.launch
   ```
 
   Launches a joystick steering module.
@@ -19,7 +19,7 @@ Steering can be switched between rover and manipulator using start/back buttons.
 - `multi_joystick_steering.launch`
 
   ```bash
-  $ roslaunch joystick_controller multi_joystick_steering.launch
+  $ roslaunch joystick_control multi_joystick_steering.launch
   ```
 
   Launches multiple joystick steering modules.

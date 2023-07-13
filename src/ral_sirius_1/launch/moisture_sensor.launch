@@ -1,5 +1,0 @@
-<launch>
-    <rosparam file="$(find ral_sirius_1)/config/moisture_sensor.yaml" command="load"/>
-
-    <node pkg="ral_sirius_1" type="moisture_sensor.py" name="moisture_sensor" required="true" output="screen"/>
-</launch>
