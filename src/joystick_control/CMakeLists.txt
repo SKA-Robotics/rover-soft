@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   message_generation
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -61,8 +62,6 @@ add_service_files(
   ListJoy.srv
   RemoveJoy.srv
   SelectJoy.srv
-
-  SetDiffDriveConfig.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -94,10 +93,9 @@ generate_messages(
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+  cfg/JoyDiffDrive.cfg
+)
 
 ###################################
 ## catkin specific configuration ##

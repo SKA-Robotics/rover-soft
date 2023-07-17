@@ -13,8 +13,6 @@ from joystick_control.srv import SelectJoy, AddJoy, RemoveJoy, ListJoy
 
 from utils.translate_joystick import JoystickTranslator
 
-from geometry_msgs.msg import Twist
-
 
 class JoystickMultiplexer:
     def __init__(self) -> None:
@@ -25,7 +23,11 @@ class JoystickMultiplexer:
         self.active_joystick = ""
         self.joystick_subscribers = {}
         self.active_topic = ""
-        self.output_publishers = {}
+        self.output_publishers = {
+            name: rospy.Publisher(name, Joy, queue_size=10)
+            for name in self.STEERING_MODES.keys()
+            if name != "emergency"
+        }
 
         self.selected_joy_topic = rospy.Publisher("selected_joy", String, queue_size=10)
         rospy.Service("~select_joy", SelectJoy, self._select_joy)
@@ -38,40 +40,32 @@ class JoystickMultiplexer:
 
         self.translator = JoystickTranslator()
 
-        self.test_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
-
     def run(self) -> None:
         rospy.spin()
 
     def _joy_subscriber_callback(self, data: Joy, topic_name=""):
         inputs = self.translator.translate(data)
 
-        # controller mode selection
-        for config in self.STEERING_MODES.values():
-            if inputs[config["button"]] == 1:
-                self.active_joystick = topic_name
-                self.active_topic = config["topic"]
+        with self.service_lock:
+            # emergency stop
+            if inputs[self.STEERING_MODES["emergency"]["button"]] == 1:
+                rospy.logwarn("emergency stop")
+                self.active_joystick = "__none"
+                self.active_topic = "__none"
+                return
 
-        # emergency stop
-        if inputs[self.STEERING_MODES["emergency"].button] == 1:
-            self.active_joystick = "__none"
-            self.active_topic = "__none"
-            return
+            # controller mode selection
+            for config in self.STEERING_MODES.values():
+                if inputs[config["button"]] == 1:
+                    rospy.logwarn(
+                        f"enabling {config['topic']} with joystick {topic_name}"
+                    )
+                    self.active_joystick = topic_name
+                    self.active_topic = config["topic"]
 
-        # input handling
-        if topic_name == self.active_joystick:
-            rover_message = Twist()
-            rover_message.linear.x = -10 * (
-                inputs["right_stick_vertical"]
-                if abs(inputs["right_stick_vertical"]) > 0.15
-                else 0.0
-            )
-            rover_message.angular.z = -10 * (
-                inputs["right_stick_horizontal"]
-                if abs(inputs["right_stick_horizontal"]) > 0.15
-                else 0.0
-            )
-            self.test_publisher.publish(rover_message)
+            # input handling
+            if topic_name == self.active_joystick:
+                self.output_publishers[self.active_topic].publish(data)
 
     def _select_joy(self, req):
         topic_name = req.topic_name
@@ -88,15 +82,14 @@ class JoystickMultiplexer:
                 return False
 
             self.active_joystick = topic_name
-
             return True
 
     def _add_joy(self, req):
         topic_name = req.topic_name
         rospy.loginfo(f"Adding {topic_name}")
         with self.service_lock:
-            # prevent topic collisions
-            if topic_name in self.joystick_subscribers:
+            # prevent topic collisions and __none, which is reserved
+            if topic_name in self.joystick_subscribers or topic_name == "__none":
                 return False
 
             self.joystick_subscribers[topic_name] = rospy.Subscriber(
@@ -104,7 +97,6 @@ class JoystickMultiplexer:
                 Joy,
                 partial(self._joy_subscriber_callback, topic_name=topic_name),
             )
-
             return True
 
     def _remove_joy(self, req):
@@ -115,6 +107,7 @@ class JoystickMultiplexer:
             if topic_name not in self.joystick_subscribers:
                 return False
 
+            self.joystick_subscribers[topic_name].unregister()
             del self.joystick_subscribers[topic_name]
 
             return True

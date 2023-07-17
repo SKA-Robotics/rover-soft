@@ -1,6 +1,5 @@
 <launch>
 	<arg name="message_rate" default="20"/> <!-- in Hz -->
-	<arg name="ID" default="0"/>
 	<arg name="joystick_type" default="XBOX_XS"/>
 		
 	<node name="joy_multiplexer" pkg="joystick_control" type="joy_multiplexer.py" output="screen">
@@ -10,6 +9,11 @@
 
         <!-- Output config -->
 		<rosparam file="$(find joystick_control)/config/steering_modes.yaml" command="load"/>
+	</node>
+
+	<node name="joy_diff_drive" pkg="joystick_control" type="joy_diff_drive.py" output="screen">
+		<rosparam file="$(find joystick_control)/config/joysticks.yaml" command="load"/>
+		<rosparam file="$(find joystick_control)/config/diff_drive.yaml" command="load"/>
 	</node>
     
     <node pkg="rosservice" type="rosservice" name="add_direct_joy_1" args="call --wait /joy_multiplexer/add_joy joy_0" />
