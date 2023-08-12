@@ -8,32 +8,38 @@ from std_msgs.msg import Header
 
 SCRIPT_DIR = dirname(__file__)
 
-INFO_TOPIC = "/fake_camera_info"
-STREAM_TOPIC = "/fake_camera_stream"
-FRAME_ID = "/manip_camera"
-MSG_RATE = 0.3  # Hz
-
 
 class FakeCamera:
     def __init__(self) -> None:
         rospy.init_node("fake_camera")
+
+        MSG_RATE = float(rospy.get_param("~message_rate", "1.0"))  # Hz
+        self.rate = rospy.Rate(MSG_RATE)
+
+        self.frame_id = rospy.get_param("~frame_id", "manip_camera")
+        self.seq_counter = 0
+
+        INFO_TOPIC = rospy.get_param("~info_topic", "/fake_camera_info")
+        STREAM_TOPIC = rospy.get_param("~stream_topic", "/fake_camera_stream")
         self.info_pub = rospy.Publisher(INFO_TOPIC, CameraInfo, queue_size=10)
         self.img_pub = rospy.Publisher(STREAM_TOPIC, Image, queue_size=10)
+
         self.bridge = CvBridge()
-        self.seq_counter = 0
-        self.rate = rospy.Rate(MSG_RATE)
+
+        ## Choose images for testing
+        path = f'{SCRIPT_DIR}/../temp'
         # self.img_buff = [
-        #     cv.imread(f'{SCRIPT_DIR}/../temp/stream{i}.jpg') for i in range(0, 10)
+        #     cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 10)
         # ]
         self.img_buff = [
-            cv.imread(f'{SCRIPT_DIR}/../temp/sample{i}.png') for i in range(0, 6)
+            cv.imread(f'{path}/sample{i}.png') for i in range(9, 10)
         ]
 
     def __del__(self) -> None:
         cv.destroyAllWindows()
 
     def run(self) -> None:
-        while rospy.is_shutdown:
+        while not rospy.is_shutdown():
             self._send_info()
             self._send_image()
             self.seq_counter += 1
@@ -42,11 +48,12 @@ class FakeCamera:
     def _send_info(self) -> None:
         msg = CameraInfo()
         msg.header = self._get_header()
-        msg.height, msg.width, _ = self.img_buff[0].shape
+        msg.height, msg.width, _ = self.img_buff[self.seq_counter %
+                                                 len(self.img_buff)].shape
         msg.distortion_model = 'plumb_bob'
         cx = msg.width / 2.0
         cy = msg.height / 2.0
-        fx = 5.0 * (msg.width + msg.height)
+        fx = 0.5 * (msg.width + msg.height)
         fy = fx
         msg.K = [fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0]
         msg.D = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -61,10 +68,8 @@ class FakeCamera:
 
     def _get_header(self) -> Header:
         header = Header()
-        time = rospy.get_time()
-        header.stamp.secs = int(time)
-        header.stamp.nsecs = int(1e9 * (time - int(time)))
-        header.frame_id = FRAME_ID
+        header.stamp = rospy.Time.now()
+        header.frame_id = self.frame_id
         header.seq = self.seq_counter
         return header
 
