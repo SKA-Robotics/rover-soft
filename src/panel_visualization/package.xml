@@ -53,6 +53,9 @@
   <depend>ar_track_alvar_msgs</depend>
   <depend>rospy</depend>
   <depend>cv_bridge</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_ros</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
