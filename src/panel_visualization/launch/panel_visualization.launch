@@ -1,0 +1,18 @@
+<launch>
+    <node name="fake_camera" pkg="panel_visualization" type="fake_camera.py" output="screen" />
+
+    <node name="static_transform_publisher" pkg="tf2_ros" type="static_transform_publisher"
+        args="0 0 0 0 0 0 1 /test_frame /manip_camera" />
+
+    <include file="$(find ar_track_alvar)/launch/pr2_indiv_no_kinect.launch">
+        <arg name="marker_size" value="4.4" /><!-- default 4.4 -->
+        <arg name="max_new_marker_error" value="0.2" /><!-- default 0.08 -->
+        <arg name="max_track_error" value="0.2" /><!-- default 0.2 -->
+        <arg name="cam_image_topic" value="/fake_camera_stream" />
+        <arg name="cam_info_topic" value="/fake_camera_info" />
+        <arg name="output_frame" value="/test_frame" />
+    </include>
+
+    <!-- TEST node -->
+    <node name="image_receiver" pkg="panel_visualization" type="image_receiver.py" output="screen" />
+</launch>
