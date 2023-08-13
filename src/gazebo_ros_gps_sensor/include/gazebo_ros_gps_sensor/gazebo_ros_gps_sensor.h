@@ -31,6 +31,8 @@
 #include <sensor_msgs/NavSatFix.h>
 #include <geometry_msgs/Vector3Stamped.h>
 
+#include <memory>
+
 namespace gazebo
 {
   namespace sensors
@@ -51,14 +53,15 @@ namespace gazebo
   private:
     bool LoadParameters();
     
-    ros::NodeHandle* node;
+    std::unique_ptr<ros::NodeHandle> node;
     ros::Publisher gps_data_publisher;
     ros::Publisher gps_velocity_data_publisher;
     sensor_msgs::NavSatFix gps_msg;
     geometry_msgs::Vector3Stamped gps_velocity_msg;
     common::Time last_time;
     gazebo::event::ConnectionPtr connection;
-    sensors::GpsSensor* sensor;
+    std::shared_ptr<sensors::GpsSensor> sensor;
+
     sdf::ElementPtr sdf;
 
     std::string robot_namespace;
