@@ -46,6 +46,74 @@ class NoiseEstimatorError(Exception):
             rospy.loginfo(self.hint)
 
 
+class StampedMessages:
+    def __init__(self, bag, topic):
+        messages = OrderedDict()
+
+        for _, message, timestamp in bag.read_messages(topics=[topic]):
+            messages[timestamp] = message
+
+        messages = OrderedDict(sorted(messages.items()))
+        self.timestamps = list(messages.keys())
+        self.messages = list(messages.values())
+
+    def retrieve(self, timestamp):
+        # Perform binary search to find the closest earlier timestamp
+        index = bisect.bisect(self.timestamps, timestamp)
+        if index:
+            # If there is an earlier timestamp, return the associated value
+            return self.messages[index - 1]
+        else:
+            # If there is no earlier timestamp, return None
+            return None
+
+    def __getitem__(self, timestamp):
+        return self.retrieve(timestamp)
+
+    def __len__(self):
+        return len(self.messages)
+
+
+def angle_diff(theta1, theta2):
+    d = theta2 - theta1
+    d = (d + pi) % (2 * pi) - pi
+    return d
+
+
+def get_localization_topics(bag, ground_truth_topic):
+    localization_topics = {topic: value.msg_type for topic, value
+                           in bag.get_type_and_topic_info().topics.items()
+                           if value.msg_type in LOCALIZATION_TYPES
+                           and topic != ground_truth_topic}
+    if len(localization_topics) == 0:
+        raise NoiseEstimatorError(
+            "No localization topics found in bag",
+            f"Available topics: {bag.get_type_and_topic_info().topics.keys()}")
+    return localization_topics
+
+
+def imuError(imu, ground_truth, tf_buffer):
+    """Compare the imu message to the ground truth message"""
+    ground_truth = transform_odometry_child_frame(
+        ground_truth, imu.header.frame_id, tf_buffer)
+
+    (imu_roll, imu_pitch, imu_yaw) = euler_from_quaternion(
+        [imu.orientation.x, imu.orientation.y,
+         imu.orientation.z, imu.orientation.w])
+    (gt_roll, gt_pitch, gt_yaw) = euler_from_quaternion(
+        [ground_truth.pose.pose.orientation.x,
+         ground_truth.pose.pose.orientation.y,
+         ground_truth.pose.pose.orientation.z,
+         ground_truth.pose.pose.orientation.w])
+
+    return [angle_diff(imu_roll, gt_roll),
+            angle_diff(imu_pitch, gt_pitch),
+            angle_diff(imu_yaw, gt_yaw),
+            imu.angular_velocity.x - ground_truth.twist.twist.angular.x,
+            imu.angular_velocity.y - ground_truth.twist.twist.angular.y,
+            imu.angular_velocity.z - ground_truth.twist.twist.angular.z]
+
+
 def initialize_bag(bag_path, ground_truth_topic):
     """Initialize and validate the bag file"""
 
@@ -81,16 +149,49 @@ def initialize_bag(bag_path, ground_truth_topic):
     return bag
 
 
-def get_localization_topics(bag, ground_truth_topic):
-    localization_topics = {topic: value.msg_type for topic, value
-                           in bag.get_type_and_topic_info().topics.items()
-                           if value.msg_type in LOCALIZATION_TYPES
-                           and topic != ground_truth_topic}
-    if len(localization_topics) == 0:
-        raise NoiseEstimatorError(
-            "No localization topics found in bag",
-            f"Available topics: {bag.get_type_and_topic_info().topics.keys()}")
-    return localization_topics
+def noiseVariance(bag, topic, calculate_error, ground_truth, tf_buffer):
+    # Initialize error_squared
+    _, message, stamp = next(bag.read_messages(topics=[topic]))
+    error_squared = [0] * len(calculate_error(message, ground_truth[stamp],
+                                              tf_buffer))
+    samples = 0
+    for _, message, stamp in bag.read_messages(topics=[topic]):
+        error = calculate_error(message, ground_truth[stamp], tf_buffer)
+        error_squared = [error_squared[i] +
+                         error[i]**2 for i in range(len(error))]
+        samples += 1
+    return [error_squared[i] /
+            samples for i in range(len(error_squared))]
+
+
+def odometryError(odom, ground_truth, tf_buffer):
+    """Compare the odometry message to the ground truth message"""
+    twist_ground_truth = transform_odometry_child_frame(
+        ground_truth, odom.child_frame_id, tf_buffer)
+    return [*poseError(odom.pose, ground_truth),
+            *twistError(odom.twist, twist_ground_truth)]
+
+
+def poseError(pose, ground_truth):
+    # pose can be stamped and with covariance, extract the pose
+    while hasattr(pose, 'pose'):
+        pose = pose.pose
+
+    (pose_roll, pose_pitch, pose_yaw) = euler_from_quaternion(
+        [pose.orientation.x, pose.orientation.y,
+         pose.orientation.z, pose.orientation.w])
+    (gt_roll, gt_pitch, gt_yaw) = euler_from_quaternion(
+        [ground_truth.pose.pose.orientation.x,
+         ground_truth.pose.pose.orientation.y,
+         ground_truth.pose.pose.orientation.z,
+         ground_truth.pose.pose.orientation.w])
+
+    return [pose.position.x - ground_truth.pose.pose.position.x,
+            pose.position.y - ground_truth.pose.pose.position.y,
+            pose.position.z - ground_truth.pose.pose.position.z,
+            angle_diff(pose_roll, gt_roll),
+            angle_diff(pose_pitch, gt_pitch),
+            angle_diff(pose_yaw, gt_yaw)]
 
 
 def prepare_tf_buffer(bag):
@@ -113,6 +214,53 @@ def prepare_tf_buffer(bag):
             else:
                 tf_buffer.set_transform(transform, "")
     return tf_buffer
+
+
+def reprImuNoise(variance):
+    return ("roll:".ljust(20) + f"{variance[0]:.4E}\n" +
+            "pitch:".ljust(20) + f"{variance[1]:.4E}\n" +
+            "yaw:".ljust(20) + f"{variance[2]:.4E}\n" +
+            "roll velocity:".ljust(20) + f"{variance[3]:.4E}\n" +
+            "pitch velocity:".ljust(20) + f"{variance[4]:.4E}\n" +
+            "yaw velocity:".ljust(20) + f"{variance[5]:.4E}")
+
+
+def reprOdometryNoise(variance):
+    return f"{reprPoseNoise(variance[:6])} \n" \
+        f"{reprTwistNoise(variance[6:])}"
+
+
+def reprPoseNoise(variance):
+    return ("x:".ljust(20) + f"{variance[0]:.4E}\n" +
+            "y:".ljust(20) + f"{variance[1]:.4E}\n" +
+            "z:".ljust(20) + f"{variance[2]:.4E}\n" +
+            "roll:".ljust(20) + f"{variance[3]:.4E}\n" +
+            "pitch:".ljust(20) + f"{variance[4]:.4E}\n" +
+            "yaw:".ljust(20) + f"{variance[5]:.4E}")
+
+
+def reprTwistNoise(variance):
+    return ("x velocity:".ljust(20) + f"{variance[0]:.4E}\n" +
+            "y velocity:".ljust(20) + f"{variance[1]:.4E}\n" +
+            "z velocity:".ljust(20) + f"{variance[2]:.4E}\n" +
+            "roll velocity:".ljust(20) + f"{variance[3]:.4E}\n" +
+            "pitch velocity:".ljust(20) + f"{variance[4]:.4E}\n" +
+            "yaw velocity:".ljust(20) + f"{variance[5]:.4E}")
+
+
+def transform_odometry_child_frame(msg, target_frame, tf_buffer):
+    """Transform the child frame of the odom message to the target frame."""
+
+    target_pose = transform_pose_child_frame(
+        msg.pose.pose, target_frame, msg.child_frame_id,
+        tf_buffer, msg.header.stamp)
+    target_twist = transform_twist_child_frame(
+        msg.twist.twist, target_frame, msg.child_frame_id,
+        tf_buffer, msg.header.stamp)
+
+    return Odometry(header=msg.header, child_frame_id=target_frame,
+                    pose=PoseWithCovariance(pose=target_pose),
+                    twist=TwistWithCovariance(twist=target_twist))
 
 
 def transform_pose_child_frame(pose, target_frame, child_frame,
@@ -194,99 +342,6 @@ def transform_twist_child_frame(twist, target_frame, child_frame,
     return twist
 
 
-def transform_odometry_child_frame(msg, target_frame, tf_buffer):
-    """Transform the child frame of the odom message to the target frame."""
-
-    target_pose = transform_pose_child_frame(
-        msg.pose.pose, target_frame, msg.child_frame_id,
-        tf_buffer, msg.header.stamp)
-    target_twist = transform_twist_child_frame(
-        msg.twist.twist, target_frame, msg.child_frame_id,
-        tf_buffer, msg.header.stamp)
-
-    return Odometry(header=msg.header, child_frame_id=target_frame,
-                    pose=PoseWithCovariance(pose=target_pose),
-                    twist=TwistWithCovariance(twist=target_twist))
-
-
-class SortedMessages:
-    def __init__(self, bag, topic):
-        messages = OrderedDict()
-
-        for _, message, timestamp in bag.read_messages(topics=[topic]):
-            messages[timestamp] = message
-
-        messages = OrderedDict(sorted(messages.items()))
-        self.timestamps = list(messages.keys())
-        self.messages = list(messages.values())
-
-    def retrieve(self, timestamp):
-        # Perform binary search to find the closest earlier timestamp
-        index = bisect.bisect(self.timestamps, timestamp)
-        if index:
-            # If there is an earlier timestamp, return the associated value
-            return self.messages[index - 1]
-        else:
-            # If there is no earlier timestamp, return None
-            return None
-
-    def __getitem__(self, timestamp):
-        return self.retrieve(timestamp)
-
-    def __len__(self):
-        return len(self.messages)
-
-
-def angle_diff(theta1, theta2):
-    d = theta2 - theta1
-    d = (d + pi) % (2 * pi) - pi
-    return d
-
-
-def imuError(imu, ground_truth, tf_buffer):
-    """Compare the imu message to the ground truth message"""
-    ground_truth = transform_odometry_child_frame(
-        ground_truth, imu.header.frame_id, tf_buffer)
-
-    (imu_roll, imu_pitch, imu_yaw) = euler_from_quaternion(
-        [imu.orientation.x, imu.orientation.y,
-         imu.orientation.z, imu.orientation.w])
-    (gt_roll, gt_pitch, gt_yaw) = euler_from_quaternion(
-        [ground_truth.pose.pose.orientation.x,
-         ground_truth.pose.pose.orientation.y,
-         ground_truth.pose.pose.orientation.z,
-         ground_truth.pose.pose.orientation.w])
-
-    return [angle_diff(imu_roll, gt_roll),
-            angle_diff(imu_pitch, gt_pitch),
-            angle_diff(imu_yaw, gt_yaw),
-            imu.angular_velocity.x - ground_truth.twist.twist.angular.x,
-            imu.angular_velocity.y - ground_truth.twist.twist.angular.y,
-            imu.angular_velocity.z - ground_truth.twist.twist.angular.z]
-
-
-def poseError(pose, ground_truth):
-    # pose can be stamped and with covariance, extract the pose
-    while hasattr(pose, 'pose'):
-        pose = pose.pose
-
-    (pose_roll, pose_pitch, pose_yaw) = euler_from_quaternion(
-        [pose.orientation.x, pose.orientation.y,
-         pose.orientation.z, pose.orientation.w])
-    (gt_roll, gt_pitch, gt_yaw) = euler_from_quaternion(
-        [ground_truth.pose.pose.orientation.x,
-         ground_truth.pose.pose.orientation.y,
-         ground_truth.pose.pose.orientation.z,
-         ground_truth.pose.pose.orientation.w])
-
-    return [pose.position.x - ground_truth.pose.pose.position.x,
-            pose.position.y - ground_truth.pose.pose.position.y,
-            pose.position.z - ground_truth.pose.pose.position.z,
-            angle_diff(pose_roll, gt_roll),
-            angle_diff(pose_pitch, gt_pitch),
-            angle_diff(pose_yaw, gt_yaw)]
-
-
 def twistError(twist, ground_truth):
     # twist can be stamped and with covariance, extract the twist
     while hasattr(twist, 'twist'):
@@ -298,61 +353,6 @@ def twistError(twist, ground_truth):
             twist.angular.x - ground_truth.twist.twist.angular.x,
             twist.angular.y - ground_truth.twist.twist.angular.y,
             twist.angular.z - ground_truth.twist.twist.angular.z]
-
-
-def odometryError(odom, ground_truth, tf_buffer):
-    """Compare the odometry message to the ground truth message"""
-    twist_ground_truth = transform_odometry_child_frame(
-        ground_truth, odom.child_frame_id, tf_buffer)
-    return [*poseError(odom.pose, ground_truth),
-            *twistError(odom.twist, twist_ground_truth)]
-
-
-def reprImuNoise(variance):
-    return ("roll:".ljust(20) + f"{variance[0]:.4E}\n" +
-            "pitch:".ljust(20) + f"{variance[1]:.4E}\n" +
-            "yaw:".ljust(20) + f"{variance[2]:.4E}\n" +
-            "roll velocity:".ljust(20) + f"{variance[3]:.4E}\n" +
-            "pitch velocity:".ljust(20) + f"{variance[4]:.4E}\n" +
-            "yaw velocity:".ljust(20) + f"{variance[5]:.4E}")
-
-
-def reprPoseNoise(variance):
-    return ("x:".ljust(20) + f"{variance[0]:.4E}\n" +
-            "y:".ljust(20) + f"{variance[1]:.4E}\n" +
-            "z:".ljust(20) + f"{variance[2]:.4E}\n" +
-            "roll:".ljust(20) + f"{variance[3]:.4E}\n" +
-            "pitch:".ljust(20) + f"{variance[4]:.4E}\n" +
-            "yaw:".ljust(20) + f"{variance[5]:.4E}")
-
-
-def reprTwistNoise(variance):
-    return ("x velocity:".ljust(20) + f"{variance[0]:.4E}\n" +
-            "y velocity:".ljust(20) + f"{variance[1]:.4E}\n" +
-            "z velocity:".ljust(20) + f"{variance[2]:.4E}\n" +
-            "roll velocity:".ljust(20) + f"{variance[3]:.4E}\n" +
-            "pitch velocity:".ljust(20) + f"{variance[4]:.4E}\n" +
-            "yaw velocity:".ljust(20) + f"{variance[5]:.4E}")
-
-
-def reprOdometryNoise(variance):
-    return f"{reprPoseNoise(variance[:6])} \n" \
-        f"{reprTwistNoise(variance[6:])}"
-
-
-def noiseVariance(bag, topic, calculate_error, ground_truth, tf_buffer):
-    # Initialize error_squared
-    _, message, stamp = next(bag.read_messages(topics=[topic]))
-    error_squared = [0] * len(calculate_error(message, ground_truth[stamp],
-                                              tf_buffer))
-    samples = 0
-    for _, message, stamp in bag.read_messages(topics=[topic]):
-        error = calculate_error(message, ground_truth[stamp], tf_buffer)
-        error_squared = [error_squared[i] +
-                         error[i]**2 for i in range(len(error))]
-        samples += 1
-    return [error_squared[i] /
-            samples for i in range(len(error_squared))]
 
 
 localization_error = {'nav_msgs/Odometry': odometryError,
@@ -390,7 +390,7 @@ if __name__ == '__main__':
          for topic, message_type
          in localization_topics.items()]))
 
-    ground_truth = SortedMessages(bag, ground_truth_topic)
+    ground_truth = StampedMessages(bag, ground_truth_topic)
 
     for topic, message_type in localization_topics.items():
         variance = noiseVariance(bag, topic,
