@@ -29,28 +29,22 @@ GZ_REGISTER_SENSOR_PLUGIN(gazebo::GazeboRosGpsSensor)
 
 namespace gazebo
 {
-  GazeboRosGpsSensor::GazeboRosGpsSensor() : SensorPlugin(), sensor(nullptr), node(nullptr)
+  GazeboRosGpsSensor::GazeboRosGpsSensor() : SensorPlugin()
   {
   }
 
   GazeboRosGpsSensor::~GazeboRosGpsSensor()
   {
-    if (connection)
-    {
-      connection.reset();
-    }
-
-    if (node)
+    if (node != nullptr)
     {
       node->shutdown();
-      delete node;
     }
   }
 
   void GazeboRosGpsSensor::Load(sensors::SensorPtr sensor_, sdf::ElementPtr sdf_)
   {
     sdf = sdf_;
-    sensor = dynamic_cast<sensors::GpsSensor*>(sensor_.get());
+    sensor = std::dynamic_pointer_cast<sensors::GpsSensor>(sensor_);
 
     if (!sensor)
     {
@@ -72,7 +66,7 @@ namespace gazebo
       return;
     }
 
-    node = new ros::NodeHandle(robot_namespace);
+    node = std::make_unique<ros::NodeHandle>(robot_namespace);
 
     gps_data_publisher = node->advertise<sensor_msgs::NavSatFix>(topic_name, 1);
     gps_velocity_data_publisher = node->advertise<geometry_msgs::Vector3Stamped>(topic_name + "_velocity", 1);
@@ -142,7 +136,7 @@ namespace gazebo
     else
     {
       topic_name = robot_namespace + "/gps";
-      ROS_WARN_STREAM("missing <topicName>, set to /namespace/default: " << topic_name);
+      ROS_WARN_STREAM("missing <topicName>, set to: " << topic_name);
     }
 
     if (sdf->HasElement("frameName"))
@@ -164,7 +158,7 @@ namespace gazebo
     else
     {
       update_rate = 1.0;
-      ROS_WARN_STREAM("missing <updateRateHZ>, set to default: " << update_rate);
+      ROS_WARN_STREAM("missing <updateRateHZ>, set to: " << update_rate);
     }
     // Load spherical_coordinates parameters
     if (sdf->HasElement("spherical_coordinates"))
@@ -201,4 +195,4 @@ namespace gazebo
     }
     return true;
   }
-}
+} // namespace gazebo
