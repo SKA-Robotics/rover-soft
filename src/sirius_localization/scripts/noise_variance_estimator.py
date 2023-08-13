@@ -355,40 +355,6 @@ def noiseVariance(bag, topic, calculate_error, ground_truth, tf_buffer):
             samples for i in range(len(error_squared))]
 
 
-def test_transform(bag, ground_truth_topic, tf_buffer):
-    for _, msg, _ in bag.read_messages(topics=[
-            ground_truth_topic]):
-
-        msg.pose.pose.position.x = 0
-        msg.pose.pose.position.y = 0
-        msg.pose.pose.position.z = 0
-
-        msg.pose.pose.orientation.x = 0
-        msg.pose.pose.orientation.y = 0
-        msg.pose.pose.orientation.z = 0
-        msg.pose.pose.orientation.w = 1
-
-        msg.twist.twist.linear.x = 1
-        msg.twist.twist.linear.y = 0
-        msg.twist.twist.linear.z = 0
-
-        msg.twist.twist.angular.x = 1
-        msg.twist.twist.angular.y = 0
-        msg.twist.twist.angular.z = 0
-
-        transformed_odometry = transform_odometry_child_frame(
-            msg, 'main_platform', tf_buffer)
-        # rospy.loginfo the pose before transformation
-        rospy.loginfo(f"\n\nBefore transformation: \n{msg}")
-
-        # rospy.loginfo the pose after transformation
-        if transformed_odometry is not None:
-            rospy.loginfo(
-                f"\nAfter transformation: \n{transformed_odometry}")
-
-        break
-
-
 localization_error = {'nav_msgs/Odometry': odometryError,
                       'sensor_msgs/Imu': imuError,
                       'geometry_msgs/PoseStamped': poseError,
@@ -423,8 +389,6 @@ if __name__ == '__main__':
         ["\n\t" + topic.ljust(max_topic_length + 5) + message_type
          for topic, message_type
          in localization_topics.items()]))
-
-    # test_transform(bag, ground_truth_topic, tf_buffer)
 
     ground_truth = SortedMessages(bag, ground_truth_topic)
 
