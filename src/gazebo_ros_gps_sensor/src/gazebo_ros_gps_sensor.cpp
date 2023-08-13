@@ -125,7 +125,7 @@ namespace gazebo
       std::size_t it = scoped_name.find("::");
 
       robot_namespace = "/" + scoped_name.substr(0, it) + "/";
-      ROS_WARN_STREAM("missing <robotNamespace>, set to default: " << robot_namespace);
+      ROS_WARN_STREAM("missing <robotNamespace>, set to: " << robot_namespace);
     }
 
     if (sdf->HasElement("topicName"))
