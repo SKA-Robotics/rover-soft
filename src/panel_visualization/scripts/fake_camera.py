@@ -28,12 +28,12 @@ class FakeCamera:
 
         ## Choose images for testing
         path = f'{SCRIPT_DIR}/../temp'
-        # self.img_buff = [
-        #     cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 10)
-        # ]
         self.img_buff = [
-            cv.imread(f'{path}/sample{i}.png') for i in range(9, 10)
+            cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 1)
         ]
+        # self.img_buff = [
+        #     cv.imread(f'{path}/sample{i}.png') for i in range(0, 10)
+        # ]
 
     def __del__(self) -> None:
         cv.destroyAllWindows()
@@ -63,6 +63,7 @@ class FakeCamera:
 
     def _send_image(self) -> None:
         img = self.img_buff[self.seq_counter % len(self.img_buff)]
+        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
         msg = self.bridge.cv2_to_imgmsg(img, "rgb8", self._get_header())
         self.img_pub.publish(msg)
 

@@ -8,13 +8,13 @@ project(panel_visualization)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  ar_track_alvar
-  ar_track_alvar_msgs
   rospy
   cv_bridge
   sensor_msgs
   std_msgs
   tf2_ros
+  aruco_detect
+  fiducials
 )
 
 ## System dependencies are found with CMake's conventions
