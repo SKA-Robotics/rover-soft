@@ -32,7 +32,7 @@ class FakeCamera:
             cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 1)
         ]
         # self.img_buff = [
-        #     cv.imread(f'{path}/sample{i}.png') for i in range(0, 10)
+        #     cv.imread(f'{path}/sample{i}.png') for i in range(0, 8)
         # ]
 
     def __del__(self) -> None:
