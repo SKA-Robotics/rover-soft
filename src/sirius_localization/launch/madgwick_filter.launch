@@ -4,11 +4,12 @@
   <rosparam file="$(find sirius_localization)/config/imu_filter.yaml" command="load" ns="map_sensor_fusion"/>   
   <arg name="imu_name"            default="front_camera"/>
   <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_fusion" output="screen">
-    <param name="use_mag" value="false"/>
+    <param name="use_mag" value="true"/>
     <param name="orientation_stddev" value="$(eval sqrt(pi/6))"/> <!-- standard deviation in radians -->
-    <param name="mag_bias_x" value="-69.7037"/>
-    <param name="mag_bias_y" value="-4.11937"/>
-    <param name="mag_bias_z" value="-76.8054"/>
+    <param name="mag_bias_x" value="0"/>
+    <param name="mag_bias_y" value="0"/>
+    <param name="mag_bias_z" value="0"/>
+    <param name="world_frame" value="enu"/>
     <param name="publish_tf" value="false"/>
     <param name="remove_gravity_vector" value="false"/>
     <remap from="imu/data_raw" to="/$(arg imu_name)/imu/data"/>
