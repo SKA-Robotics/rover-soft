@@ -161,21 +161,21 @@ namespace gazebo
       ROS_WARN_STREAM("missing <updateRateHZ>, set to: " << update_rate);
     }
     // Load spherical_coordinates parameters
-    if (sdf->HasElement("spherical_coordinates"))
+    if (sdf->HasElement("sphericalCoordinates"))
     {
       // Set Gazebo world origin to the spherical_coordinates values
       gazebo::physics::WorldPtr world = gazebo::physics::get_world(sensor->WorldName());
       if (world){
-        sdf::ElementPtr spherical_coordinates = sdf->GetElement("spherical_coordinates");
+        sdf::ElementPtr spherical_coordinates = sdf->GetElement("sphericalCoordinates");
 
-        if (spherical_coordinates->HasElement("latitude_deg")){
-          auto latitude = spherical_coordinates->Get<double>("latitude_deg") * M_PI / 180;
+        if (spherical_coordinates->HasElement("latitudeDeg")){
+          auto latitude = spherical_coordinates->Get<double>("latitudeDeg") * M_PI / 180;
           world->SphericalCoords()->SetLatitudeReference(latitude);
           ROS_INFO_STREAM("Latitude: " << latitude);
         }
 
-        if (spherical_coordinates->HasElement("longitude_deg")){
-          auto longitude = spherical_coordinates->Get<double>("longitude_deg") * M_PI / 180;
+        if (spherical_coordinates->HasElement("longitudeDeg")){
+          auto longitude = spherical_coordinates->Get<double>("longitudeDeg") * M_PI / 180;
           world->SphericalCoords()->SetLongitudeReference(longitude);
           ROS_INFO_STREAM("Longitude: " << longitude);
         }
@@ -186,8 +186,8 @@ namespace gazebo
           ROS_INFO_STREAM("Elevation: " << elevation);
         }
         
-        if (spherical_coordinates->HasElement("heading_deg")){
-          auto heading = spherical_coordinates->Get<double>("heading_deg") * M_PI / 180;
+        if (spherical_coordinates->HasElement("headingDeg")){
+          auto heading = spherical_coordinates->Get<double>("headingDeg") * M_PI / 180;
           world->SphericalCoords()->SetHeadingOffset(heading);
           ROS_INFO_STREAM("Heading: " << heading);
         }
