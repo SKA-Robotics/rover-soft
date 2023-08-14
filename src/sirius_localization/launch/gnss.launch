@@ -17,7 +17,9 @@
     <param name="broadcast_cartesian_transform_as_parent_frame" value="true"/>
     <param name="publish_filtered_gps" value="true"/>
     <param name="wait_for_datum" value="true"/>
-    <param name="datum" value="[39.21945878167668, -111.0218057638522, 0.0]"/>
+    <!-- ERC: Marsyard -->
+    <param name="datum" value="[50.878151, 20.642273, -35.59]"/>
+    <!-- URC: The Mars Desert Research Station  -->
     <!-- <param name="datum" value="[38.4190235, -110.7823884, 0.0]"/> -->
   </node> 
 

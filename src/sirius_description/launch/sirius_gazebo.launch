@@ -8,10 +8,13 @@
     <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
     <arg name="imu_frequency"         default="200.0" />
     <arg name="stereo_fps"            default="30"  />
+    <arg name="datum" default="[50.878151, 20.642273, -35.59]"/>
+    <arg name="elevation" default="308.1445"/>
+    <arg name="year" default=""/>
 
     <param name="use_sim_time" command="$(arg use_sim_time)" />
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml' stereo_fps:=$(arg stereo_fps) imu_frequency:='$(arg imu_frequency)'" />
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml' stereo_fps:='$(arg stereo_fps)' imu_frequency:='$(arg imu_frequency)' datum:='$(arg datum)' elevation:='$(arg elevation)' year:='$(arg year)'" />
 
     <arg name="rviz" default="true"/>
 
@@ -56,8 +59,11 @@
         <param name="broadcast_cartesian_transform" value="true"/>
         <param name="broadcast_cartesian_transform_as_parent_frame" value="true"/>
         <param name="publish_filtered_gps" value="true"/>
-        <!-- <param name="wait_for_datum" value="true"/>
-        <param name="datum" value="[0, 0, 0.0]"/> -->
+        <param name="wait_for_datum" value="true"/>
+        <param name="datum" value="$(arg datum)"/>
+        <!-- ERC: Marsyard -->
+        <!-- <param name="datum" value="[50.878147, 20.642303, -35.59]"/> -->
+        <!-- URC: The Mars Desert Research Station  -->
         <!-- <param name="datum" value="[38.4190235, -110.7823884, 0.0]"/> -->
     </node> 
 
