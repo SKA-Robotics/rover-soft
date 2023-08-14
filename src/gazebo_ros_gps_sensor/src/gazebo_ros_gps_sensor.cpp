@@ -169,13 +169,13 @@ namespace gazebo
         sdf::ElementPtr spherical_coordinates = sdf->GetElement("sphericalCoordinates");
 
         if (spherical_coordinates->HasElement("latitudeDeg")){
-          auto latitude = spherical_coordinates->Get<double>("latitudeDeg") * M_PI / 180;
+          auto latitude = spherical_coordinates->Get<double>("latitudeDeg");
           world->SphericalCoords()->SetLatitudeReference(latitude);
           ROS_INFO_STREAM("Latitude: " << latitude);
         }
 
         if (spherical_coordinates->HasElement("longitudeDeg")){
-          auto longitude = spherical_coordinates->Get<double>("longitudeDeg") * M_PI / 180;
+          auto longitude = spherical_coordinates->Get<double>("longitudeDeg");
           world->SphericalCoords()->SetLongitudeReference(longitude);
           ROS_INFO_STREAM("Longitude: " << longitude);
         }
@@ -187,7 +187,7 @@ namespace gazebo
         }
         
         if (spherical_coordinates->HasElement("headingDeg")){
-          auto heading = spherical_coordinates->Get<double>("headingDeg") * M_PI / 180;
+          auto heading = spherical_coordinates->Get<double>("headingDeg");
           world->SphericalCoords()->SetHeadingOffset(heading);
           ROS_INFO_STREAM("Heading: " << heading);
         }
