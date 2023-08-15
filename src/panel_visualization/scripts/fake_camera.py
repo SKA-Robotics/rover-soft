@@ -29,7 +29,7 @@ class FakeCamera:
         ## Choose images for testing
         path = f'{SCRIPT_DIR}/../temp'
         self.img_buff = [
-            cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 1)
+            cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 10)
         ]
         # self.img_buff = [
         #     cv.imread(f'{path}/sample{i}.png') for i in range(0, 8)
