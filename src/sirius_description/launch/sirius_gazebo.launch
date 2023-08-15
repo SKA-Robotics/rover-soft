@@ -8,7 +8,7 @@
     <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
     <arg name="imu_frequency"         default="200.0" />
     <arg name="stereo_fps"            default="30"  />
-    <arg name="datum" default="[50.878151, 20.642273, -35.59]"/>
+    <arg name="datum" default="[50.878151, 20.642273, 144.41]"/>
     <arg name="elevation" default="308.1445"/>
     <arg name="year" default=""/>
 

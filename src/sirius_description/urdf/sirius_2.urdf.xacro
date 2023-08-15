@@ -11,7 +11,7 @@
   <xacro:property name="stereo_fps" value="$(arg stereo_fps)" /> 
   <xacro:arg name="imu_frequency" default="200.0"/>
   <xacro:property name="imu_frequency" value="$(arg imu_frequency)" /> 
-  <xacro:arg name="datum" default="[50.878151, 20.642273, -35.59]"/>
+  <xacro:arg name="datum" default="[50.878151, 20.642273, 144.41]"/>
   <xacro:property name="datum" value="${$(arg datum)}" />
   <xacro:arg name="elevation" default="0.0"/>
   <xacro:property name="elevation" value="$(arg elevation)" />
