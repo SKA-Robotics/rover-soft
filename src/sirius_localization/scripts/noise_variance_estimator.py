@@ -166,8 +166,11 @@ def noiseVariance(bag, topic, calculate_error, ground_truth, tf_buffer):
 
 def odometryError(odom, ground_truth, tf_buffer):
     """Compare the odometry message to the ground truth message"""
-    twist_ground_truth = transform_odometry_child_frame(
-        ground_truth, odom.child_frame_id, tf_buffer)
+    if odom.child_frame_id != "":
+        twist_ground_truth = transform_odometry_child_frame(
+            ground_truth, odom.child_frame_id, tf_buffer)
+    else:
+        twist_ground_truth = ground_truth
     return [*poseError(odom.pose, ground_truth),
             *twistError(odom.twist, twist_ground_truth)]
 
