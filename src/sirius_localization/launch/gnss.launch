@@ -18,9 +18,9 @@
     <param name="publish_filtered_gps" value="true"/>
     <param name="wait_for_datum" value="true"/>
     <!-- ERC: Marsyard -->
-    <param name="datum" value="[50.878151, 20.642273, -35.59]"/>
+    <rosparam param="datum">[50.878147, 20.642303, -35.59]</rosparam>
     <!-- URC: The Mars Desert Research Station  -->
-    <!-- <param name="datum" value="[38.4190235, -110.7823884, 0.0]"/> -->
+    <!-- <rosparam param="datum">[38.4190235, -110.7823884, 0.0]</rosparam> -->
   </node> 
 
 </launch>
