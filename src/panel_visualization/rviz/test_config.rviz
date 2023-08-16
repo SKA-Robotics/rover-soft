@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /MarkerArray1
       Splitter Ratio: 0.5
     Tree Height: 483
   - Class: rviz/Selection
@@ -64,10 +65,12 @@ Visualization Manager:
       Value: false
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /fiducials
+      Marker Topic: /visual_objects
       Name: MarkerArray
       Namespaces:
-        aruco_tag: true
+        pannel_A: true
+        pannel_B1: true
+        pannel_B2: true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -98,7 +101,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.5990406274795532
+      Distance: 3.1647839546203613
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
