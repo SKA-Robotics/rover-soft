@@ -166,14 +166,13 @@
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>
     </plugin>
-    <plugin name="p3d_plugin" filename="libgazebo_ros_p3d.so">
+    <plugin name="p3d_plugin" filename="libsirius_gazebo_ros_p3d.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>100.0</updateRate>
       <bodyName>base_link</bodyName>
       <topicName>ground_truth</topicName>
       <frameName>map</frameName>
-      <!-- <rpyOffset>0 0 ${-35.59 * pi/180}</rpyOffset> -->
-      <rpyOffset>0 0 ${datum[2] * pi/180}</rpyOffset>
+      <frameRpyOffset>0 0 ${datum[2] * pi/180}</frameRpyOffset>
     </plugin>
   </gazebo>
 </robot>
