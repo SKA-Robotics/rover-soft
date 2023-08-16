@@ -23,9 +23,6 @@
 
 
     <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
-    <rosparam file="$(find sirius_description)/config/sensor_fusion_odom.yaml" command="load" ns="odom_sensor_fusion"/>  
-    <rosparam file="$(find sirius_description)/config/sensor_fusion_odom.yaml" command="load" ns="map_sensor_fusion"/>  
-    <rosparam file="$(find sirius_description)/config/sensor_fusion_gnss.yaml" command="load" ns="map_sensor_fusion"/>  
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(arg world_name)"/>

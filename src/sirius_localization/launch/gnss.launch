@@ -1,5 +1,4 @@
 <launch>
-  <rosparam file="$(find sirius_localization)/config/gnss.yaml" command="load" ns="map_sensor_fusion"/>  
   <arg name="datum" default="[50.878151, 20.642273, 144.41]"/>
 
   <node pkg="ublox_gps" type="ublox_gps" name="ublox_gps" output="screen">
