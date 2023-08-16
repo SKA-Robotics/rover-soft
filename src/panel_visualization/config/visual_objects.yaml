@@ -1,0 +1,50 @@
+visual_objects:
+  - name: pannel_A
+    file: A.dae
+    tags:
+      - id: 42
+        position:
+          x: 0.042
+          y: -0.042
+          z: 0.0
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
+  - name: pannel_B1
+    file: B1.dae
+    tags:
+      - id: 12
+        position:
+          x: 0.104
+          y: -0.042
+          z: 0.0
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
+      - id: 27
+        position:
+          x: 0.104
+          y: -0.113
+          z: 0.0
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
+  - name: pannel_B2
+    file: B2.dae
+    tags:
+      - id: 18
+        position:
+          x: 0.042
+          y: -0.113
+          z: 0.0
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
