@@ -60,7 +60,7 @@
         <param name="wait_for_datum" value="true"/>
         <rosparam param="datum" subst_value="True">$(arg datum)</rosparam>
         <!-- ERC: Marsyard -->
-        <!-- <rosparam param="datum">[50.878147, 20.642303, -35.59]</rosparam> -->
+        <!-- <rosparam param="datum">[50.878147, 20.642303, 144.41]</rosparam> -->
         <!-- URC: The Mars Desert Research Station  -->
         <!-- <rosparam param="datum">[38.4190235, -110.7823884, 0.0]</rosparam> -->
     </node> 
