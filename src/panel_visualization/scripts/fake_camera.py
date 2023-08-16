@@ -28,12 +28,15 @@ class FakeCamera:
 
         ## Choose images for testing
         path = f'{SCRIPT_DIR}/../temp'
-        self.img_buff = [
-            cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 10)
-        ]
+        # self.img_buff = [
+        #     cv.imread(f'{path}/stream{i}.jpg') for i in range(0, 10)
+        # ]
         # self.img_buff = [
         #     cv.imread(f'{path}/sample{i}.png') for i in range(0, 8)
         # ]
+        self.img_buff = [
+            cv.imread(f'{path}/panel ({i}).jpg') for i in range(0, 16)
+        ]
 
     def __del__(self) -> None:
         cv.destroyAllWindows()
