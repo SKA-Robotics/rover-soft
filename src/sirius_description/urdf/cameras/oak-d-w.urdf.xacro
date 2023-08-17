@@ -151,7 +151,7 @@
           <image>
             <width>${calibration.cam0.resolution[0]}</width>
             <height>${calibration.cam0.resolution[1]}</height>
-            <format>L8</format>
+            <format>R8G8B8</format>
           </image>
           <clip>
             <near>0.02</near>

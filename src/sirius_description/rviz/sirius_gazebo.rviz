@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /DepthCloud1
       Splitter Ratio: 0.48945146799087524
     Tree Height: 454
   - Class: rviz/Selection
@@ -227,7 +228,7 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/DepthCloud
       Color: 255; 255; 255
-      Color Image Topic: /front_camera/left/image_rect_gray
+      Color Image Topic: /front_camera/thrash/image_rect_gray
       Color Transformer: RGB8
       Color Transport Hint: raw
       Decay Time: 0
