@@ -151,15 +151,21 @@ def initialize_bag(bag_path, ground_truth_topic):
 
 def noiseVariance(bag, topic, calculate_error, ground_truth, tf_buffer):
     # Initialize error_squared
-    _, message, stamp = next(bag.read_messages(topics=[topic]))
-    error_squared = [0] * len(calculate_error(message, ground_truth[stamp],
+    ground_truth_message = None
+    bag_iterator = bag.read_messages(topics=[topic])
+    while ground_truth_message is None:
+        _, message, stamp = next(bag_iterator)
+        ground_truth_message = ground_truth[stamp]
+    error_squared = [0] * len(calculate_error(message, ground_truth_message,
                                               tf_buffer))
     samples = 0
     for _, message, stamp in bag.read_messages(topics=[topic]):
-        error = calculate_error(message, ground_truth[stamp], tf_buffer)
-        error_squared = [error_squared[i] +
-                         error[i]**2 for i in range(len(error))]
-        samples += 1
+        ground_truth_message = ground_truth[stamp]
+        if ground_truth_message is not None:
+            error = calculate_error(message, ground_truth_message, tf_buffer)
+            error_squared = [error_squared[i] +
+                             error[i]**2 for i in range(len(error))]
+            samples += 1
     return [error_squared[i] /
             samples for i in range(len(error_squared))]
 
