@@ -33,13 +33,13 @@
           <horizontal>
             <noise type="gaussian">
               <mean>0.0</mean>
-              <stddev>5e-7</stddev>
+              <stddev>0.03</stddev>
             </noise>
           </horizontal>
           <vertical>
             <noise type="gaussian">
               <mean>0.0</mean>
-              <stddev>5e-7</stddev>
+              <stddev>0.03</stddev>
             </noise>
           </vertical>
         </position_sensing>
@@ -47,13 +47,13 @@
           <horizontal>
             <noise type="gaussian">
               <mean>0.0</mean>
-              <stddev>5e-7</stddev>
+              <stddev>0.05</stddev>
             </noise>
           </horizontal>
           <vertical>
             <noise type="gaussian">
               <mean>0.0</mean>
-              <stddev>5e-7</stddev>
+              <stddev>0.05</stddev>
             </noise>
           </vertical>
         </velocity_sensing>
@@ -68,6 +68,8 @@
             <headingDeg>${datum[2]}</headingDeg>
             <elevation>${elevation}</elevation>
         </sphericalCoordinates>
+        <positionCovariance>0.03 0 0 0 0.03 0 0 0 0.03</positionCovariance>
+        <positionCovarianceType>diagonal_known</positionCovarianceType>
       </plugin>
     </sensor>
   </gazebo>

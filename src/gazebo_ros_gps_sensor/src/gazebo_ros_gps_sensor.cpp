@@ -24,6 +24,9 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/physics/physics.hh>
 #include <cmath>
+#include <sstream>
+#include <algorithm>
+#include <cctype>
 
 GZ_REGISTER_SENSOR_PLUGIN(gazebo::GazeboRosGpsSensor)
 
@@ -95,6 +98,17 @@ namespace gazebo
       gps_velocity_msg.vector.y = sensor->VelocityNorth();
       gps_velocity_msg.vector.z = sensor->VelocityUp();
 
+      gps_msg.position_covariance[0] = position_covariance[0];
+      gps_msg.position_covariance[1] = position_covariance[1];
+      gps_msg.position_covariance[2] = position_covariance[2];
+      gps_msg.position_covariance[3] = position_covariance[3];
+      gps_msg.position_covariance[4] = position_covariance[4];
+      gps_msg.position_covariance[5] = position_covariance[5];
+      gps_msg.position_covariance[6] = position_covariance[6];
+      gps_msg.position_covariance[7] = position_covariance[7];
+      gps_msg.position_covariance[8] = position_covariance[8];
+
+
       gps_msg.header.frame_id = body_name;
       gps_msg.header.stamp.sec = current_time.sec;
       gps_msg.header.stamp.nsec = current_time.nsec;
@@ -160,6 +174,34 @@ namespace gazebo
       update_rate = 1.0;
       ROS_WARN_STREAM("missing <updateRateHZ>, set to: " << update_rate);
     }
+    if (sdf->HasElement("positionCovariance")){
+      auto position_covariance_stream = std::stringstream(sdf->Get<std::string>("positionCovariance"));
+      position_covariance_stream.setf(std::ios_base::skipws);
+      position_covariance_stream >> position_covariance[0] >> position_covariance[1] >> position_covariance[2] >> position_covariance[3] >> position_covariance[4] >> position_covariance[5] >> position_covariance[6] >> position_covariance[7] >> position_covariance[8];
+      ROS_INFO_STREAM("Position covariance: " << position_covariance[0] << " " << position_covariance[1] << " " << position_covariance[2] << " " << position_covariance[3] << " " << position_covariance[4] << " " << position_covariance[5] << " " << position_covariance[6] << " " << position_covariance[7] << " " << position_covariance[8]);     
+    }
+    if (sdf->HasElement("positionCovarianceType")){
+      auto position_covariance_type = sdf->Get<std::string>("positionCovarianceType");
+      std::transform(position_covariance_type.begin(), position_covariance_type.end(), position_covariance_type.begin(), [](unsigned char c){ return std::tolower(c); });
+      
+      if (position_covariance_type == "unknown"){
+        gps_msg.position_covariance_type = 0;
+        ROS_INFO_STREAM("Position covariance type: UNKNOWN");
+      } else if (position_covariance_type == "approximated"){
+        gps_msg.position_covariance_type = 1;
+        ROS_INFO_STREAM("Position covariance type: APPROXIMATED");
+      } else if (position_covariance_type == "diagonal_known"){
+        gps_msg.position_covariance_type = 2;
+        ROS_INFO_STREAM("Position covariance type: DIAGONAL_KNOWN");
+      } else if (position_covariance_type == "known"){
+        gps_msg.position_covariance_type = 3;
+        ROS_INFO_STREAM("Position covariance type: KNOWN");
+      } else {
+        gps_msg.position_covariance_type = 0;
+        ROS_WARN_STREAM("missing or unknown positionCovarianceType: " << position_covariance_type << ". Set to UNKNOWN");
+      }
+    }
+
     // Load spherical_coordinates parameters
     if (sdf->HasElement("sphericalCoordinates"))
     {

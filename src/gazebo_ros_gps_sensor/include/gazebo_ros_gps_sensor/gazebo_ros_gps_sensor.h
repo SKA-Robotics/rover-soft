@@ -92,6 +92,9 @@ namespace gazebo
     std::string body_name;
     /// \brief Sensor update rate.
     double update_rate;
+    
+    /// position_covariance
+    double position_covariance[9];
   };
 }
 
