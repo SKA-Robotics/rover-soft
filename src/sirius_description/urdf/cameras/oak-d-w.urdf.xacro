@@ -92,8 +92,8 @@
           </noise>
           <lens>            
             <intrinsics>
-            <fx>${calibration.cam0.intrinsics[0]}</fx>
-            <fy>${calibration.cam0.intrinsics[1]}</fy>
+            <fx>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</fx>
+            <fy>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</fy>
             <cx>${calibration.cam0.intrinsics[2]}</cx>
             <cy>${calibration.cam0.intrinsics[3]}</cy>
             <s>0</s>
@@ -119,8 +119,8 @@
           </noise>
           <lens>            
             <intrinsics>
-            <fx>${calibration.cam0.intrinsics[0]}</fx>
-            <fy>${calibration.cam0.intrinsics[1]}</fy>
+            <fx>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</fx>
+            <fy>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</fy>
             <cx>${calibration.cam0.intrinsics[2]}</cx>
             <cy>${calibration.cam0.intrinsics[3]}</cy>
             <s>0</s>
@@ -137,6 +137,9 @@
           <frameName>${prefix}_left_camera_optical_frame</frameName>
           <rightFrameName>${prefix}_right_camera_optical_frame</rightFrameName>
           <hackBaseline>${baseline}</hackBaseline>  
+          <focalLength>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</focalLength>
+          <Cx>${calibration.cam0.intrinsics[2]}</Cx>
+          <Cy>${calibration.cam0.intrinsics[3]}</Cy>
         </plugin>
       </sensor>
        <sensor type="depth" name="${prefix}_camera_depth">
@@ -161,8 +164,8 @@
           </noise>
           <lens>            
             <intrinsics>
-            <fx>${calibration.cam0.intrinsics[0]}</fx>
-            <fy>${calibration.cam0.intrinsics[1]}</fy>
+            <fx>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</fx>
+            <fy>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</fy>
             <cx>${calibration.cam0.intrinsics[2]}</cx>
             <cy>${calibration.cam0.intrinsics[3]}</cy>
             <s>0</s>
@@ -181,7 +184,7 @@
           <pointCloudCutoffMax>35.0</pointCloudCutoffMax>
           <frameName>${prefix}_left_camera_optical_frame</frameName>
           <baseline>${baseline}</baseline>
-          <CxPrime>${calibration.cam0.intrinsics[2]}</CxPrime>
+          <focalLength>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</focalLength>
           <Cx>${calibration.cam0.intrinsics[2]}</Cx>
           <Cy>${calibration.cam0.intrinsics[3]}</Cy>
           <hackBaseline>0.0</hackBaseline>
