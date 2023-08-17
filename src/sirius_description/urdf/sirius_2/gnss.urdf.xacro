@@ -10,7 +10,7 @@
       <geometry>
         <mesh filename="package://${package}/meshes/sirius_2/gnss.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <!-- <origin xyz="0 0 0" rpy="${pi/2} 0 0" /> -->
+      <origin xyz="0 0 ${collisions['gnss_height']/2}" rpy="${pi/2} 0 0" />
     </visual>
     <inertial>
       <mass value="${inertial['gnss_mass']}"/>
