@@ -192,12 +192,48 @@
     <!-- IMU -->
     <gazebo reference="${prefix}_camera_imu_frame">
       <sensor type="imu" name="imu_sensor">
+        <always_on>true</always_on>
         <update_rate>${imu_frequency}</update_rate>
+        <imu>
+          <angular_velocity>
+            <x>
+              <noise type="gaussian">
+                <stddev>0.0541052</stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <stddev>0.0541052</stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <stddev>0.0541052</stddev>
+              </noise>
+            </z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x>
+              <noise type="gaussian">
+                <stddev>0.35</stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <stddev>0.35</stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <stddev>0.35</stddev>
+              </noise>
+            </z>
+          </linear_acceleration>
+        </imu>
         <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
           <topicName>/${prefix}_camera/imu/data</topicName>
           <frameName>${prefix}_camera_imu_frame</frameName>
           <updateRateHZ>${imu_frequency}</updateRateHZ>
-          <gaussianNoise>0.0</gaussianNoise>
           <initialOrientationAsReference>false</initialOrientationAsReference>
           <xyzOffset>0 0.0 0.0</xyzOffset>
           <rpyOffset>0 0 ${datum[2] * pi/180}</rpyOffset>
@@ -212,20 +248,17 @@
         <magnetometer>
           <x>
             <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>5e-7</stddev>
+              <stddev>1.4e-6</stddev>
             </noise>
           </x>
           <y>
             <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>5e-7</stddev>
+              <stddev>1.4e-6</stddev>
             </noise>
           </y>
           <z>
             <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>5e-7</stddev>
+              <stddev>1.4e-6</stddev>
             </noise>
           </z>
         </magnetometer>
@@ -243,7 +276,6 @@
         </plugin>
       </sensor>
     </gazebo>
-
   </xacro:macro>
 
 </robot>

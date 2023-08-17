@@ -2,7 +2,7 @@
   <arg name="imu_name"            default="front_camera"/>
   <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_fusion" output="screen">
     <param name="use_mag" value="true"/>
-    <param name="orientation_stddev" value="$(eval sqrt(pi/6))"/> <!-- standard deviation in radians -->
+    <param name="orientation_stddev" value="$(eval 3.5 * pi/180)"/> <!-- standard deviation in radians -->
     <param name="mag_bias_x" value="0"/>
     <param name="mag_bias_y" value="0"/>
     <param name="mag_bias_z" value="0"/>
