@@ -1,7 +1,7 @@
 import rospy
 
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64
+from sirius_msgs.msg import JointState as SiriusJointState
 from geometry_msgs.msg import PointStamped
 
 from manip_interface import ManipInterface, ManipParams, ManipInterfaceDecorator
@@ -17,6 +17,7 @@ class ROSManipInterface(ManipInterface):
         self._params = self._load_ROSparams()
         self._initialize_subscriber()
         self._initialize_publishers()
+        self._offsets = rospy.get_param("~home_offsets")
 
     def _initialize_subscriber(self):
         self.jointstate_topic = rospy.get_param("~jointstate_topic", "/manipulator/joint_states")
@@ -36,32 +37,48 @@ class ROSManipInterface(ManipInterface):
 
     def set_jointstate(self, jointstate: ManipJointState):
         self.jointstate = jointstate
+        jointstate = self._remove_offset(jointstate)
         jointstate_cmd = JointStateConverter.manip_to_ros(jointstate, self._params.joint_names())
         self._distribute_joint_commands(jointstate_cmd)
 
     def _update_jointstate(self, msg):
         self.actual_jointstate = JointStateConverter.ros_to_manip(msg, self._params.joint_names())
+        self.actual_jointstate = self._add_offset(self.actual_jointstate)
         if self.jointstate is None:
             self.jointstate = self.actual_jointstate
+    
+    def _remove_offset(self, jointstate: ManipJointState) -> ManipJointState:
+        return ManipJointState.from_list([position - offset for position, offset in zip(jointstate.to_list(), self._offsets)])
+
+    def _add_offset(self, jointstate: ManipJointState) -> ManipJointState:
+        return ManipJointState.from_list([position + offset for position, offset in zip(jointstate.to_list(), self._offsets)])
 
     def _initialize_publishers(self):
         self.publishers = {}
         info = "Initialized publishers:"
         for joint, topic in self.command_topics.items():
-            self.publishers[joint] = rospy.Publisher(topic, Float64, queue_size=10)
+            self.publishers[joint] = rospy.Publisher(topic, SiriusJointState, queue_size=10)
             info = info + f"\n    - {joint}: {topic}"
         rospy.loginfo(info)
 
     def _distribute_joint_commands(self, jointstate: JointState):
         for index, value in enumerate(jointstate.position):
             publisher = self.publishers[jointstate.name[index]]
-            publisher.publish(Float64(value))
+            publisher.publish(self._make_message(value))
+    
+    def _make_message(self, value):
+        msg = SiriusJointState()
+        msg.header.stamp= rospy.Time.now()
+        msg.position = [value]
+        return msg
+        
 
     def sleep(self, time):
         rospy.sleep(rospy.Duration(time))
 
     def get_manip_params(self) -> ManipParams:
         return self._params
+    
 
 
 class PosePublishingDecorator(ManipInterfaceDecorator):
@@ -130,7 +147,6 @@ class ROSPosePublisher:
     def publish(self, pose):
         msg = PointStamped()
         msg.header.stamp = rospy.Time.now()
-        msg.header.frame_id = "base_link"
         msg.point.x = pose.x
         msg.point.y = pose.y
         msg.point.z = pose.z
@@ -158,6 +174,4 @@ class JointStateConverter:
             index = jointstate.name.index(name)
             filtered_jointstate.name.append(name)
             filtered_jointstate.position.append(jointstate.position[index])
-            filtered_jointstate.velocity.append(jointstate.velocity[index])
-            filtered_jointstate.effort.append(jointstate.effort[index])
         return filtered_jointstate

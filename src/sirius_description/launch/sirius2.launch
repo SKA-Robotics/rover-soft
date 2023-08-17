@@ -3,7 +3,8 @@
     <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml'" />
 
     <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
-    <rosparam file="$(find sirius_description)/config/odrive.yaml" command="load"/>   
+    <rosparam file="$(find sirius_description)/config/odrive.yaml" command="load"/> 
+    <rosparam file="$(find manip_control)/config/roboclaws.yaml" command="load"/> 
 
     <remap from="/sirius/controller/wheels/cmd_vel" to="/cmd_vel" />
 
@@ -14,7 +15,7 @@
              /sirius/controller/wheels_right_state
              /sirius/controller/wheels
     "/>
-    
+
     <node name="odrive_driver" pkg="odrive_driver" type="driver.py" output="screen">
         <remap from="/odrive_driver/wheels_left/motor0/joint_state" to="/wheels_left/motor0/joint_state"/>
         <remap from="/odrive_driver/wheels_left/motor0/set_joint_state" to="/wheels_left/motor0/set_joint_state"/>
@@ -31,9 +32,5 @@
     <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
     </node>
 
-    <include file="$(find sirius_localization)/launch/gnss.launch"/>
-    <include file="$(find sirius_cameras)/launch/oak_d_w.launch"/>
-    <include file="$(find manip_control)/launch/manip_control.launch"/>
     <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
-    <include file="$(find web_interface)/launch/servers.launch"/>
 </launch>
