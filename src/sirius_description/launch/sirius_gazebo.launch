@@ -8,13 +8,17 @@
     <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
     <arg name="imu_frequency"         default="200.0" />
     <arg name="stereo_fps"            default="30"  />
-    <arg name="datum" default="[50.878151, 20.642273, 144.41]"/>
+    <!-- ERC: Marsyard -->
+    <arg name="spherical_coordinates" default="[50.878151, 20.642273, 144.41]"/>
     <arg name="elevation" default="308.1445"/>
+    <!-- URC: The Mars Desert Research Station  -->
+    <!-- <arg name="spherical_coordinates" default="[38.4190235, -110.7823884, 0.0]"/> -->
+    <!-- <arg name="elevation" default="1378.0"/> -->
     <arg name="year" default=""/>
 
     <param name="use_sim_time" command="$(arg use_sim_time)" />
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml' stereo_fps:='$(arg stereo_fps)' imu_frequency:='$(arg imu_frequency)' datum:='$(arg datum)' elevation:='$(arg elevation)' year:='$(arg year)'" />
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml' stereo_fps:='$(arg stereo_fps)' imu_frequency:='$(arg imu_frequency)' datum:='$(arg spherical_coordinates)' elevation:='$(arg elevation)' year:='$(arg year)'" />
 
     <arg name="rviz" default="true"/>
 
@@ -58,11 +62,7 @@
         <param name="broadcast_cartesian_transform_as_parent_frame" value="true"/>
         <param name="publish_filtered_gps" value="true"/>
         <param name="wait_for_datum" value="true"/>
-        <rosparam param="datum" subst_value="True">$(arg datum)</rosparam>
-        <!-- ERC: Marsyard -->
-        <!-- <rosparam param="datum">[50.878147, 20.642303, 144.41]</rosparam> -->
-        <!-- URC: The Mars Desert Research Station  -->
-        <!-- <rosparam param="datum">[38.4190235, -110.7823884, 0.0]</rosparam> -->
+    <rosparam param="datum" subst_value="True">$(eval ','.join(spherical_coordinates.split(',')[0:2]) + ', 0]')</rosparam>
     </node> 
 
 </launch>

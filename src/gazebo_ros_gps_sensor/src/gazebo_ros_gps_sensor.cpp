@@ -232,7 +232,7 @@ namespace gazebo
           auto heading = spherical_coordinates->Get<double>("headingDeg");
           // We rotate the heading by 180 degrees because the gazebo returns (-E)(-N)U, instead of ENU
           // This is a bug in gazebo. See: https://github.com/ros-simulation/gazebo_ros_pkgs/pull/982
-          world->SphericalCoords()->SetHeadingOffset(M_PI + heading * M_PI / 180.0);
+          world->SphericalCoords()->SetHeadingOffset(M_PI - heading * M_PI / 180.0);
           ROS_INFO_STREAM("Heading: " << heading);
         }
       }
