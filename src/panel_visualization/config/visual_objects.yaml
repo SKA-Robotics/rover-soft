@@ -5,8 +5,8 @@ visual_objects:
       - id: 42
         position:
           x: 0.042
-          y: -0.042
-          z: 0.0
+          y: 0.0
+          z: -0.042
         rotation:
           x: -0.70710678118
           y: 0.0
@@ -18,8 +18,8 @@ visual_objects:
       - id: 12
         position:
           x: 0.104
-          y: -0.042
-          z: 0.0
+          y: 0.0
+          z: -0.042
         rotation:
           x: -0.70710678118
           y: 0.0
@@ -28,8 +28,8 @@ visual_objects:
       - id: 27
         position:
           x: 0.104
-          y: -0.113
-          z: 0.0
+          y: 0.0
+          z: -0.113
         rotation:
           x: -0.70710678118
           y: 0.0
@@ -41,8 +41,8 @@ visual_objects:
       - id: 18
         position:
           x: 0.042
-          y: -0.113
-          z: 0.0
+          y: 0.0
+          z: -0.113
         rotation:
           x: -0.70710678118
           y: 0.0
