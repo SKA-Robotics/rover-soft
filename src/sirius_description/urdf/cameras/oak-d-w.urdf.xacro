@@ -175,8 +175,8 @@
         </camera>
         <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
           <cameraName>/${prefix}_camera</cameraName>
-          <imageTopicName>thrash/image_rect_gray</imageTopicName>
-          <cameraInfoTopicName>thrash/camera_info</cameraInfoTopicName>
+          <imageTopicName>rgb/image_raw_rgb</imageTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
           <depthImageTopicName>depth/depth_registered</depthImageTopicName>
           <depthImageInfoTopicName>depth/camera_info</depthImageInfoTopicName>
           <pointCloudTopicName>point_cloud/cloud_registered</pointCloudTopicName>
