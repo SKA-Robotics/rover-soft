@@ -5,25 +5,26 @@
     <arg name="manip_frame" default="base_link" />
     <arg name="info_topic" default="/camera_info" />
     <arg name="stream_topic" default="/camera" />
-    <arg name="marker_size_override" default="12: 0.032, 27: 0.032" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
+    <arg name="aruco_size" default="0.05" />
+    <arg name="aruco_size_override" default="12: 0.032, 27: 0.032" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
 
     <node name="aruco_detect" pkg="aruco_detect" type="aruco_detect">
         <param name="dictionary" value="0" /> <!-- DICT_4X4_50 -->
         <param name="publish_images" value="true" />
-        <param name="fiducial_len" value="0.05" /> <!-- real size in test steam: 0.023 -->
-        <param name="fiducial_len_override" value="$(arg marker_size_override)" />
+        <param name="fiducial_len" value="$(arg aruco_size)" /> <!-- real size in test steam: 0.023 -->
+        <param name="fiducial_len_override" value="$(arg aruco_size_override)" />
     </node>
 
-    <node name="marker_sender" pkg="panel_visualization" type="marker_sender.py"
+    <node name="panel_tracker" pkg="panel_visualization" type="panel_tracker.py"
         output="screen">
         <param name="message_rate" value="$(arg message_rate)" />
-        <param name="marker_length" value="0.05" />
-        <param name="marker_lengths" value="$(arg marker_size_override)" />
+        <param name="marker_length" value="$(arg aruco_size)" />
+        <param name="marker_lengths_override" value="$(arg aruco_size_override)" />
         <rosparam file="$(find panel_visualization)/config/visual_objects.yaml" command="load" />
     </node>
 
     <node name="static_transform_publisher_0" pkg="tf2_ros" type="static_transform_publisher"
-        args="0 0 0 -0.5 -0.5 0.5 0.5 $(arg manip_frame) $(arg camera_frame)" />
+        args="0 0 0 0.5 -0.5 0.5 -0.5 $(arg manip_frame) $(arg camera_frame)" />
 
     <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" output="screen"
         args="-d $(find panel_visualization)/rviz/test_config.rviz" />

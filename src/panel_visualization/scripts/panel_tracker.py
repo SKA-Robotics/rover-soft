@@ -1,20 +1,43 @@
 #!/usr/bin/python3
-import rospy
 import numpy as np
 import tf.transformations as tft
-from std_msgs.msg import Header
+
+import rospy
+from std_msgs.msg import Header, ColorRGBA
 from geometry_msgs.msg import Pose, Point, Quaternion
 from visualization_msgs.msg import Marker, MarkerArray
 from fiducial_msgs.msg import FiducialTransform, FiducialTransformArray
 
+WARNING_DURATION = 3  # [numer of frames]
 
-class MarkerSender:
+
+class PanelTracker:
     def __init__(self) -> None:
-        rospy.init_node("marker_corrector")
+        rospy.init_node("panel_tracker")
 
-        self.message_rate: float = rospy.get_param("~message_rate", 1.0)
+        message_rate: float = rospy.get_param("~message_rate", 1.0)
+        secs = int(1.0 / message_rate)
+        nsecs = int(1e9 * (1.0 / message_rate - secs))
+        self.marker_lifetime = rospy.Duration(secs, nsecs)
+
         objects: list[dict] = rospy.get_param("~visual_objects", {})
         self.objects = [VisulObject(dict_obj) for dict_obj in objects]
+
+        self.marker_size: float = rospy.get_param("~marker_length", 0.05)
+        lengths: str = rospy.get_param("~marker_lengths_override", "")
+        self.sizes: dict[int, float] = {}
+        try:
+            for (k, v) in [scope.split(':') for scope in lengths.split(',')]:
+                if k.find('-') != -1:
+                    for (s, e) in [k.split('-')]:
+                        self.sizes.update(
+                            {i: float(v)
+                             for i in range(int(s),
+                                            int(e) + 1)})
+                else:
+                    self.sizes.update({int(k): float(v)})
+        except:
+            pass
 
         rospy.Subscriber("/fiducial_transforms",
                          FiducialTransformArray,
@@ -36,6 +59,7 @@ class MarkerSender:
             obj.update_transforms(transforms_dict)
             marker = obj.get_marker(msg.header)
             if marker:
+                marker.lifetime = self.marker_lifetime
                 new_msg.markers.append(marker)
 
         new_msg.markers.extend(self._get_aruco_markers(msg))
@@ -49,7 +73,7 @@ class MarkerSender:
 
         for t in transforms:
             id = t.fiducial_id
-            size = 0.032 if id == 12 or id == 27 else 0.05
+            size = self.sizes[id] if id in self.sizes else self.marker_size
             marker = create_basic_marker(msg.header)
             marker.header.frame_id = f'fiducial_{id}'
             marker.id = id
@@ -58,7 +82,7 @@ class MarkerSender:
             marker.scale.y = size
             marker.scale.z = 0.001
             marker.color.g = 1.0
-            marker.lifetime = rospy.Duration(1 / self.message_rate)
+            marker.lifetime = self.marker_lifetime
             markers.append(marker)
 
         return markers
@@ -86,6 +110,7 @@ class VisulObject:
             for tag in data['tags']
         ]
         self.last_pose: 'Pose | None' = None
+        self.duration_of_no_pose = 0
 
     def update_transforms(self, transforms: 'dict[int, FiducialTransform]'):
         for tag in self.tags:
@@ -96,19 +121,18 @@ class VisulObject:
         valid_tags = [tag for tag in self.tags if tag.is_visible()]
 
         marker = create_basic_marker(header)
-        pose = self._get_pose(valid_tags)
+        current_pose = self._get_pose(valid_tags)
 
-        if not pose:
+        if not current_pose and not self.last_pose:
+            self.duration_of_no_pose += 1
             return None
 
-        self.last_pose = pose
+        marker.color = self._get_color(bool(current_pose), len(valid_tags))
 
-        if len(valid_tags):
-            marker.color.g = 1.0
-            marker.color.b = 1.0
+        self.duration_of_no_pose = 0 if current_pose else self.duration_of_no_pose + 1
+        marker.pose = current_pose if current_pose else self.last_pose
+        self.last_pose = marker.pose
 
-        marker.color.r = 1.0
-        marker.pose = pose
         marker.id = 0
         marker.ns = self.name
         marker.type = Marker.MESH_RESOURCE
@@ -119,7 +143,7 @@ class VisulObject:
 
     def _get_pose(self, valid_tags: 'list[Tag]') -> 'Pose | None':
         if not len(valid_tags):
-            return self.last_pose
+            return None
 
         if len(valid_tags) < 2:
             return self._calculate_pose_from_single_tag(valid_tags[0])
@@ -131,6 +155,33 @@ class VisulObject:
             )
 
         return self._calculate_pose_from_multi_tags(valid_tags)
+
+    def _get_color(self, is_detected: bool, valid_tags_num: int) -> ColorRGBA:
+        color = ColorRGBA(a=1.0)
+
+        if is_detected:
+            if valid_tags_num < len(self.tags):
+                color.r = 0.5
+                color.g = 0.5
+                color.b = 1.0
+            elif self.duration_of_no_pose == 0:
+                color.r = 1.0
+                color.g = 1.0
+                color.b = 1.0
+            else:
+                color.r = 0.5
+                color.g = 1.0
+                color.b = 0.5
+        else:
+            if self.duration_of_no_pose < WARNING_DURATION:
+                color.r = 1.0
+                color.g = 1.0
+            else:
+                color.r = 1.0
+                color.g = 0.5
+                color.b = 0.5
+
+        return color
 
     def _calculate_pose_from_single_tag(self, base_tag: 'Tag') -> Pose:
         pose_matrix = base_tag.get_panel_pose_matrix()
@@ -187,7 +238,7 @@ class VisulObject:
 
 
 class Tag:
-    def __init__(self, id, posision: dict, orientation: dict):
+    def __init__(self, id, posision: dict, orientation: dict) -> None:
         self.id = int(id)
         t_mat = tft.translation_matrix([val for val in posision.values()])
         r_mat = tft.quaternion_matrix([val for val in orientation.values()])
@@ -253,6 +304,6 @@ def create_basic_marker(header: Header) -> Marker:
 
 if __name__ == "__main__":
     try:
-        MarkerSender().run()
+        PanelTracker().run()
     except:
         pass
