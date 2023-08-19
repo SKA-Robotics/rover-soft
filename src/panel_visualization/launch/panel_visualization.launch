@@ -16,6 +16,7 @@
 
     <node name="marker_sender" pkg="panel_visualization" type="marker_sender.py"
         output="screen">
+        <param name="message_rate" value="$(arg message_rate)" />
         <param name="marker_length" value="0.05" />
         <param name="marker_lengths" value="$(arg marker_size_override)" />
         <rosparam file="$(find panel_visualization)/config/visual_objects.yaml" command="load" />
@@ -23,7 +24,7 @@
 
     <node name="static_transform_publisher_0" pkg="tf2_ros" type="static_transform_publisher"
         args="0 0 0 -0.5 -0.5 0.5 0.5 $(arg manip_frame) $(arg camera_frame)" />
-    
+
     <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" output="screen"
         args="-d $(find panel_visualization)/rviz/test_config.rviz" />
 

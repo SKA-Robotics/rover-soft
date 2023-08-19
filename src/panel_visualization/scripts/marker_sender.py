@@ -7,14 +7,12 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 from visualization_msgs.msg import Marker, MarkerArray
 from fiducial_msgs.msg import FiducialTransform, FiducialTransformArray
 
-CAMERA_FRAME = 'camera_frame'
-MESSAGE_RATE = 1.0  # Hz
-
 
 class MarkerSender:
     def __init__(self) -> None:
         rospy.init_node("marker_corrector")
 
+        self.message_rate: float = rospy.get_param("~message_rate", 1.0)
         objects: list[dict] = rospy.get_param("~visual_objects", {})
         self.objects = [VisulObject(dict_obj) for dict_obj in objects]
 
@@ -36,10 +34,9 @@ class MarkerSender:
 
         for obj in self.objects:
             obj.update_transforms(transforms_dict)
-            marker = obj.get_marker()
-            marker.header.seq = msg.header.seq
-            marker.header.stamp = msg.header.stamp
-            new_msg.markers.append(marker)
+            marker = obj.get_marker(msg.header)
+            if marker:
+                new_msg.markers.append(marker)
 
         new_msg.markers.extend(self._get_aruco_markers(msg))
         # new_msg.markers.append(self._get_test_mesh_model('B2.dae', msg.header.seq))
@@ -61,16 +58,14 @@ class MarkerSender:
             marker.scale.y = size
             marker.scale.z = 0.001
             marker.color.g = 1.0
-            marker.lifetime = rospy.Duration(1 / MESSAGE_RATE)
+            marker.lifetime = rospy.Duration(1 / self.message_rate)
             markers.append(marker)
 
         return markers
 
     def _get_test_mesh_model(self, file: str, seq: int = 0) -> Marker:
-        marker = create_basic_marker(Header(seq=seq))
+        marker = create_basic_marker(Header(seq=seq, frame_id='base_link'))
         marker.type = Marker.MESH_RESOURCE
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'base_link'
         marker.id = 1
         marker.ns = 'test'
         marker.color.g = 1.0
@@ -97,28 +92,32 @@ class VisulObject:
             msg = transforms.get(tag.id)
             tag.update(msg)
 
-    def get_marker(self) -> Marker:
-        valid_tags = [
-            tag for tag in self.tags if not tag.no_transform_duration
-        ]
+    def get_marker(self, header: Header) -> 'Marker | None':
+        valid_tags = [tag for tag in self.tags if tag.is_visible()]
 
-        marker = create_basic_marker(Header(frame_id=CAMERA_FRAME))
-        marker.id = 0
-        marker.ns = self.name
-        marker.type = Marker.MESH_RESOURCE
+        marker = create_basic_marker(header)
         pose = self._get_pose(valid_tags)
-        if pose:
-            marker.pose = pose
+
+        if not pose:
+            return None
+
+        self.last_pose = pose
+
         if len(valid_tags):
             marker.color.g = 1.0
             marker.color.b = 1.0
 
         marker.color.r = 1.0
+        marker.pose = pose
+        marker.id = 0
+        marker.ns = self.name
+        marker.type = Marker.MESH_RESOURCE
         marker.mesh_resource = f'package://panel_visualization/mesh/{self.file}'
         marker.mesh_use_embedded_materials = True
+
         return marker
 
-    def _get_pose(self, valid_tags: 'list[Tag]') -> Pose:
+    def _get_pose(self, valid_tags: 'list[Tag]') -> 'Pose | None':
         if not len(valid_tags):
             return self.last_pose
 
@@ -134,8 +133,8 @@ class VisulObject:
         return self._calculate_pose_from_multi_tags(valid_tags)
 
     def _calculate_pose_from_single_tag(self, base_tag: 'Tag') -> Pose:
-        pose_matrix = base_tag.panel_pose_from_tag()
-        t_b2c = base_tag.transform_from_tag_to_camera()
+        pose_matrix = base_tag.get_panel_pose_matrix()
+        t_b2c = base_tag.get_transform_to_camera_rf()
         panel_pose = np.matmul(t_b2c, pose_matrix)
         p = tft.translation_from_matrix(panel_pose)
         q = tft.quaternion_from_matrix(panel_pose)
@@ -143,16 +142,16 @@ class VisulObject:
         return self._ros_pose_from_matrix(p, q)
 
     def _calculate_pose_from_multi_tags(self, valid_tags: 'list[Tag]') -> Pose:
-        err_sum = sum(tag.object_error for tag in valid_tags)
+        err_sum = sum(tag.get_uncertainty() for tag in valid_tags)
         panel_poses = []
 
         for tag, base_tag in [(valid_tags[0], valid_tags[1]),
                               (valid_tags[1], valid_tags[0])]:
 
-            t_p2b = base_tag.transform_from_panel_to_tag()
-            t_c2b = base_tag.transform_from_camera_to_tag()
-            delta_p = np.matmul(t_p2b, tag.tag_pose_from_panel())
-            delta_c = np.matmul(t_c2b, tag.tag_pose_from_camera())
+            t_p2b = base_tag.get_transform_from_panel_rf()
+            t_c2b = base_tag.get_transform_from_camera_rf()
+            delta_p = np.matmul(t_p2b, tag.get_pose_matrix_from_panel_rf())
+            delta_c = np.matmul(t_c2b, tag.get_pose_matrix_from_camera_rf())
             t_p = tft.translation_from_matrix(delta_p)
             t_c = tft.translation_from_matrix(delta_c)
             axis = np.cross(t_p, t_c)
@@ -161,13 +160,13 @@ class VisulObject:
             angle = np.math.acos(np.dot(t_p_norm, t_c_norm))
             r_mat = tft.rotation_matrix(angle, axis)
 
-            base_panel_pose = base_tag.panel_pose_from_tag()
+            base_panel_pose = base_tag.get_panel_pose_matrix()
             corrected_pose = np.matmul(r_mat, base_panel_pose)
-            t_b2c = base_tag.transform_from_tag_to_camera()
+            t_b2c = base_tag.get_transform_to_camera_rf()
             panel_pose = np.matmul(t_b2c, corrected_pose)
             panel_position = tft.translation_from_matrix(panel_pose)
             panel_orientation = tft.quaternion_from_matrix(panel_pose)
-            obj_err = tag.object_error / err_sum
+            obj_err = tag.get_uncertainty() / err_sum
             panel_poses.append((panel_position, panel_orientation, obj_err))
 
         p0, q0, err0 = panel_poses[0]
@@ -195,7 +194,7 @@ class Tag:
         self.pose_from_panel = np.matmul(t_mat, r_mat)
         self.pose_from_camera: 'np.matrix | None' = None
         self.object_error = 0.0
-        self.no_transform_duration = 0
+        self.duration_of_no_transform = 0
 
     def update(self, msg: FiducialTransform) -> None:
         if msg:
@@ -205,26 +204,32 @@ class Tag:
             r_mat = tft.quaternion_matrix([q.x, q.y, q.z, q.w])
             self.pose_from_camera = np.matmul(t_mat, r_mat)
             self.object_error = msg.object_error
-            self.no_transform_duration = 0
+            self.duration_of_no_transform = 0
         else:
-            self.no_transform_duration += 1
+            self.duration_of_no_transform += 1
 
-    def panel_pose_from_tag(self):
+    def is_visible(self) -> bool:
+        return not self.duration_of_no_transform
+
+    def get_uncertainty(self) -> float:
+        return self.object_error
+
+    def get_panel_pose_matrix(self):
         return np.linalg.inv(self.pose_from_panel)
 
-    def tag_pose_from_panel(self):
+    def get_pose_matrix_from_panel_rf(self):
         return self.pose_from_panel
 
-    def transform_from_panel_to_tag(self):
+    def get_transform_from_panel_rf(self):
         return np.linalg.inv(self.pose_from_panel)
 
-    def tag_pose_from_camera(self):
+    def get_pose_matrix_from_camera_rf(self):
         return self.pose_from_camera
 
-    def transform_from_camera_to_tag(self):
+    def get_transform_from_camera_rf(self):
         return np.linalg.inv(self.pose_from_camera)
 
-    def transform_from_tag_to_camera(self):
+    def get_transform_to_camera_rf(self):
         return self.pose_from_camera
 
 
