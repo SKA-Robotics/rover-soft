@@ -1,0 +1,10 @@
+<launch>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <arg name="port" value="8081"/>
+        <arg name="certfile" value="/certificates/firo.crt"/>
+        <arg name="keyfile" value="/certificates/firo.key" />
+        <arg name="ssl" value="true" />
+    </include>
+
+    <include file="$(find joystick_control)/launch/remote_joystick_steering.launch"/>
+</launch>
