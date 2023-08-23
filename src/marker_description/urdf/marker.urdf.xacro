@@ -1,26 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marker">
-  <xacro:property name="package" value="marker_description" />
-  <xacro:property name="params" value="${xacro.load_yaml('marker.yaml')}" /> 
-  <xacro:include filename="materials.urdf.xacro" />
-    <link name="marker">
-      <visual>
-         <geometry>
-           <box size="1 1 1" />
-         </geometry>
-      </visual>
-      <collision>    
-         <geometry>
-           <box size="1 1 1" />
-         </geometry>
-      </collision>
-        <inertial>
-          <origin xyz="1 0 0" />
-          <mass value="1.0" />
-          <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
-        </inertial>
-    </link>
-    <gazebo reference="marker">
-    <material>YourMaterialName</material>
-    </gazebo>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+<xacro:macro name="marker" params="size:=0.4 margin:=0.2 name:='marker' image:='marker'">
+  <link name="${name}">
+    <visual> 
+        <geometry>
+          <box size="0.0005 ${size + margin*2} ${size + margin*2}" />
+        </geometry>
+        <origin xyz="0.00025 0 0" rpy="0 0 0"/>
+    </visual>
+    <collision>    
+        <geometry>
+          <box size="0.0005 ${size + margin*2} ${size + margin*2}" />
+        </geometry>
+        <origin xyz="0.00025 0 0" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+  </link>
+  <link name="${name}_image">
+    <visual>
+        <geometry>
+          <box size="0.0005 ${size} ${size}" />
+        </geometry>
+    </visual>
+    <collision>    
+        <geometry>
+          <box size="0.0005 ${size} ${size}" />
+        </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+  </link>
+  <joint name="${name}_image_joint" type="continuous">
+    <parent link="${name}"/>
+    <child link="${name}_image"/>
+    <origin xyz="0.00075 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+    <limit effort="0" velocity="0"/>
+  </joint> 
+  <gazebo reference="${name}_image">
+    <material>${image}</material>
+  </gazebo>
+  <gazebo reference="${name}">
+    <material>  
+      <ambient>1 1 1 1</ambient>  
+      <diffuse>1 1 1 1</diffuse>  
+      <specular>0 0 0 0.0</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </gazebo>
+
+  <gazebo>
+    <static>true</static>
+  </gazebo>
+</xacro:macro>
 </robot>

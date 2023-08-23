@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marker">
+  <xacro:property name="package" value="marker_description" />
+  <xacro:property name="params" value="${xacro.load_yaml('marker.yaml')}" /> 
+  <xacro:include filename="marker.urdf.xacro" />
+  <link name="marker">
+  </link>
+  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_front'/>
+  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_back'/>
+  <joint name="margin_front_joint" type="fixed">
+    <parent link="marker"/>
+    <child link="marker_front"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint> 
+  <joint name="margin_back_joint" type="fixed">
+    <parent link="marker"/>
+    <child link="marker_back"/>
+    <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+    <axis xyz="0 0 0"/>
+  </joint> 
+</robot>

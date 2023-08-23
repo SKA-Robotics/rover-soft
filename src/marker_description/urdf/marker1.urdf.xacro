@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marker">
+  <xacro:property name="package" value="marker_description" />
+  <xacro:property name="params" value="${xacro.load_yaml('marker.yaml')}" /> 
+  <xacro:include filename="marker.urdf.xacro" />
+  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker'/>
+</robot>

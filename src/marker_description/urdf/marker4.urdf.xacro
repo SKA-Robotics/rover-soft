@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marker">
+  <xacro:property name="package" value="marker_description" />
+  <xacro:property name="params" value="${xacro.load_yaml('marker.yaml')}" /> 
+  <xacro:include filename="marker.urdf.xacro" />
+  <link name="marker">
+  </link>
+  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_front'/>
+  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_left'/>
+  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_back'/>
+  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_right'/>
+  <joint name="margin_front_joint" type="fixed">
+    <parent link="marker"/>
+    <child link="marker_front"/>
+    <origin xyz="${params['marker_size']/2 + params['margin']} 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint> 
+  <joint name="margin_left_joint" type="fixed">
+    <parent link="marker"/>
+    <child link="marker_left"/>
+    <origin xyz="0 ${params['marker_size']/2 + params['margin']} 0" rpy="0 0 ${pi/2}"/>
+    <axis xyz="0 0 0"/>
+  </joint> 
+  <joint name="margin_back_joint" type="fixed">
+    <parent link="marker"/>
+    <child link="marker_back"/>
+    <origin xyz="-${params['marker_size']/2 + params['margin']} 0 0" rpy="0 0 ${pi}"/>
+    <axis xyz="0 0 0"/>
+  </joint> 
+  <joint name="margin_right_joint" type="fixed">
+    <parent link="marker"/>
+    <child link="marker_right"/>
+    <origin xyz="0 -${params['marker_size']/2 + params['margin']} 0" rpy="0 0 ${-pi/2}"/>
+    <axis xyz="0 0 0"/>
+  </joint> 
+</robot>
