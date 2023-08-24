@@ -6,12 +6,12 @@
     <arg name="info_topic" default="/camera_info" />
     <arg name="stream_topic" default="/camera" />
     <arg name="aruco_size" default="0.05" />
-    <arg name="aruco_size_override" default="12: 0.032, 27: 0.032" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
+    <arg name="aruco_size_override" default="13-14: 0.032" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
 
     <node name="aruco_detect" pkg="aruco_detect" type="aruco_detect">
-        <param name="dictionary" value="0" /> <!-- DICT_4X4_50 -->
+        <param name="dictionary" value="16" /> <!-- DICT_ARUCO_ORIGINAL -->
         <param name="publish_images" value="true" />
-        <param name="fiducial_len" value="$(arg aruco_size)" /> <!-- real size in test steam: 0.023 -->
+        <param name="fiducial_len" value="$(arg aruco_size)" />
         <param name="fiducial_len_override" value="$(arg aruco_size_override)" />
     </node>
 

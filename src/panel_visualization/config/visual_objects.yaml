@@ -1,8 +1,8 @@
 visual_objects:
-  - name: pannel_A
+  - name: panel_A
     file: A.dae
     tags:
-      - id: 42
+      - id: 11
         position:
           x: 0.042
           y: 0.0
@@ -12,10 +12,10 @@ visual_objects:
           y: 0.0
           z: 0.0
           w: -0.70710678118
-  - name: pannel_B1
+  - name: panel_B1
     file: B1.dae
     tags:
-      - id: 12
+      - id: 14
         position:
           x: 0.104
           y: 0.0
@@ -25,7 +25,7 @@ visual_objects:
           y: 0.0
           z: 0.0
           w: -0.70710678118
-      - id: 27
+      - id: 13
         position:
           x: 0.104
           y: 0.0
@@ -35,10 +35,10 @@ visual_objects:
           y: 0.0
           z: 0.0
           w: -0.70710678118
-  - name: pannel_B2
+  - name: panel_B2
     file: B2.dae
     tags:
-      - id: 18
+      - id: 15
         position:
           x: 0.042
           y: 0.0
