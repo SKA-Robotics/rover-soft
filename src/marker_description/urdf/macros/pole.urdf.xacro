@@ -1,0 +1,33 @@
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+<xacro:macro name="pole" params="height:=0.417 radius:=0.005 name:='marker'">
+  <link name="${name}">
+    <visual>
+        <geometry>
+          <cylinder length="${height}" radius="${radius}" />
+        </geometry>
+        <origin xyz="0 0 ${height/2}" rpy="0 0 0"/>
+    </visual>
+    <collision>    
+        <geometry>
+          <cylinder length="${height}" radius="${radius}" />
+        </geometry>
+        <origin xyz="0 0 ${height/2}" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+  </link>
+  <gazebo reference="${name}">
+    <material>  
+      <ambient>0.6 0.3 0 1</ambient>  
+      <diffuse>0.6 0.3 0 1</diffuse>  
+      <specular>0 0 0 0.0</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </gazebo>
+  <gazebo>
+    <static>true</static>
+  </gazebo>
+</xacro:macro>
+</robot>
