@@ -1,12 +1,13 @@
-material marker{
+material artag_13{
     technique
     {
         pass
         {
             texture_unit
             {
-                texture ../texture/marker.jpg
+                texture ../texture/artag/13.png 2d 0
                 scale 1 1
+                filtering none
             }
         }   
     }

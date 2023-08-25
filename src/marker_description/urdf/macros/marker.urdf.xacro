@@ -1,5 +1,5 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="marker" params="size:=0.4 margin:=0.2 name:='marker' image:='marker'">
+<xacro:macro name="marker" params="size:=0.4 margin:=0.2 name:='marker' image:='artag_0'">
   <link name="${name}">
     <visual> 
         <geometry>
