@@ -1,7 +1,7 @@
 <launch>
-    <arg name="model" default="$(find marker_description)/urdf/marker4.urdf.xacro"/>
+    <arg name="model" default="$(find marker_description)/urdf/marker.urdf.xacro"/>
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' sides:=4 family:='artag' id:=0" />
 
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
         args="-z 4 -unpause -urdf -model marker -param robot_description" respawn="false" output="screen" />

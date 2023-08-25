@@ -1,15 +1,16 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="marker" params="size:=0.4 margin:=0.2 name:='marker' image:='artag_0'">
+<xacro:macro name="marker" params="marker_size:=^0.15 margin:=^0.03 name:=^'marker' family:=^'artag' id:=^'0'">
+<xacro:property name="material" value="${family}_${id}" /> 
   <link name="${name}">
     <visual> 
         <geometry>
-          <box size="0.0005 ${size + margin*2} ${size + margin*2}" />
+          <box size="0.0005 ${marker_size + margin*2} ${marker_size + margin*2}" />
         </geometry>
         <origin xyz="0.00025 0 0" rpy="0 0 0"/>
     </visual>
     <collision>    
         <geometry>
-          <box size="0.0005 ${size + margin*2} ${size + margin*2}" />
+          <box size="0.0005 ${marker_size + margin*2} ${marker_size + margin*2}" />
         </geometry>
         <origin xyz="0.00025 0 0" rpy="0 0 0"/>
     </collision>
@@ -18,15 +19,15 @@
       <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
     </inertial>
   </link>
-  <link name="${name}_image">
+  <link name="${name}_material">
     <visual>
         <geometry>
-          <box size="0.0005 ${size} ${size}" />
+          <box size="0.0005 ${marker_size} ${marker_size}" />
         </geometry>
     </visual>
     <collision>    
         <geometry>
-          <box size="0.0005 ${size} ${size}" />
+          <box size="0.0005 ${marker_size} ${marker_size}" />
         </geometry>
     </collision>
     <inertial>
@@ -34,15 +35,15 @@
       <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
     </inertial>
   </link>
-  <joint name="${name}_image_joint" type="continuous">
+  <joint name="${name}_material_joint" type="continuous">
     <parent link="${name}"/>
-    <child link="${name}_image"/>
+    <child link="${name}_material"/>
     <origin xyz="0.00075 0 0" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
     <limit effort="0" velocity="0"/>
   </joint> 
-  <gazebo reference="${name}_image">
-    <material>${image}</material>
+  <gazebo reference="${name}_material">
+    <material>${material}</material>
   </gazebo>
   <gazebo reference="${name}">
     <material>  

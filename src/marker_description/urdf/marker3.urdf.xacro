@@ -1,40 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marker">
   <xacro:property name="package" value="marker_description" />
-  <xacro:property name="params" value="${xacro.load_yaml('marker.yaml')}" /> 
+  <xacro:arg name="name" default=""/>
+  <xacro:property name="name" value="$(arg name)" />
+  <xacro:arg name="family" default="artag"/>
+  <xacro:property name="family" value="$(arg family)" />
+  <xacro:arg name="id" default="0"/>
+  <xacro:property name="id" value="${$(arg id)}" />
+  <xacro:arg name="marker_size" default="0.15"/>
+  <xacro:property name="marker_size" value="${$(arg marker_size)}" />
+  <xacro:arg name="margin" default="0.03"/>
+  <xacro:property name="margin" value="${$(arg margin)}" />
+  <xacro:arg name="pole_height" default="0.417"/>
+  <xacro:property name="pole_height" value="${$(arg pole_height)}" />
+  <xacro:arg name="pole_radius" default="0.005"/>
+  <xacro:property name="pole_radius" value="${$(arg pole_radius)}" />
   <xacro:include filename="macros/marker.urdf.xacro" />
   <xacro:include filename="macros/pole.urdf.xacro" />
-  <xacro:property name="width" value="${params['marker_size'] + params['margin']*2}" /> 
+  <xacro:property name="width" value="${marker_size + margin*2}" /> 
   <xacro:property name="radius" value="${width * sqrt(3) / 6}" /> 
+  <xacro:if value="${name == ''}">
+    <xacro:property name="name" value="${family}_${id}" />
+  </xacro:if>
   
-  <link name="marker_box">
+  <link name="${name}_box">
   </link>
-  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_front'/>
-  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_left'/>
-  <xacro:marker size='${params["marker_size"]}' margin='${params["margin"]}' name='marker_right'/>
-  <xacro:pole height='${params["pole_height"]}' radius='${params["pole_radius"]}' name='marker'/>
+  <xacro:marker name='${name}_front'/>
+  <xacro:marker name='${name}_left'/>
+  <xacro:marker name='${name}_right'/>
+  <xacro:pole height='${pole_height}' radius='${pole_radius}' name='${name}'/>
   <joint name="margin_front_joint" type="fixed">
-    <parent link="marker_box"/>
-    <child link="marker_front"/>
+    <parent link="${name}_box"/>
+    <child link="${name}_front"/>
     <origin xyz="${radius} 0 0" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint> 
   <joint name="margin_left_joint" type="fixed">
-    <parent link="marker_box"/>
-    <child link="marker_left"/>
+    <parent link="${name}_box"/>
+    <child link="${name}_left"/>
     <origin xyz="-${radius * 0.5} ${width / 4} 0" rpy="0 0 ${pi*2/3}"/>
     <axis xyz="0 0 0"/>
   </joint> 
   <joint name="margin_right_joint" type="fixed">
-    <parent link="marker_box"/>
-    <child link="marker_right"/>
+    <parent link="${name}_box"/>
+    <child link="${name}_right"/>
     <origin xyz="-${radius * 0.5} -${width / 4} 0" rpy="0 0 ${-pi*2/3}"/>
     <axis xyz="0 0 0"/>
   </joint> 
-  <joint name="marker_pole_joint" type="fixed">
-    <parent link="marker"/>
-    <child link="marker_box"/>
-    <origin xyz="0 0 ${params['pole_height'] + params['marker_size']/2 + params['margin']}" rpy="0 0 0"/>
+  <joint name="${name}_pole_joint" type="fixed">
+    <parent link="${name}"/>
+    <child link="${name}_box"/>
+    <origin xyz="0 0 ${pole_height + marker_size/2 + margin}" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint> 
 </robot>
