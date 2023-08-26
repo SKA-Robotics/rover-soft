@@ -82,7 +82,10 @@ class JoystickDifferentialDrive:
                 self.config_lock.acquire()
 
             # mode change
-            if inputs["start_button"] == 1 and self.prev_inputs["start_button"] == 0:
+            if (
+                inputs[self.CHANGE_MODE_BUTTON] == 1
+                and self.prev_inputs[self.CHANGE_MODE_BUTTON] == 0
+            ):
                 next_mode = self.mode + 1
                 if next_mode > self.config_server.type.max["mode"]:
                     next_mode = self.config_server.type.min["mode"]

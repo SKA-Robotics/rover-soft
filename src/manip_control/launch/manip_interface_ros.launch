@@ -1,5 +1,8 @@
 <launch>
-	<node name="manip_interface_ros" pkg="manip_control" type="manip_jointstate_aggregator.py" output="screen">
+	<!--<node name="manip_interface_ros" pkg="manip_control" type="manip_jointstate_aggregator.py" output="screen">
 		<rosparam file="$(find manip_control)/config/manip_interface_ros.yaml" command="load"/>
-	</node>
+	</node>-->
+    <node name="manip_interface" pkg="manip_control" type="manip_gazebo_interface.py" output="screen">
+		<rosparam file="$(find manip_control)/config/manip_gazebo_interface.yaml" command="load"/>
+    </node>
 </launch>
