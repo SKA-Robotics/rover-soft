@@ -43,7 +43,7 @@ def optimize_image(input_path, output_path=None, force=False):
 def main():
     # Check for minimum number of arguments
     if len(sys.argv) < 2:
-        print("Usage: python script_name.py <input_path> [output_path] [-f]")
+        print("Usage: python optimize_png.py <input_path> [output_path] [-f]")
         sys.exit(1)
 
     input_path = sys.argv[1]

@@ -1,7 +1,7 @@
 <launch>
     <arg name="family" default="artag"/>
     <arg name="id" default="0"/>
-    <arg name="sides" default="4"/>
+    <arg name="sides" default="1"/>
     <arg name="name" default=""/>
     <arg name="x" default="0"/>
     <arg name="y" default="0"/>
@@ -9,8 +9,12 @@
     <arg name="R" default="0"/>
     <arg name="P" default="0"/>
     <arg name="Y" default="0"/>
+    <arg name="marker_size" default="0.15"/>
+    <arg name="margin" default="0.03"/>
+    <arg name="pole_height" default="0.417"/>
+    <arg name="pole_radius" default="0.005"/>
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(find marker_description)/urdf/marker.urdf.xacro' sides:=$(arg sides) family:='$(arg family)' id:=$(arg id) name:='$(arg name)'" />
+    <param name="robot_description" command="$(find xacro)/xacro '$(find marker_description)/urdf/marker.urdf.xacro' sides:=$(arg sides) family:='$(arg family)' id:=$(arg id) name:='$(arg name)' marker_size:=$(arg marker_size) margin:=$(arg margin) pole_height:=$(arg pole_height) pole_radius:=$(arg pole_radius)" />
 
 
     <node unless="$(eval name=='')" name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
