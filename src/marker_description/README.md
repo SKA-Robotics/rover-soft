@@ -20,7 +20,8 @@ Description of the fiducial markers. Package provides:
     - 'z' - z coordinate of the marker in meters (default: `0`)
     - 'R' - roll angle of the marker in radians (default: `0`)
     - 'P' - pitch angle of the marker in radians (default: `0`)
-    - 'Y' - yaw angle of the marker in radians (default: `0`)
+    - 'Y' - yaw angle of the marker in radians (default: `0`)  
+    
     Also accepts all arguments from `marker.urdf.xacro` (see below).
 
 ## URDF
