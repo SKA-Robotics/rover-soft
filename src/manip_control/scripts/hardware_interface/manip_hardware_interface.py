@@ -19,6 +19,7 @@ class ManipHardwareInterface(ABC):
         self.config_server = Server(ManipInterfaceConfig, self._dynamic_reconfigure)
 
     def run(self):
+        self._pre_run()
         rospy.spin()
 
     def _dynamic_reconfigure(self, config, level):
@@ -66,8 +67,10 @@ class ManipHardwareInterface(ABC):
             new_jointstate.position.append(position + (multiplier * self.offsets[name]))
 
         new_jointstate.header = joint_state.header
-        new_jointstate.effort = joint_state.effort
-        new_jointstate.velocity = joint_state.velocity
+        if len(joint_state.position) == 0:
+            new_jointstate.name = joint_state.name
+            new_jointstate.velocity = joint_state.velocity
+            new_jointstate.effort = joint_state.effort
 
         return new_jointstate
 
@@ -77,4 +80,7 @@ class ManipHardwareInterface(ABC):
 
     @abstractmethod
     def _send_hardware_command(self, joint_state: JointState):
+        pass
+
+    def _pre_run(self):
         pass
