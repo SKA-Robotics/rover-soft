@@ -21,7 +21,7 @@ Description of the fiducial markers. Package provides:
     - 'R' - roll angle of the marker in radians (default: `0`)
     - 'P' - pitch angle of the marker in radians (default: `0`)
     - 'Y' - yaw angle of the marker in radians (default: `0`)  
-    
+
     Also accepts all arguments from `marker.urdf.xacro` (see below).
 
 ## URDF
@@ -47,7 +47,7 @@ Description of the fiducial markers. Package provides:
 Textures are located in `media/materials/texture/` directory and are organized in subdirectories named after tag family. All gazebo material files are located in `media/materials/scripts/` directory and are named as `<family>_<id>`. Currently there are following tag families available:
 - [`artag`](media/materials/texture/artag/)  
     id: 0-17  
-    <img src="media/materials/texture/artag/0.png" width="200" style="image-rendering: pixelated;">
+    ![artag](docs/artag_0.png)
 
 ## Other
 - [PNG optimizer script](media/materials/texture/optimize_png.py)  
