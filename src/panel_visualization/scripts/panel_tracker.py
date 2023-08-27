@@ -3,8 +3,9 @@ import numpy as np
 import tf.transformations as tft
 
 import rospy
+from tf2_ros import TransformBroadcaster
 from std_msgs.msg import Header, ColorRGBA
-from geometry_msgs.msg import Pose, Point, Quaternion
+from geometry_msgs.msg import Pose, Point, Quaternion, TransformStamped
 from visualization_msgs.msg import Marker, MarkerArray
 from fiducial_msgs.msg import FiducialTransform, FiducialTransformArray
 
@@ -59,6 +60,10 @@ class PanelTracker:
             obj.update_transforms(transforms_dict)
             marker = obj.get_marker(msg.header)
             if marker:
+                # marker.header.frame_id = marker.ns
+                # marker.pose = Pose()
+                # marker.pose.orientation.w = 1.0
+                obj.publish_transform(msg.header.frame_id)
                 marker.lifetime = self.marker_lifetime
                 new_msg.markers.append(marker)
 
@@ -111,11 +116,26 @@ class VisulObject:
         ]
         self.last_pose: 'Pose | None' = None
         self.duration_of_no_pose = 0
+        self.broadcaster = TransformBroadcaster()
 
     def update_transforms(self, transforms: 'dict[int, FiducialTransform]'):
         for tag in self.tags:
             msg = transforms.get(tag.id)
             tag.update(msg)
+
+    def publish_transform(self, frame_id: str) -> None:
+        msg = TransformStamped()
+        msg.header.frame_id = frame_id
+        msg.header.stamp = rospy.Time.now()
+        msg.child_frame_id = self.name
+        pose = self.last_pose
+        if not pose:
+            return
+        msg.transform.translation.x = pose.position.x
+        msg.transform.translation.y = pose.position.y
+        msg.transform.translation.z = pose.position.z
+        msg.transform.rotation = pose.orientation
+        self.broadcaster.sendTransform(msg)
 
     def get_marker(self, header: Header) -> 'Marker | None':
         valid_tags = [tag for tag in self.tags if tag.is_visible()]
@@ -224,9 +244,6 @@ class VisulObject:
         p1, q1, err1 = panel_poses[1]
         p = p0 * err1 + p1 * err0
         q = tft.quaternion_slerp(q0, q1, err0)
-        # rospy.loginfo(f'Quaterion 0: {q0}')
-        # rospy.loginfo(f'Quaterion 1: {q1}')
-        # rospy.loginfo(f'Quaterion 2: {q}')
 
         return self._ros_pose_from_matrix(p, q)
 
