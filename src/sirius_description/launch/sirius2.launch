@@ -1,4 +1,6 @@
 <launch>
+    <arg name="certificate_path" default="$(find sirius_description)/../../../certificates/sirius"/>
+
     <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
     <rosparam file="$(find sirius_description)/config/odrive.yaml" command="load"/> 
     <rosparam file="$(find manip_control)/config/roboclaws.yaml" command="load"/> 
@@ -27,7 +29,9 @@
     <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
     </node>
 
-    <include file="$(find sirius_description)/launch/control_system.launch"/>
+    <include file="$(find sirius_description)/launch/control_system.launch">
+        <arg name="certificate_path" value="$(arg certificate_path)"/>
+    </include>
     <include file="$(find manip_control)/launch/manip_control.launch"/>
 
     <!--<include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>-->

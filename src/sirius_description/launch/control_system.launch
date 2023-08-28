@@ -1,9 +1,11 @@
 <launch>
+    <arg name="certificate_path" default="$(find sirius_description)/../../../certificates/sirius"/>
+
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
         <arg name="port" value="8081"/>
-        <arg name="certfile" value="/home/rover/certificates/sirius.crt"/>
-        <arg name="keyfile" value="/home/rover/certificates/sirius.key" />
-        <arg name="ssl" value="true" />
+        <arg name="certfile" value="$(arg certificate_path).crt"/>
+        <arg name="keyfile" value="$(arg certificate_path).key"/>
+        <arg name="ssl" value="true"/>
     </include>
 
     <node 
