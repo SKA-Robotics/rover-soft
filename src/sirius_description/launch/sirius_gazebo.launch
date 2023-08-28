@@ -1,0 +1,68 @@
+<launch>
+    <arg name="world_name" default="$(find leo_gazebo_worlds)/worlds/marsyard2022.world"/>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
+    <arg name="imu_frequency"         default="200.0" />
+    <arg name="stereo_fps"            default="30"  />
+    <!-- ERC: Marsyard -->
+    <arg name="spherical_coordinates" default="[50.878151, 20.642273, 144.41]"/>
+    <arg name="elevation" default="308.1445"/>
+    <!-- URC: The Mars Desert Research Station  -->
+    <!-- <arg name="spherical_coordinates" default="[38.4190235, -110.7823884, 0.0]"/> -->
+    <!-- <arg name="elevation" default="1378.0"/> -->
+    <arg name="year" default=""/>
+
+    <param name="use_sim_time" command="$(arg use_sim_time)" />
+
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml' stereo_fps:='$(arg stereo_fps)' imu_frequency:='$(arg imu_frequency)' datum:='$(arg spherical_coordinates)' elevation:='$(arg elevation)' year:='$(arg year)'" />
+
+    <arg name="rviz" default="true"/>
+
+    <remap from="/sirius/controller/wheels/cmd_vel" to="/cmd_vel" />
+    <remap from="/sirius/controller/wheels/odom" to="/odom" />
+
+
+    <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)"/>
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-z 0 -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="30.0" />
+    </node>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"
+    args="
+            /sirius/controller/wheels_left_state
+            /sirius/controller/wheels_right_state
+            /sirius/controller/wheels
+    "/>
+    <node if="$(arg rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find sirius_description)/rviz/sirius_gazebo.rviz" />
+        
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" clear_params="true">
+        <remap from="odometry/filtered" to="odometry/filtered_map"/>
+        <param name="frequency" value="20"/>
+        <param name="delay" value="0.0"/>
+        <param name="transform_timeout" value="0.05" />
+        <param name="zero_altitude" value="true"/>
+        <param name="broadcast_cartesian_transform" value="true"/>
+        <param name="broadcast_cartesian_transform_as_parent_frame" value="true"/>
+        <param name="publish_filtered_gps" value="true"/>
+        <param name="wait_for_datum" value="true"/>
+    <rosparam param="datum" subst_value="True">$(eval ','.join(spherical_coordinates.split(',')[0:2]) + ', 0]')</rosparam>
+    </node> 
+
+</launch>

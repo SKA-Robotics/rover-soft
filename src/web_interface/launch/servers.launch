@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find web_interface)/launch/ros_servers.launch"/>
+    <node name="server" pkg="web_interface" type="start_http_server.bash"/>
+</launch>

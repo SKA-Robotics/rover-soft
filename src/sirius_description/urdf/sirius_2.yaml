@@ -1,0 +1,20 @@
+blue_indicator_light_xyz: 0.4430 -0.1141 0.6540
+yellow_indicator_light_xyz: 0.4371 0.1522 0.6540
+back_mast_camera_xyz: 0.45 0.0 0.57
+back_mast_camera_rpy: 3.141592 1.4835 0.0
+front_mast_camera_xyz: 0.35 0.0 0.654
+front_mast_camera_rpy: 0 0.9599 3.141592
+back_camera_xyz: 0.38 0.0 0.19
+back_camera_rpy: 0 0 0
+front_camera_xyz: -0.2 0.0 0.19
+front_camera_rpy: 0 0.0 3.141592
+suspension_height: 0.24875
+suspension_separation_x: 0.229
+suspension_separation_y: 0.312
+suspension_thickness: 0.02
+suspension_z: 0.12746
+track: 0.584
+wheel_base: 0.5795
+wheel_radius: 0.114
+wheel_width: 0.210
+gnss_xyz: -0.34 0 0.49

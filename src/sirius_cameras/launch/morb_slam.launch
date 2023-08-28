@@ -1,0 +1,33 @@
+<launch>
+    <arg name="gazebo"            default="false"/>
+    <arg name="camera_name"            default="front_camera"/>
+    <!-- ORB-SLAM3 -->
+    <node name="morb_slam_ros" pkg="morb_slam_ros" type="morb_slam_ros_stereo" output="screen" respawn="true">
+        <remap if="$(arg gazebo)" from="~left/image_raw"    to="/front_camera/left/image_rect_gray"/>
+        <remap if="$(arg gazebo)" from="~right/image_raw"   to="/front_camera/right/image_rect_gray"/>
+        <remap unless="$(arg gazebo)" from="~left/image_raw"    to="/$(arg camera_name)/left_raw/image_raw_gray"/>
+        <remap unless="$(arg gazebo)" from="~right/image_raw"   to="/$(arg camera_name)/right_raw/image_raw_gray"/>
+        <remap from="~imu"                      to="/$(arg camera_name)/imu/data"/>
+        <remap from="~pose"                  to="/$(arg camera_name)/pose"/>
+        <remap from="~keypoints"                  to="/$(arg camera_name)/keypoints"/>
+        <!-- Parameters for original ORB-SLAM3 -->
+        <param name="voc_file"      type="string"   value="$(find morb_slam_ros)/Vocabulary/ORBvoc.txt" />
+        <param if="$(arg gazebo)"     name="settings_file" type="string"   value="$(find sirius_cameras)/config/oak_d_w/morb_slam_gazebo.yaml" />
+        <param unless="$(arg gazebo)" name="settings_file" type="string"   value="$(find sirius_cameras)/config/oak_d_w/morb_slam_ros.yaml" />
+
+        <!-- Parameters for ROS -->
+        <param name="world_tf"  type="string"   value="odom" />
+        <param name="camera_tf" type="string"   value="$(arg camera_name)_rgb_camera_optical_frame" />
+    </node>
+
+    <!-- Visualization - RViz-->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find sirius_cameras)/launch/morb_slam_ros.rviz" output="screen" />
+
+    <node pkg="hector_trajectory_server" type="hector_trajectory_server" name="trajectory_server_orb_slam3" output="screen">
+        <param name="target_frame_name" value="odom" />
+        <param name="source_frame_name" value="$(arg camera_name)_rgb_camera_optical_frame" />
+        <param name="trajectory_update_rate" value="5.0" />
+        <param name="trajectory_publish_rate" value="5.0" />
+        <remap from="trajectory" to="$(arg camera_name)/path_map" />
+    </node>
+</launch>

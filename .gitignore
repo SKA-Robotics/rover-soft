@@ -6,6 +6,7 @@ logs/
 
 # VS Code
 .vscode/
+.cache
 
 # Python
 *.pyc

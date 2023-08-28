@@ -1,0 +1,27 @@
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+<xacro:macro name="wheel" params="prefix material *gazebo_material package:=^ params:=^ inertial:=^">
+    <link name="${prefix}_wheel">
+      <visual>
+        <material name="${material}" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/sirius_2/wheel.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <mass value="${inertial['wheel_mass']}"/>
+        <inertia ixx="${inertial['wheel_inertia']['ixx']}" ixy="${inertial['wheel_inertia']['ixy']}" ixz="${inertial['wheel_inertia']['ixz']}" iyy="${inertial['wheel_inertia']['iyy']}" iyz="${inertial['wheel_inertia']['iyz']}" izz="${inertial['wheel_inertia']['izz']}"/>
+      </inertial>
+      <collision>    
+        <geometry>
+          <cylinder length="${params['wheel_width']}" radius="${params['wheel_radius']}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+      </collision>
+    </link>   
+    <gazebo reference="${prefix}_wheel">
+      <visual>  
+        <xacro:insert_block name="gazebo_material" />
+      </visual> 
+    </gazebo>
+</xacro:macro>
+</robot>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+<xacro:macro name="indicator_light" params="prefix material *gazebo_material package:=^ collisions:=^ inertial:=^">
+  <link name="${prefix}_indicator_light">
+    <visual>
+      <material name="${material}">
+      </material>
+      <geometry>
+        <mesh filename="package://${package}/meshes/sirius_2/indicator_light.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="${inertial['indicator_light_mass']}"/>
+      <inertia ixx="${inertial['indicator_light_inertia']['ixx']}" ixy="${inertial['indicator_light_inertia']['ixy']}" ixz="${inertial['indicator_light_inertia']['ixz']}" iyy="${inertial['indicator_light_inertia']['iyy']}" iyz="${inertial['indicator_light_inertia']['iyz']}" izz="${inertial['indicator_light_inertia']['izz']}"/>
+    </inertial>
+    <collision>    
+      <geometry>
+          <cylinder length="${collisions['indicator_light_height']}" radius="${collisions['indicator_light_radius']}"/>
+      </geometry>
+      <origin xyz="0 0 ${collisions['indicator_light_height']/2}" />
+    </collision>
+  </link>
+  <gazebo reference="${prefix}_indicator_light">
+      <visual>  
+        <xacro:insert_block name="gazebo_material" />
+      </visual> 
+  </gazebo>
+</xacro:macro>
+</robot>

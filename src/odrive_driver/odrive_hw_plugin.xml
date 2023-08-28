@@ -1,0 +1,7 @@
+<library path="lib/libodrive_hardware_interfaces">
+  <class name="odrive/OdriveHWInterface" type="odrive::OdriveHWInterface" base_class_type="hardware_interface::RobotHW">
+    <description>
+      Interface for odrive motor controllers
+    </description>
+  </class>
+</library>

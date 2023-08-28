@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+<arg name="camera_name"            default="front_camera"/>
+<arg name="bag_file" default="$(find sirius_cameras)/config/oak_d_w/magnetometer.bag"/>
+
+<node pkg="rosbag" type="play" name="player" args="-q --clock $(arg bag_file)" if="$(eval bag_file[0] == '/')" />
+<node pkg="rosbag" type="play" name="player" args="-q --clock $(env PWD)/$(arg bag_file)" unless="$(eval bag_file[0] == '/')" />
+<node name="magnetometer_calibration" pkg="robot_calibration" type="magnetometer_calibration" output="screen">
+    <param name="rotation_manual"         type="string" value="base_link"/>
+    <param name="rotation_duration"       value="220"/>
+    <remap from="/imu/mag"   to="/$(arg camera_name)/imu/mag"/>
+</node>
+</launch>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sirius_2">
+  <xacro:property name="package" value="sirius_description" />
+  <xacro:property name="params" value="${xacro.load_yaml('sirius_2.yaml')}" /> 
+  <xacro:arg name="calibration_path" default=""/>
+  <xacro:property name="calibration_path" value="$(arg calibration_path)" /> 
+  <xacro:if value="${calibration_path != ''}">
+    <xacro:property name="calibration" value="${xacro.load_yaml(calibration_path)}" /> 
+  </xacro:if>
+  <xacro:arg name="stereo_fps" default="30"/>
+  <xacro:property name="stereo_fps" value="$(arg stereo_fps)" /> 
+  <xacro:arg name="imu_frequency" default="200.0"/>
+  <xacro:property name="imu_frequency" value="$(arg imu_frequency)" /> 
+  <xacro:arg name="datum" default="[50.878151, 20.642273, 144.41]"/>
+  <xacro:property name="datum" value="${$(arg datum)}" />
+  <xacro:arg name="elevation" default="0.0"/>
+  <xacro:property name="elevation" value="$(arg elevation)" />
+  <xacro:arg name="year" default=""/>
+  <xacro:property name="year" value="$(arg year)" />
+  <xacro:property name="collisions" value="${xacro.load_yaml('sirius_2/sirius_2_collisions.yaml')}" /> 
+  <xacro:property name="inertial" value="${xacro.load_yaml('sirius_2/sirius_2_inertial.yaml')}" /> 
+  <xacro:property name="cameras" value="${xacro.load_yaml('cameras/cameras.yaml')}" />  
+  <xacro:property name="cameras_inertial" value="${xacro.load_yaml('cameras/cameras_inertial.yaml')}" /> 
+  <xacro:include filename="materials.urdf.xacro" />
+  <xacro:include filename="sirius_2/indicator_light.urdf.xacro" />
+  <xacro:include filename="sirius_2/gnss.urdf.xacro" />
+  <xacro:include filename="sirius_2/platform.urdf.xacro" />
+
+  <xacro:include filename="cameras/hp_4310.urdf.xacro" />
+  <xacro:include filename="cameras/oak-d-w.urdf.xacro" />
+
+  <xacro:property name="link_prefix" value=""/>
+  <xacro:property name="robot_ns" value=""/>
+  <xacro:property name="joint_prefix" value=""/>
+  <xacro:macro name="drive_system" params="reflect:=false prefix:='' params:=^ direction:=1">
+    <xacro:include filename="sirius_2/suspension.urdf.xacro" />
+    <xacro:include filename="sirius_2/wheel.urdf.xacro" />
+    <xacro:include filename="sirius_2/drive_train.urdf.xacro" />
+    
+    <xacro:suspension prefix="${prefix}" material="bronze">
+      <xacro:bronze/>
+    </xacro:suspension>
+    <xacro:drive_train prefix="${prefix}" material="gray">
+      <xacro:gray/>
+    </xacro:drive_train>
+    <xacro:wheel prefix="${prefix}" material="gold">
+      <xacro:gold/>
+    </xacro:wheel>
+
+    <joint name="${prefix}_suspension_to_${prefix}_drive_train" type="fixed">
+      <parent link="${prefix}_suspension"/>
+      <child link="${prefix}_drive_train"/>
+      <origin xyz="${params['suspension_separation_x']/2 - params['wheel_base']/2} ${-reflect*params['suspension_thickness']} ${-params['suspension_height']}" rpy="0 0 ${reflect*pi}"/>
+      <axis xyz="0 0 1"/>
+    </joint>  
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="${prefix}_drive_train"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="0 ${params['track']/2 - params['suspension_thickness']/2 - params['suspension_separation_y']/2} 0"/>
+      <axis xyz="0 ${-(1-2*reflect) * direction} 0"/>
+      <limit effort="18.0" velocity="8.0"/>
+    </joint>    
+    <transmission name="${prefix}_wheel_transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_wheel_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:indicator_light prefix="yellow" material="yellow_t">
+    <xacro:yellow_t/>
+  </xacro:indicator_light>
+  <xacro:indicator_light prefix="blue" material="blue_t">
+    <xacro:blue_t/>
+  </xacro:indicator_light>
+
+  <xacro:gnss material="light_gray">
+    <xacro:light_gray/>
+  </xacro:gnss>
+
+  <xacro:hp_4310 prefix="front_mast" material="black">
+    <xacro:black/>
+  </xacro:hp_4310>
+  <xacro:hp_4310 prefix="back_mast" material="black">
+    <xacro:black/>
+  </xacro:hp_4310>
+  <xacro:oak-d-w prefix="front"/>
+
+
+  <xacro:drive_system prefix="right_front" />
+  <xacro:drive_system reflect="true" prefix="right_back" direction="-1"/>
+  <xacro:drive_system reflect="true" prefix="left_front" />
+  <xacro:drive_system prefix="left_back" direction="-1"/>
+  
+  <link name="base_link" />
+  <xacro:platform prefix="main" material="gray">
+    <xacro:gray/>
+  </xacro:platform>
+
+  <joint name="base_link_to_main_platform" type="fixed">
+    <parent link="base_link"/>
+    <child link="main_platform"/>
+    <origin xyz="0 0 ${params['wheel_radius'] + params['suspension_height'] - params['suspension_z']}" rpy="0 0 ${pi}"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="base_right_front_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="right_front_suspension"/>
+    <origin xyz="${-params['suspension_separation_x']/2} ${params['suspension_separation_y']/2 + params['suspension_thickness']/2} ${params['suspension_z']}" rpy="0 0 0"/>
+  </joint>
+  <joint name="base_right_back_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="right_back_suspension"/>
+    <origin xyz="${params['suspension_separation_x']/2} ${params['suspension_separation_y']/2 - params['suspension_thickness']/2} ${params['suspension_z']}" rpy="0 0 ${pi}"/>
+  </joint>
+  <joint name="base_left_front_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="left_front_suspension"/>
+    <origin xyz="${-params['suspension_separation_x']/2} ${-params['suspension_separation_y']/2 + params['suspension_thickness']/2} ${params['suspension_z']}"/>
+  </joint>
+  <joint name="base_left_back_suspension" type="fixed">
+    <parent link="main_platform"/>
+    <child link="left_back_suspension"/>
+    <origin xyz="${params['suspension_separation_x']/2} ${-params['suspension_separation_y']/2 - params['suspension_thickness']/2} ${params['suspension_z']}" rpy="0 0 ${pi}"/>
+  </joint>
+  
+  <joint name="base_to_yellow_indicator_light" type="fixed">
+    <parent link="main_platform"/>
+    <child link="yellow_indicator_light"/>
+    <origin xyz="${params['yellow_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
+  </joint>
+  <joint name="base_to_blue_indicator_light" type="fixed">
+    <parent link="main_platform"/>
+    <child link="blue_indicator_light"/>
+    <origin xyz="${params['blue_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
+  </joint>
+
+  <joint name="base_to_gnss" type="fixed">
+    <parent link="base_link"/>
+    <child link="gnss"/>
+    <origin xyz="${params['gnss_xyz']}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="base_to_front_mast_camera" type="fixed">
+    <parent link="main_platform"/>
+    <child link="front_mast_camera"/>
+    <origin xyz="${params['front_mast_camera_xyz']}" rpy="${params['front_mast_camera_rpy']}"/>
+  </joint>
+  <joint name="base_to_back_mast_camera" type="fixed">
+    <parent link="main_platform"/>
+    <child link="back_mast_camera"/>
+    <origin xyz="${params['back_mast_camera_xyz']}" rpy="${params['back_mast_camera_rpy']}"/>
+  </joint>
+  <joint name="base_to_front_camera" type="fixed">
+    <parent link="main_platform"/>
+    <child link="front_camera_center"/>
+    <origin xyz="${params['front_camera_xyz']}" rpy="${params['front_camera_rpy']}"/>
+  </joint>
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
+    <plugin name="p3d_plugin" filename="libsirius_gazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth</topicName>
+      <frameName>map</frameName>
+      <frameRpyOffset>0 0 ${datum[2] * pi/180}</frameRpyOffset>
+    </plugin>
+  </gazebo>
+</robot>

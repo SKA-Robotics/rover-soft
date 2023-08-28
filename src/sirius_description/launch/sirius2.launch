@@ -1,0 +1,43 @@
+<launch>
+    <arg name="certificate_path" default="$(find sirius_description)/../../../certificates/sirius"/>
+
+    <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml'" />
+
+    <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
+    <rosparam file="$(find sirius_description)/config/odrive.yaml" command="load"/> 
+    <rosparam file="$(find manip_control)/config/roboclaws.yaml" command="load"/> 
+
+    <remap from="/sirius/controller/wheels/cmd_vel" to="/cmd_vel" />
+
+    <node name="sirius_control_loop" pkg="sirius_control_loop" type="sirius_control_loop" output="screen"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"
+        args="
+             /sirius/controller/wheels_left_state
+             /sirius/controller/wheels_right_state
+             /sirius/controller/wheels
+    "/>
+
+    <node name="odrive_driver" pkg="odrive_driver" type="driver.py" output="screen">
+        <remap from="/odrive_driver/wheels_left/motor0/joint_state" to="/wheels_left/motor0/joint_state"/>
+        <remap from="/odrive_driver/wheels_left/motor0/set_joint_state" to="/wheels_left/motor0/set_joint_state"/>
+        <remap from="/odrive_driver/wheels_left/motor1/joint_state" to="/wheels_left/motor1/joint_state"/>
+        <remap from="/odrive_driver/wheels_left/motor1/set_joint_state" to="/wheels_left/motor1/set_joint_state"/>
+        <remap from="/odrive_driver/wheels_right/motor0/joint_state" to="/wheels_right/motor0/joint_state"/>
+        <remap from="/odrive_driver/wheels_right/motor0/set_joint_state" to="/wheels_right/motor0/set_joint_state"/>
+        <remap from="/odrive_driver/wheels_right/motor1/joint_state" to="/wheels_right/motor1/joint_state"/>
+        <remap from="/odrive_driver/wheels_right/motor1/set_joint_state" to="/wheels_right/motor1/set_joint_state"/>
+    </node>
+    <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="30.0" />
+    </node>
+    <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
+    </node>
+
+    <include file="$(find sirius_description)/launch/control_system.launch">
+        <arg name="certificate_path" value="$(arg certificate_path)"/>
+    </include>
+    <include file="$(find manip_control)/launch/manip_control.launch"/>
+
+    <!--<include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>-->
+</launch>

@@ -1,0 +1,82 @@
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <material name="yellow_t">
+    <color rgba=".75 .75 0 0.5" />
+  </material>
+  <material name="blue_t">
+    <color rgba="0 0 1 0.5" />
+  </material>
+  <material name="bronze">
+    <color rgba=".839 .471 .369 1" />
+  </material>
+  <material name="gold">
+    <color rgba=".910 .443 .031 1" />
+  </material>
+  <material name="gray">
+    <color rgba=".796 .824 .937 1" />
+  </material>
+  <material name="light_gray">
+        <color rgba="0.25 0.25 0.25 1"/>
+  </material>
+  <material name="black">
+    <color rgba="0 0 0 1" />
+  </material>
+  <material name="green">
+    <color rgba="0 1 0 1" />
+  </material>
+  <xacro:macro name="gold">
+    <material>  
+      <ambient>1 .6 .2 1</ambient>  
+      <diffuse>1 .6 .2 1</diffuse>  
+      <specular>.4 .2 .1 1</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+  <xacro:macro name="gray">
+    <material>  
+      <ambient>0.92 0.95 1 1</ambient>  
+      <diffuse>0.92 0.95 1 1</diffuse>  
+      <specular>1 1 1 1</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+  <xacro:macro name="bronze">
+    <material>  
+      <ambient>.9 .5 .4 1</ambient>  
+      <diffuse>.9 .5 .4 1</diffuse>  
+      <specular>1 1 1 1</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+  <xacro:macro name="yellow_t">
+    <material>  
+      <ambient>1 1 0 0.5</ambient>  
+      <diffuse>1 1 0 0.5</diffuse>  
+      <specular>1 1 1 0.5</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+  <xacro:macro name="blue_t">
+    <material>  
+      <ambient>0 0 1 0.5</ambient>  
+      <diffuse>0 0 1 0.5</diffuse>  
+      <specular>0 0 1 0.5</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+  <xacro:macro name="light_gray">
+    <material>  
+      <ambient>0.25 0.25 0.25 1</ambient>  
+      <diffuse>0.25 0.25 0.25 1</diffuse>  
+      <specular>0.5 0.5 0.5 1</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+  <xacro:macro name="black">
+    <material>  
+      <ambient>0 0 0 1</ambient>  
+      <diffuse>0 0 0 1</diffuse>  
+      <specular>0 0 0 1</specular>  
+      <emissive>0.0 0.0 0.0 0.0</emissive>  
+    </material>  
+  </xacro:macro>
+</robot>

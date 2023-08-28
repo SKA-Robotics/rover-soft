@@ -1,0 +1,7 @@
+<launch>
+    <rosparam file="$(find sirius_description)/config/hardware_tmp.yaml" command="load"/> 
+    
+    <node name="roboclaw_driver" pkg="roboclaw_driver" type="driver.py" output="screen">
+    </node>
+
+</launch>

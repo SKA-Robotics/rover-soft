@@ -1,0 +1,63 @@
+%YAML:1.0
+File.version: "1.0"
+Camera.type: "Rectified"
+
+# Camera calibration and distortion parameters (OpenCV)
+Camera1.fx: 574.8975263974625
+Camera1.fy: 574.435756683178
+Camera1.cx: 632.0006541642256
+Camera1.cy: 347.5452660175513
+
+# Camera resolution
+Camera.width: 1280
+Camera.height: 720
+
+# Camera frames per second
+Camera.fps: 30
+
+# Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
+Camera.RGB: 1
+
+# Close/Far threshold. Baseline times.
+Stereo.ThDepth: 40.0
+
+# stereo baseline
+Stereo.b: 0.0750814912421509
+
+# Transformation from camera 0 to body-frame (imu)
+IMU.T_b_c1: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: f
+   data: 
+    [-0.00558715,  0.99995497, -0.00767045, -0.00060827,
+      0.99969438,  0.00540064, -0.02412408, -0.07797021,
+      -0.02408156, -0.00780289, -0.99967955,  0.00621334,
+      0.,          0.,          0.,          1.        ]
+
+# IMU noise
+IMU.NoiseGyro: 0.003532925199
+IMU.NoiseAcc:  3.
+IMU.GyroWalk: 2.0e-04
+IMU.AccWalk:  2.
+IMU.Frequency: 200.0
+IMU.InsertKFsWhenLost: 0
+#--------------------------------------------------------------------------------------------
+# ORB Parameters
+#--------------------------------------------------------------------------------------------
+
+# ORB Extractor: Number of features per image
+ORBextractor.nFeatures: 1000
+
+# ORB Extractor: Scale factor between levels in the scale pyramid
+ORBextractor.scaleFactor: 1.2
+
+# ORB Extractor: Number of levels in the scale pyramid
+ORBextractor.nLevels: 8
+
+# ORB Extractor: Fast threshold
+# Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
+# Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
+# You can lower these values if your images have low contrast
+ORBextractor.iniThFAST: 20
+ORBextractor.minThFAST: 7

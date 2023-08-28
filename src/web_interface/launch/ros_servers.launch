@@ -1,0 +1,7 @@
+<launch>
+    <remap from="/web_interface/control/linear/x/max_velocity" to="/sirius/controller/wheels/linear/x/max_velocity"/>
+    <remap from="/web_interface/control/angular/z/max_velocity" to="/sirius/controller/wheels/angular/z/max_velocity"/>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <arg name="port" value="8081"/>
+    </include>
+</launch>

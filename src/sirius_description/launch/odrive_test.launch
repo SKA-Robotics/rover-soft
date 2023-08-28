@@ -1,0 +1,9 @@
+<launch>
+    <rosparam file="$(find sirius_description)/config/odrive_test.yaml" command="load"/>   
+    
+    <node name="odrive_wheels_left" pkg="odrive_driver" type="driver.py" output="screen">
+        <remap from="/odrive_wheels_left/motor0/joint_state" to="/wheels_left/odrive/motor0/joint_state"/>
+        <remap from="/odrive_wheels_left/motor0/set_joint_state" to="/wheels_left/odrive/motor0/set_joint_state"/>
+    </node>
+    
+</launch>

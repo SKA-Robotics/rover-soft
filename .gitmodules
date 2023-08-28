@@ -1,0 +1,9 @@
+[submodule "src/external/gazebo_ros_magnetometer_sensor"]
+	path = src/external/gazebo_ros_magnetometer_sensor
+	url = https://github.com/Wihmajster/gazebo_ros_magnetometer_sensor.git
+[submodule "src/external/morb_slam_ros"]
+	path = src/external/morb_slam_ros
+	url = https://github.com/Wihmajster/morb_slam_ros.git
+[submodule "src/external/depthai-ros"]
+	path = src/external/depthai-ros
+	url = https://github.com/luxonis/depthai-ros.git
