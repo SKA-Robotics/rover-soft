@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marker">
+  <xacro:property name="package" value="marker_description" />
+  <xacro:arg name="name" default=""/>
+  <xacro:property name="name" value="$(arg name)" />
+  <xacro:arg name="family" default="artag"/>
+  <xacro:property name="family" value="$(arg family)" />
+  <xacro:arg name="id" default="0"/>
+  <xacro:property name="id" value="${$(arg id)}" />
+  <xacro:arg name="marker_size" default="0.15"/>
+  <xacro:property name="marker_size" value="${$(arg marker_size)}" />
+  <xacro:arg name="margin" default="0.03"/>
+  <xacro:property name="margin" value="${$(arg margin)}" />
+  <xacro:arg name="pole_height" default="0.417"/>
+  <xacro:property name="pole_height" value="${$(arg pole_height)}" />
+  <xacro:arg name="pole_radius" default="0.005"/>
+  <xacro:property name="pole_radius" value="${$(arg pole_radius)}" />
+  <xacro:if value="${name == ''}">
+    <xacro:property name="name" value="${family}_${id}" />
+  </xacro:if>
+
+  <xacro:include filename="macros/marker.urdf.xacro" />
+  <xacro:include filename="macros/pole.urdf.xacro" />
+  <xacro:marker name='${name}_box'/>
+  <xacro:pole height='${pole_height}' radius='${pole_radius}' name='${name}'/>
+
+  <joint name="${name}_pole_joint" type="fixed">
+    <parent link="${name}"/>
+    <child link="${name}_box"/>
+    <origin xyz="0 0 ${pole_height + marker_size/2 + margin}" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint> 
+</robot>

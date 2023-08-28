@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marker">
+
+  <xacro:arg name="sides" default="1"/>
+  
+  <xacro:if value="${$(arg sides) == 1}">
+    <xacro:include filename="marker1.urdf.xacro"></xacro:include>
+  </xacro:if>
+  <xacro:if value="${$(arg sides) == 2}">
+    <xacro:include filename="marker2.urdf.xacro"></xacro:include>
+  </xacro:if>
+  <xacro:if value="${$(arg sides) == 3}">
+    <xacro:include filename="marker3.urdf.xacro"></xacro:include>
+  </xacro:if>
+  <xacro:if value="${$(arg sides) == 4}">
+    <xacro:include filename="marker4.urdf.xacro"></xacro:include>
+  </xacro:if>
+</robot>
