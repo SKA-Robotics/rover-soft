@@ -11,12 +11,19 @@
   <xacro:property name="stereo_fps" value="$(arg stereo_fps)" /> 
   <xacro:arg name="imu_frequency" default="200.0"/>
   <xacro:property name="imu_frequency" value="$(arg imu_frequency)" /> 
+  <xacro:arg name="datum" default="[50.878151, 20.642273, 144.41]"/>
+  <xacro:property name="datum" value="${$(arg datum)}" />
+  <xacro:arg name="elevation" default="0.0"/>
+  <xacro:property name="elevation" value="$(arg elevation)" />
+  <xacro:arg name="year" default=""/>
+  <xacro:property name="year" value="$(arg year)" />
   <xacro:property name="collisions" value="${xacro.load_yaml('sirius_2/sirius_2_collisions.yaml')}" /> 
   <xacro:property name="inertial" value="${xacro.load_yaml('sirius_2/sirius_2_inertial.yaml')}" /> 
   <xacro:property name="cameras" value="${xacro.load_yaml('cameras/cameras.yaml')}" />  
   <xacro:property name="cameras_inertial" value="${xacro.load_yaml('cameras/cameras_inertial.yaml')}" /> 
   <xacro:include filename="materials.urdf.xacro" />
   <xacro:include filename="sirius_2/indicator_light.urdf.xacro" />
+  <xacro:include filename="sirius_2/gnss.urdf.xacro" />
   <xacro:include filename="sirius_2/platform.urdf.xacro" />
 
   <xacro:include filename="cameras/hp_4310.urdf.xacro" />
@@ -70,6 +77,10 @@
   <xacro:indicator_light prefix="blue" material="blue_t">
     <xacro:blue_t/>
   </xacro:indicator_light>
+
+  <xacro:gnss material="light_gray">
+    <xacro:light_gray/>
+  </xacro:gnss>
 
   <xacro:hp_4310 prefix="front_mast" material="black">
     <xacro:black/>
@@ -129,6 +140,12 @@
     <origin xyz="${params['blue_indicator_light_xyz']}" rpy="0 0 ${pi}"/>
   </joint>
 
+  <joint name="base_to_gnss" type="fixed">
+    <parent link="base_link"/>
+    <child link="gnss"/>
+    <origin xyz="${params['gnss_xyz']}" rpy="0 0 0"/>
+  </joint>
+
   <joint name="base_to_front_mast_camera" type="fixed">
     <parent link="main_platform"/>
     <child link="front_mast_camera"/>
@@ -148,6 +165,14 @@
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>
+    </plugin>
+    <plugin name="p3d_plugin" filename="libsirius_gazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth</topicName>
+      <frameName>map</frameName>
+      <frameRpyOffset>0 0 ${datum[2] * pi/180}</frameRpyOffset>
     </plugin>
   </gazebo>
 </robot>

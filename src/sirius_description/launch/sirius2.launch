@@ -1,6 +1,9 @@
 <launch>
     <arg name="certificate_path" default="$(find sirius_description)/../../../certificates/sirius"/>
 
+    <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml'" />
+
     <rosparam file="$(find sirius_description)/config/controllers.yaml" command="load"/>
     <rosparam file="$(find sirius_description)/config/odrive.yaml" command="load"/> 
     <rosparam file="$(find manip_control)/config/roboclaws.yaml" command="load"/> 
@@ -25,7 +28,9 @@
         <remap from="/odrive_driver/wheels_right/motor1/joint_state" to="/wheels_right/motor1/joint_state"/>
         <remap from="/odrive_driver/wheels_right/motor1/set_joint_state" to="/wheels_right/motor1/set_joint_state"/>
     </node>
-
+    <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="30.0" />
+    </node>
     <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
     </node>
 

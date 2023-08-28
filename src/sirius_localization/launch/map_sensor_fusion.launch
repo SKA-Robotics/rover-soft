@@ -1,0 +1,6 @@
+<launch>
+  <rosparam command="load" file="$(find sirius_localization)/config/map_sensor_fusion.yaml" ns="map_sensor_fusion"/>
+  <node pkg="robot_localization" type="ekf_localization_node" name="map_sensor_fusion">
+    <remap from="odometry/filtered" to="odometry/filtered_map"/>
+  </node>
+</launch>
