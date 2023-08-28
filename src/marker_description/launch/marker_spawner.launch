@@ -1,0 +1,26 @@
+<launch>
+    <arg name="family" default="artag"/>
+    <arg name="id" default="0"/>
+    <arg name="sides" default="1"/>
+    <arg name="name" default=""/>
+    <arg name="x" default="0"/>
+    <arg name="y" default="0"/>
+    <arg name="z" default="0"/>
+    <arg name="R" default="0"/>
+    <arg name="P" default="0"/>
+    <arg name="Y" default="0"/>
+    <arg name="marker_size" default="0.15"/>
+    <arg name="margin" default="0.03"/>
+    <arg name="pole_height" default="0.417"/>
+    <arg name="pole_radius" default="0.005"/>
+
+    <param name="robot_description" command="$(find xacro)/xacro '$(find marker_description)/urdf/marker.urdf.xacro' sides:=$(arg sides) family:='$(arg family)' id:=$(arg id) name:='$(arg name)' marker_size:=$(arg marker_size) margin:=$(arg margin) pole_height:=$(arg pole_height) pole_radius:=$(arg pole_radius)" />
+
+
+    <node unless="$(eval name=='')" name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y) -unpause -urdf -model $(arg name) -param robot_description" respawn="false" output="screen" />
+    <node if="$(eval name=='')" name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y) -unpause -urdf -model $(arg family)_$(arg id) -param robot_description" respawn="false" output="screen" />
+
+ 
+</launch>

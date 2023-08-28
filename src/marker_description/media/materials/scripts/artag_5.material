@@ -1,0 +1,14 @@
+material artag_5{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture ../texture/artag/5.png 2d 0
+                scale 1 1
+                filtering none
+            }
+        }   
+    }
+}
