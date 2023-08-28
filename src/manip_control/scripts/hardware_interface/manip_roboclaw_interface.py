@@ -89,7 +89,8 @@ class ManipRoboclawInterface(ManipHardwareInterface):
             if index < len(joint_state.velocity):
                 msg.velocity.append(joint_state.velocity[index])
             if index < len(joint_state.effort):
-                msg.effort.append(joint_state.effort[index])
+                # we interpret input effort as duty, even though it's technically incorrect
+                msg.duty.append(joint_state.effort[index])
 
             self.command_publishers[name].publish(msg)
 

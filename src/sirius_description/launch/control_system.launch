@@ -1,8 +1,8 @@
 <launch>
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
         <arg name="port" value="8081"/>
-        <arg name="certfile" value="/certificates/firo.crt"/>
-        <arg name="keyfile" value="/certificates/firo.key" />
+        <arg name="certfile" value="/home/rover/certificates/sirius.crt"/>
+        <arg name="keyfile" value="/home/rover/certificates/sirius.key" />
         <arg name="ssl" value="true" />
     </include>
 

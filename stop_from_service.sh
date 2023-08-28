@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "/home/jetson/.bashrc"
+source "/home/rover/.bashrc"
 
 tmux kill-session -t ros
 
