@@ -1,4 +1,6 @@
 <launch>
+    <arg name="certificate_path" default="$(find sirius_description)/../../../certificates/sirius"/>
+
     <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
     <param name="robot_description" command="$(find xacro)/xacro '$(arg model)' calibration_path:='$(find sirius_cameras)/config/oak_d_w/kalibr_imucam_chain.yaml'" />
 
@@ -32,5 +34,10 @@
     <node name="roboclaw_driver" pkg="roboclaw_driver" type="all.py" output="screen">
     </node>
 
-    <include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>
+    <include file="$(find sirius_description)/launch/control_system.launch">
+        <arg name="certificate_path" value="$(arg certificate_path)"/>
+    </include>
+    <include file="$(find manip_control)/launch/manip_control.launch"/>
+
+    <!--<include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>-->
 </launch>

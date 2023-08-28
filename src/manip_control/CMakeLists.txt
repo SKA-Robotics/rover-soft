@@ -4,6 +4,14 @@ project(manip_control)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
+  dynamic_reconfigure
+)
+
+catkin_python_setup()
+
+#add dynamic reconfigure api
+generate_dynamic_reconfigure_options(
+  cfg/ManipInterface.cfg
 )
 
 catkin_package(
