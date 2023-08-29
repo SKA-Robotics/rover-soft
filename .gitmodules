@@ -7,3 +7,6 @@
 [submodule "src/external/depthai-ros"]
 	path = src/external/depthai-ros
 	url = https://github.com/luxonis/depthai-ros.git
+[submodule "src/external/ar_track_alvar"]
+	path = src/external/ar_track_alvar
+	url = https://github.com/ros-perception/ar_track_alvar.git
