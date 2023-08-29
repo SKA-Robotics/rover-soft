@@ -168,12 +168,6 @@ class VisulObject:
         if len(valid_tags) < 2:
             return self._calculate_pose_from_single_tag(valid_tags[0])
 
-        # TODO: Add possibility of more than 2 tags interpolation
-        if len(valid_tags) > 2:
-            rospy.logwarn(
-                f'Too many tags ({len(valid_tags)}) on one object. Expected 1 or 2.'
-            )
-
         return self._calculate_pose_from_multi_tags(valid_tags)
 
     def _get_color(self, is_detected: bool, valid_tags_num: int) -> ColorRGBA:
@@ -207,47 +201,63 @@ class VisulObject:
         pose_matrix = base_tag.get_panel_pose_matrix()
         t_b2c = base_tag.get_transform_to_camera_rf()
         panel_pose = np.matmul(t_b2c, pose_matrix)
-        p = tft.translation_from_matrix(panel_pose)
-        q = tft.quaternion_from_matrix(panel_pose)
 
-        return self._ros_pose_from_matrix(p, q)
+        return self._ros_pose_from_matrix(panel_pose)
 
     def _calculate_pose_from_multi_tags(self, valid_tags: 'list[Tag]') -> Pose:
-        err_sum = sum(tag.get_uncertainty() for tag in valid_tags)
-        panel_poses = []
+        weights = [1 / tag.get_uncertainty() for tag in valid_tags]
+        p_poses = [
+            tft.translation_from_matrix(tag.get_pose_matrix_from_panel_rf())
+            for tag in valid_tags
+        ]
+        c_poses = [
+            tft.translation_from_matrix(tag.get_pose_matrix_from_camera_rf())
+            for tag in valid_tags
+        ]
+        mid_point_from_panel = np.average(p_poses, axis=0, weights=weights)
+        mid_point_from_camera = np.average(c_poses, axis=0, weights=weights)
+        mid_t_p = tft.translation_matrix(mid_point_from_panel)
+        mid_t_c = tft.translation_matrix(mid_point_from_camera)
 
-        for tag, base_tag in [(valid_tags[0], valid_tags[1]),
-                              (valid_tags[1], valid_tags[0])]:
+        t_m2c = mid_t_c
+        t_c2m = np.linalg.inv(t_m2c)
+        panel_orientations: 'list[tuple[np.matrix, float]]' = []
 
-            t_p2b = base_tag.get_transform_from_panel_rf()
-            t_c2b = base_tag.get_transform_from_camera_rf()
-            delta_p = np.matmul(t_p2b, tag.get_pose_matrix_from_panel_rf())
-            delta_c = np.matmul(t_c2b, tag.get_pose_matrix_from_camera_rf())
-            t_p = tft.translation_from_matrix(delta_p)
-            t_c = tft.translation_from_matrix(delta_c)
+        for tag in valid_tags:
+            t_p2b = tag.get_transform_from_panel_rf()
+            t_c2b = tag.get_transform_from_camera_rf()
+            t_p = tft.translation_from_matrix(np.matmul(t_p2b, mid_t_p))
+            t_c = tft.translation_from_matrix(np.matmul(t_c2b, mid_t_c))
             axis = np.cross(t_p, t_c)
             t_p_norm = t_p / np.linalg.norm(t_p)
             t_c_norm = t_c / np.linalg.norm(t_c)
             angle = np.math.acos(np.dot(t_p_norm, t_c_norm))
             r_mat = tft.rotation_matrix(angle, axis)
 
-            base_panel_pose = base_tag.get_panel_pose_matrix()
+            base_panel_pose = tag.get_panel_pose_matrix()
             corrected_pose = np.matmul(r_mat, base_panel_pose)
-            t_b2c = base_tag.get_transform_to_camera_rf()
-            panel_pose = np.matmul(t_b2c, corrected_pose)
-            panel_position = tft.translation_from_matrix(panel_pose)
-            panel_orientation = tft.quaternion_from_matrix(panel_pose)
-            obj_err = tag.get_uncertainty() / err_sum
-            panel_poses.append((panel_position, panel_orientation, obj_err))
+            t_b2c = tag.get_transform_to_camera_rf()
+            t_b2m = np.matmul(t_c2m, t_b2c)
+            pose_in_mid_rf = np.matmul(t_b2m, corrected_pose)
+            orientation = tft.quaternion_from_matrix(pose_in_mid_rf)
+            panel_orientations.append((orientation, 1 / tag.get_uncertainty()))
 
-        p0, q0, err0 = panel_poses[0]
-        p1, q1, err1 = panel_poses[1]
-        p = p0 * err1 + p1 * err0
-        q = tft.quaternion_slerp(q0, q1, err0)
+        current_orientation, current_weight = panel_orientations[0]
+        for q, w in panel_orientations[1:]:
+            current_weight += w
+            current_orientation = tft.quaternion_slerp(current_orientation, q,
+                                                       w / current_weight)
 
-        return self._ros_pose_from_matrix(p, q)
+        panel_orientation = tft.quaternion_matrix(current_orientation)
+        panel_position = np.linalg.inv(mid_t_p)  # in rf with panel orientation
+        panel_pose = np.matmul(panel_orientation, panel_position)
+        pose_in_camera_rf = np.matmul(t_m2c, panel_pose)
 
-    def _ros_pose_from_matrix(self, t, q) -> Pose:
+        return self._ros_pose_from_matrix(pose_in_camera_rf)
+
+    def _ros_pose_from_matrix(self, panel_pose: np.matrix) -> Pose:
+        t = tft.translation_from_matrix(panel_pose)
+        q = tft.quaternion_from_matrix(panel_pose)
         pose = Pose()
         pose.position = Point(x=t[0], y=t[1], z=t[2])
         pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
