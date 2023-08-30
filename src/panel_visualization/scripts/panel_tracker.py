@@ -17,6 +17,8 @@ class PanelTracker:
         rospy.init_node("panel_tracker")
 
         message_rate: float = rospy.get_param("~message_rate", 1.0)
+        self.filter_size: int = rospy.get_param("~filter_size", 3)
+        message_rate /= self.filter_size
         secs = int(1.0 / message_rate)
         nsecs = int(1e9 * (1.0 / message_rate - secs))
         self.marker_lifetime = rospy.Duration(secs, nsecs)
@@ -48,6 +50,8 @@ class PanelTracker:
                                    MarkerArray,
                                    queue_size=10)
 
+        self.counter = 0
+
     def run(self) -> None:
         rospy.spin()
 
@@ -57,9 +61,17 @@ class PanelTracker:
         transforms_dict = {t.fiducial_id: t for t in transforms}
 
         for obj in self.objects:
-            obj.update_transforms(transforms_dict)
-            marker = obj.get_marker(msg.header)
-            if marker:
+            obj.update_pose(transforms_dict)
+
+        self.counter += 1
+        self.counter %= self.filter_size
+
+        if not self.counter:
+            for obj in self.objects:
+                marker = obj.get_marker(msg.header)
+                if not marker:
+                    continue
+
                 # marker.header.frame_id = marker.ns
                 # marker.pose = Pose()
                 # marker.pose.orientation.w = 1.0
@@ -117,11 +129,14 @@ class VisulObject:
         self.last_pose: 'Pose | None' = None
         self.duration_of_no_pose = 0
         self.broadcaster = TransformBroadcaster()
+        self.pose_buffer: list[Pose] = []
 
-    def update_transforms(self, transforms: 'dict[int, FiducialTransform]'):
+    def update_pose(self, transforms: 'dict[int, FiducialTransform]'):
         for tag in self.tags:
             msg = transforms.get(tag.id)
             tag.update(msg)
+
+        self.pose_buffer.append(self._calculate_pose())
 
     def publish_transform(self, frame_id: str) -> None:
         msg = TransformStamped()
@@ -131,6 +146,7 @@ class VisulObject:
         pose = self.last_pose
         if not pose:
             return
+
         msg.transform.translation.x = pose.position.x
         msg.transform.translation.y = pose.position.y
         msg.transform.translation.z = pose.position.z
@@ -138,21 +154,24 @@ class VisulObject:
         self.broadcaster.sendTransform(msg)
 
     def get_marker(self, header: Header) -> 'Marker | None':
-        valid_tags = [tag for tag in self.tags if tag.is_visible()]
+        current_pose = self._get_average_pose()
+        is_detected = bool(current_pose)
+        is_not_found_at_all = not self.last_pose
+        is_restored = is_detected and bool(self.duration_of_no_pose)
 
-        marker = create_basic_marker(header)
-        current_pose = self._get_pose(valid_tags)
-
-        if not current_pose and not self.last_pose:
+        if not is_detected and is_not_found_at_all:
             self.duration_of_no_pose += 1
             return None
 
-        marker.color = self._get_color(bool(current_pose), len(valid_tags))
+        if is_detected:
+            self.last_pose = current_pose
+            self.duration_of_no_pose = 0
+        else:
+            self.duration_of_no_pose += 1
 
-        self.duration_of_no_pose = 0 if current_pose else self.duration_of_no_pose + 1
-        marker.pose = current_pose if current_pose else self.last_pose
-        self.last_pose = marker.pose
-
+        marker = create_basic_marker(header)
+        marker.color = self._get_color(is_detected, is_restored)
+        marker.pose = self.last_pose
         marker.id = 0
         marker.ns = self.name
         marker.type = Marker.MESH_RESOURCE
@@ -161,33 +180,58 @@ class VisulObject:
 
         return marker
 
-    def _get_pose(self, valid_tags: 'list[Tag]') -> 'Pose | None':
-        if not len(valid_tags):
+    def _get_average_pose(self) -> 'Pose | None':
+        if not len(self.pose_buffer):
             return None
 
-        if len(valid_tags) < 2:
+        p_a = [0.0, 0.0, 0.0]
+        q_a = [0.0, 0.0, 0.0, 1.0]
+
+        for counter, pose in enumerate(self.pose_buffer):
+            pose_matrix = self._matrix_from_ros_pose(pose)
+            t = tft.translation_from_matrix(pose_matrix)
+            q = tft.quaternion_from_matrix(pose_matrix)
+            p_a += t
+            q_a = tft.quaternion_slerp(q_a, q, 1.0 / (counter + 1))
+
+        p_a = p_a / len(self.pose_buffer)
+        t_a = tft.translation_matrix(p_a)
+        r_a = tft.quaternion_matrix(q_a)
+        m = np.matmul(t_a, r_a)
+        self.pose_buffer.clear()
+
+        return self._ros_pose_from_matrix(m)
+
+    def _calculate_pose(self) -> 'Pose | None':
+        valid_tags = [tag for tag in self.tags if tag.is_visible()]
+
+        if len(valid_tags) == 0:
+            return None
+        elif len(valid_tags) == 1:
             return self._calculate_pose_from_single_tag(valid_tags[0])
+        else:
+            return self._calculate_pose_from_multi_tags(valid_tags)
 
-        return self._calculate_pose_from_multi_tags(valid_tags)
-
-    def _get_color(self, is_detected: bool, valid_tags_num: int) -> ColorRGBA:
+    # TODO: new rules for coloring in case of pose averaging
+    def _get_color(self, is_detected: bool, is_restored: bool) -> ColorRGBA:
         color = ColorRGBA(a=1.0)
+        valid_tags_num = sum([1 for tag in self.tags if tag.is_visible()])
 
         if is_detected:
             if valid_tags_num < len(self.tags):
                 color.r = 0.5
                 color.g = 0.5
                 color.b = 1.0
-            elif self.duration_of_no_pose == 0:
-                color.r = 1.0
-                color.g = 1.0
-                color.b = 1.0
-            else:
+            elif is_restored:
                 color.r = 0.5
                 color.g = 1.0
                 color.b = 0.5
+            else:
+                color.r = 1.0
+                color.g = 1.0
+                color.b = 1.0
         else:
-            if self.duration_of_no_pose < WARNING_DURATION:
+            if self.duration_of_no_pose <= WARNING_DURATION:
                 color.r = 1.0
                 color.g = 1.0
             else:
@@ -255,13 +299,21 @@ class VisulObject:
 
         return self._ros_pose_from_matrix(pose_in_camera_rf)
 
-    def _ros_pose_from_matrix(self, panel_pose: np.matrix) -> Pose:
-        t = tft.translation_from_matrix(panel_pose)
-        q = tft.quaternion_from_matrix(panel_pose)
+    def _ros_pose_from_matrix(self, pose_matrix: np.matrix) -> Pose:
+        t = tft.translation_from_matrix(pose_matrix)
+        q = tft.quaternion_from_matrix(pose_matrix)
         pose = Pose()
         pose.position = Point(x=t[0], y=t[1], z=t[2])
         pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
         return pose
+
+    def _matrix_from_ros_pose(self, pose: Pose) -> np.matrix:
+        t = pose.position
+        q = pose.orientation
+        translation = tft.translation_matrix([t.x, t.y, t.z])
+        rotation = tft.quaternion_matrix([q.x, q.y, q.z, q.w])
+        pose_matrix = np.matmul(translation, rotation)
+        return pose_matrix
 
 
 class Tag:
