@@ -1,6 +1,6 @@
 <launch>
     <arg name="rviz" default="true" />
-    <arg name="message_rate" default="3.0" />
+    <arg name="message_rate" default="1.0" />
     <arg name="camera_frame" default="camera_frame" />
     <arg name="manip_frame" default="base_link" />
     <arg name="info_topic" default="/camera_info" />
@@ -18,6 +18,7 @@
     <node name="panel_tracker" pkg="panel_visualization" type="panel_tracker.py"
         output="screen">
         <param name="message_rate" value="$(arg message_rate)" />
+        <param name="filter_size" value="1" />
         <param name="marker_length" value="$(arg aruco_size)" />
         <param name="marker_lengths_override" value="$(arg aruco_size_override)" />
         <rosparam file="$(find panel_visualization)/config/visual_objects.yaml" command="load" />
