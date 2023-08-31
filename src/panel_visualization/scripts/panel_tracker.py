@@ -134,7 +134,7 @@ class VisulObject:
         self.filter_size = fileter_size
         self.counter = 0
         self.last_pose: 'Pose | None' = None
-        self.pose_buffer: list[np.matrix] = []
+        self.pose_buffer: list[tuple[np.matrix, float]] = []
         self.duration_of_no_pose = 0
 
     def update_pose(self, transforms: 'dict[int, FiducialTransform]'):
@@ -142,9 +142,9 @@ class VisulObject:
             msg = transforms.get(tag.id)
             tag.update(msg)
 
-        pose = self._calculate_pose()
+        pose, weight = self._calculate_pose()
         if not pose is None:
-            self.pose_buffer.append(pose)
+            self.pose_buffer.append((pose, weight))
 
         self.counter += 1
         self.counter %= self.filter_size
@@ -185,18 +185,20 @@ class VisulObject:
         p_a = [0.0, 0.0, 0.0]
         q_a = [0.0, 0.0, 0.0, 1.0]
 
-        for counter, pose in enumerate(self.pose_buffer):
+        current_weight = 0.0
+        for pose, weight in self.pose_buffer:
             t = tft.translation_from_matrix(pose)
             q = tft.quaternion_from_matrix(pose)
-            p_a += t
-            q_a = tft.quaternion_slerp(q_a, q, 1.0 / (counter + 1))
+            p_a += t * weight
+            current_weight += weight
+            q_a = tft.quaternion_slerp(q_a, q, weight / current_weight)
 
-        p_a = p_a / len(self.pose_buffer)
+        p_a = p_a / current_weight
         t_a = tft.translation_matrix(p_a)
         r_a = tft.quaternion_matrix(q_a)
-        m = np.matmul(t_a, r_a)
+        pose_matrix = np.matmul(t_a, r_a)
 
-        return self.ros_interface.ros_pose_from_matrix(m)
+        return self.ros_interface.ros_pose_from_matrix(pose_matrix)
 
     # TODO: new rules for coloring in case of pose averaging
     def _get_color(self, is_detected: bool, is_restored: bool) -> ColorRGBA:
@@ -227,25 +229,27 @@ class VisulObject:
 
         return color
 
-    def _calculate_pose(self) -> 'np.matrix | None':
+    def _calculate_pose(self) -> 'tuple[np.matrix | None, float]':
         valid_tags = [tag for tag in self.tags if tag.is_visible()]
 
         if len(valid_tags) == 0:
-            return None
+            return None, 0.0
         elif len(valid_tags) == 1:
             return self._calculate_pose_from_single_tag(valid_tags[0])
         else:
             return self._calculate_pose_from_multi_tags(valid_tags)
 
-    def _calculate_pose_from_single_tag(self, base_tag: 'Tag') -> np.matrix:
-        pose_matrix = base_tag.get_panel_pose_matrix()
-        t_b2c = base_tag.get_transform_to_camera_rf()
+    def _calculate_pose_from_single_tag(
+            self, tag: 'Tag') -> 'tuple[np.matrix, float]':
+        pose_matrix = tag.get_panel_pose_matrix()
+        t_b2c = tag.get_transform_to_camera_rf()
         panel_pose = np.matmul(t_b2c, pose_matrix)
+        weight = 1 / tag.get_uncertainty()
 
-        return panel_pose
+        return panel_pose, weight
 
-    def _calculate_pose_from_multi_tags(self,
-                                        valid_tags: 'list[Tag]') -> np.matrix:
+    def _calculate_pose_from_multi_tags(
+            self, valid_tags: 'list[Tag]') -> 'tuple[np.matrix, float]':
         weights = [1 / tag.get_uncertainty() for tag in valid_tags]
         p_poses = [
             tft.translation_from_matrix(tag.get_pose_matrix_from_panel_rf())
@@ -294,7 +298,7 @@ class VisulObject:
         panel_pose = np.matmul(panel_orientation, panel_position)
         pose_in_camera_rf = np.matmul(t_m2c, panel_pose)
 
-        return pose_in_camera_rf
+        return pose_in_camera_rf, sum(weights)
 
 
 class ROSInterface:
