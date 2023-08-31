@@ -77,7 +77,7 @@ Visualization Manager:
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: /camera
+      Image Topic: /fake_camera/image
       Name: Camera
       Overlay Alpha: 0.5
       Queue Size: 2

@@ -19,20 +19,23 @@ class FakeCamera:
         self.frame_id = rospy.get_param("~frame_id", "manip_camera")
         self.seq_counter = 0
 
-        INFO_TOPIC = rospy.get_param("~info_topic", "/fake_camera_info")
-        STREAM_TOPIC = rospy.get_param("~stream_topic", "/fake_camera_stream")
-        self.info_pub = rospy.Publisher(INFO_TOPIC, CameraInfo, queue_size=10)
-        self.img_pub = rospy.Publisher(STREAM_TOPIC, Image, queue_size=10)
+        NS = rospy.get_param("~camera_name", "/fake_camera")
+        self.info_pub = rospy.Publisher(f'{NS}/camera_info',
+                                        CameraInfo,
+                                        queue_size=10)
+        self.img_pub = rospy.Publisher(f'{NS}/image', Image, queue_size=10)
 
         self.bridge = CvBridge()
 
         ## Choose images for testing
-        path = f'{SCRIPT_DIR}/../temp'
+        self.path = f'{SCRIPT_DIR}/../temp'
         self.img_buff = [
-            cv.imread(f'{path}/test_{i}.jpg') for i in range(0, 5)
+            cv.imread(f'{self.path}/test_{i}.jpg') for i in range(0, 5)
         ]
+        self.video = cv.VideoCapture(f'{self.path}/test_video.mp4')
 
     def __del__(self) -> None:
+        self.video.release()
         cv.destroyAllWindows()
 
     def run(self) -> None:
@@ -59,7 +62,17 @@ class FakeCamera:
         self.info_pub.publish(msg)
 
     def _send_image(self) -> None:
-        img = self.img_buff[self.seq_counter % len(self.img_buff)]
+        if self.video.isOpened():
+            ok, img = self.video.read()
+            if not ok:
+                self.video.release()
+                self.video.open(f'{self.path}/test_video.mp4')
+                if self.video.isOpened():
+                    ok, img = self.video.read()
+                rospy.loginfo('Repeating video')
+        else:
+            img = self.img_buff[self.seq_counter % len(self.img_buff)]
+
         img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
         msg = self.bridge.cv2_to_imgmsg(img, "rgb8", self._get_header())
         self.img_pub.publish(msg)

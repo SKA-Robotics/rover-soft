@@ -18,7 +18,7 @@ class PanelTracker:
 
         message_rate: float = rospy.get_param("~message_rate", 1.0)
         filter_size: int = rospy.get_param("~filter_size", 3)
-        message_rate /= filter_size
+        message_rate /= 2 * filter_size
         secs = int(1.0 / message_rate)
         nsecs = int(1e9 * (1.0 / message_rate - secs))
         self.marker_lifetime = rospy.Duration(secs, nsecs)
