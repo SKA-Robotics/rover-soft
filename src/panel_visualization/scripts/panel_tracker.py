@@ -3,9 +3,10 @@ import numpy as np
 import tf.transformations as tft
 
 import rospy
+import tf2_ros
 from tf2_ros import TransformBroadcaster
 from std_msgs.msg import Header, ColorRGBA
-from geometry_msgs.msg import Pose, Point, Quaternion, TransformStamped
+from geometry_msgs.msg import Pose, Point, Quaternion, Transform, TransformStamped
 from visualization_msgs.msg import Marker, MarkerArray
 from fiducial_msgs.msg import FiducialTransform, FiducialTransformArray
 
@@ -32,13 +33,23 @@ class PanelTracker:
         lengths: str = rospy.get_param("~marker_lengths_override", "")
         self.sizes = self._translate_marker_sizes(lengths)
 
-        rospy.Subscriber("/fiducial_transforms",
-                         FiducialTransformArray,
-                         self._callback,
-                         queue_size=10)
+        name_list: str = rospy.get_param("~cameras_names", "[]")
+        if name_list[0] != '[' or name_list[-1] != ']':
+            rospy.logwarn("Incorrect syntax for 'camera_name' param!")
+            return
+
+        for name in name_list[1:-1].split(','):
+            rospy.Subscriber(f'{name.strip()}/fiducial_transforms',
+                             FiducialTransformArray,
+                             self._callback,
+                             queue_size=10)
         self.pub = rospy.Publisher("/visual_objects",
                                    MarkerArray,
                                    queue_size=10)
+
+        self.base_frame: str = rospy.get_param("~base_frame", "base_link")
+        self.buffer = tf2_ros.Buffer()
+        tf2_ros.TransformListener(self.buffer)
 
     def run(self) -> None:
         rospy.spin()
@@ -67,24 +78,31 @@ class PanelTracker:
         transforms: list[FiducialTransform] = msg.transforms
         transforms_dict = {t.fiducial_id: t for t in transforms}
 
+        try:
+            frame_transform: TransformStamped = self.buffer.lookup_transform(
+                self.base_frame, msg.header.frame_id, msg.header.stamp)
+        except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(ex).__name__, ex.args)
+            rospy.logwarn(message)
+            return
+
+        new_header = Header(stamp=msg.header.stamp, frame_id=self.base_frame)
+
         for obj in self.objects:
-            obj.update_pose(transforms_dict)
+            obj.update_pose(transforms_dict, frame_transform)
             if not obj.is_ready():
                 continue
 
-            marker = obj.generate_next_marker(msg.header)
+            marker = obj.generate_next_marker(new_header)
             if not marker:
                 continue
 
-            # marker.header.frame_id = marker.ns
-            # marker.pose = Pose()
-            # marker.pose.orientation.w = 1.0
-            obj.publish_transform(msg.header.frame_id)
+            obj.publish_transform(self.base_frame)
             marker.lifetime = self.marker_lifetime
             new_msg.markers.append(marker)
 
         new_msg.markers.extend(self._get_aruco_markers(msg))
-        # new_msg.markers.append(self._get_test_mesh_model('B2.dae', msg.header.seq))
         self.pub.publish(new_msg)
 
     def _get_aruco_markers(self,
@@ -98,7 +116,7 @@ class PanelTracker:
             marker = create_basic_marker(msg.header)
             marker.header.frame_id = f'fiducial_{id}'
             marker.id = id
-            marker.ns = 'aruco'
+            marker.ns = 'aruco_tags'
             marker.scale.x = size
             marker.scale.y = size
             marker.scale.z = 0.001
@@ -137,14 +155,18 @@ class VisulObject:
         self.pose_buffer: list[tuple[np.matrix, float]] = []
         self.duration_of_no_pose = 0
 
-    def update_pose(self, transforms: 'dict[int, FiducialTransform]'):
+    def update_pose(self, transforms: 'dict[int, FiducialTransform]',
+                    camera_to_base: TransformStamped):
         for tag in self.tags:
             msg = transforms.get(tag.id)
             tag.update(msg)
 
         pose, weight = self._calculate_pose()
         if not pose is None:
-            self.pose_buffer.append((pose, weight))
+            t = camera_to_base.transform
+            t_c2b = self.ros_interface.matrix_from_ros_transform(t)
+            based_pose = np.matmul(t_c2b, pose)
+            self.pose_buffer.append((based_pose, weight))
 
         self.counter += 1
         self.counter %= self.filter_size
@@ -323,6 +345,14 @@ class ROSInterface:
         pose_matrix = np.matmul(translation, rotation)
         return pose_matrix
 
+    def matrix_from_ros_transform(self, transform: Transform) -> np.matrix:
+        t = transform.translation
+        q = transform.rotation
+        t_mat = tft.translation_matrix([t.x, t.y, t.z])
+        r_mat = tft.quaternion_matrix([q.x, q.y, q.z, q.w])
+        transform_matrix = np.matmul(t_mat, r_mat)
+        return transform_matrix
+
     def publish_transform(self, frame_id: str, pose: Pose) -> None:
         if not pose:
             return
@@ -361,7 +391,7 @@ class Tag:
         self.object_error = 0.0
         self.duration_of_no_transform = 0
 
-    def update(self, msg: FiducialTransform) -> None:
+    def update(self, msg: 'FiducialTransform | None') -> None:
         if msg:
             t = msg.transform.translation
             q = msg.transform.rotation

@@ -1,32 +1,32 @@
 <launch>
     <arg name="rviz" default="true" />
-    <arg name="message_rate" default="10.0" />
+    <arg name="message_rate" default="3.0" />
     <arg name="camera_frame" default="camera_frame" />
     <arg name="manip_frame" default="base_link" />
-    <arg name="camera_name" default="fake_camera" />
     <arg name="aruco_size" default="0.05" />
     <arg name="aruco_size_override" default="13-14: 0.032" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
 
-    <node name="aruco_detect" pkg="aruco_detect" type="aruco_detect">
-        <param name="dictionary" value="16" /> <!-- DICT_ARUCO_ORIGINAL -->
-        <param name="publish_images" value="true" />
-        <param name="fiducial_len" value="$(arg aruco_size)" />
-        <param name="fiducial_len_override" value="$(arg aruco_size_override)" />
-        <remap from="/camera" to="$(arg camera_name)/image" />
-        <remap from="/camera_info" to="$(arg camera_name)/camera_info" />
-    </node>
+    <arg name="camera_name_0" default="/fake_camera" />
+    <arg name="camera_name_1" default="/next_camera" />
+
+    <include file="$(find panel_visualization)/launch/aruco_detection.launch">
+        <arg name="camera_name" default="$(arg camera_name_0)" />
+    </include>
+
+    <!-- <include file="$(find panel_visualization)/launch/aruco_detection.launch">
+        <arg name="camera_name" default="$(arg camera_name_1)" />
+    </include> -->
 
     <node name="panel_tracker" pkg="panel_visualization" type="panel_tracker.py"
         output="screen">
-        <param name="message_rate" value="$(arg message_rate)" />
-        <param name="filter_size" value="10" />
+        <param name="base_frame" value="$(arg manip_frame)" />
+        <param name="cameras_names" value="[$(arg camera_name_0), $(arg camera_name_1)]" />
+        <param name="message_rate" value="$(arg message_rate)" /> <!-- for marker life time-->
+        <param name="filter_size" value="3" /> <!-- number of images to average -->
         <param name="marker_length" value="$(arg aruco_size)" />
         <param name="marker_lengths_override" value="$(arg aruco_size_override)" />
         <rosparam file="$(find panel_visualization)/config/visual_objects.yaml" command="load" />
     </node>
-
-    <node name="static_transform_publisher_0" pkg="tf2_ros" type="static_transform_publisher"
-        args="0 0 0 0.5 -0.5 0.5 -0.5 $(arg manip_frame) $(arg camera_frame)" />
 
     <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" output="screen"
         args="-d $(find panel_visualization)/rviz/test_config.rviz" />
@@ -35,7 +35,10 @@
     <node name="fake_camera" pkg="panel_visualization" type="fake_camera.py" output="screen">
         <param name="message_rate" value="$(arg message_rate)" />
         <param name="frame_id" value="$(arg camera_frame)" />
-        <param name="camera_name" value="$(arg camera_name)" />
+        <param name="camera_name" value="$(arg camera_name_0)" />
     </node>
+
+    <node name="static_transform_publisher_0" pkg="tf2_ros" type="static_transform_publisher"
+        args="0 0 0 0.5 -0.5 0.5 -0.5 $(arg manip_frame) $(arg camera_frame)" />
 
 </launch>

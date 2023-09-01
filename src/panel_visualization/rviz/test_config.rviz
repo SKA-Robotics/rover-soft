@@ -53,7 +53,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: false
-      Image Topic: /fiducial_images
+      Image Topic: /fake_camera/fiducial_images
       Max Value: 1
       Median window: 5
       Min Value: 0
