@@ -4,7 +4,3 @@
 [submodule "src/external/morb_slam_ros"]
 	path = src/external/morb_slam_ros
 	url = https://github.com/Wihmajster/morb_slam_ros.git
-[submodule "src/external/ar_track_alvar"]
-	path = src/external/ar_track_alvar
-	url = https://github.com/ros-perception/ar_track_alvar.git
-	branch = noetic-devel
