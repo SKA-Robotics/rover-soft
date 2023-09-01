@@ -51,11 +51,13 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>
   <depend>cv_bridge</depend>
-  <depend>sensor_msgs</depend>
-  <depend>std_msgs</depend>
   <depend>tf2_ros</depend>
   <depend>aruco_detect</depend>
-  <depend>fiducials</depend>
+  <depend>fiducial_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

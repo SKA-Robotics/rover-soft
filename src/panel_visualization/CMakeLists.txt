@@ -10,11 +10,13 @@ project(panel_visualization)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   cv_bridge
-  sensor_msgs
-  std_msgs
   tf2_ros
   aruco_detect
-  fiducials
+  fiducial_msgs
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -109,7 +111,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES panel_visualization
-#  CATKIN_DEPENDS ar_track_alvar ar_track_alvar_msgs rospy
+#  CATKIN_DEPENDS fiducial_msgs rospy
 #  DEPENDS system_lib
 )
 
