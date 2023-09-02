@@ -7,6 +7,7 @@ from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import Header
 
 SCRIPT_DIR = dirname(__file__)
+GET_VIDEO = True
 
 
 class FakeCamera:
@@ -40,16 +41,26 @@ class FakeCamera:
 
     def run(self) -> None:
         while not rospy.is_shutdown():
-            self._send_info()
-            self._send_image()
+            if GET_VIDEO and self.video.isOpened():
+                ok, img = self.video.read()
+                if not ok:
+                    self.video.release()
+                    self.video.open(f'{self.path}/test_video.mp4')
+                    if self.video.isOpened():
+                        ok, img = self.video.read()
+                    rospy.loginfo('Repeating video')
+            else:
+                img = self.img_buff[self.seq_counter % len(self.img_buff)]
+
+            self._send_info(img)
+            self._send_image(img)
             self.seq_counter += 1
             self.rate.sleep()
 
-    def _send_info(self) -> None:
+    def _send_info(self, img: cv.Mat) -> None:
         msg = CameraInfo()
         msg.header = self._get_header()
-        msg.height, msg.width, _ = self.img_buff[self.seq_counter %
-                                                 len(self.img_buff)].shape
+        msg.height, msg.width, _ = img.shape
         msg.distortion_model = 'plumb_bob'
         cx = msg.width / 2.0
         cy = msg.height / 2.0
@@ -61,20 +72,9 @@ class FakeCamera:
         msg.P = [fx, 0.0, cx, 0.0, 0.0, fy, cy, 0.0, 0.0, 0.0, 1.0, 0.0]
         self.info_pub.publish(msg)
 
-    def _send_image(self) -> None:
-        if self.video.isOpened():
-            ok, img = self.video.read()
-            if not ok:
-                self.video.release()
-                self.video.open(f'{self.path}/test_video.mp4')
-                if self.video.isOpened():
-                    ok, img = self.video.read()
-                rospy.loginfo('Repeating video')
-        else:
-            img = self.img_buff[self.seq_counter % len(self.img_buff)]
-
-        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-        msg = self.bridge.cv2_to_imgmsg(img, "rgb8", self._get_header())
+    def _send_image(self, img: cv.Mat) -> None:
+        rgb_img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+        msg = self.bridge.cv2_to_imgmsg(rgb_img, "rgb8", self._get_header())
         self.img_pub.publish(msg)
 
     def _get_header(self) -> Header:
