@@ -9,7 +9,8 @@ from dynamic_reconfigure.server import Server
 from dynamic_reconfigure.client import Client
 
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Joy, JointState
+from sensor_msgs.msg import JointState
+from joystick_control.msg import Gamepad
 from joystick_control.cfg import Joy5dofManipulatorConfig
 from topic_tools.srv import MuxSelect
 
@@ -28,7 +29,7 @@ class Joystick5dofManipulator:
         # topics for main processing
         self.subscriber = rospy.Subscriber(
             "joy_5dof_manipulator",
-            Joy,
+            Gamepad,
             self._joy_subscriber_callback,
         )
         self.ik_publisher = rospy.Publisher("/cmd_manip", Twist, queue_size=10)
@@ -74,7 +75,7 @@ class Joystick5dofManipulator:
     def run(self) -> None:
         rospy.spin()
 
-    def _joy_subscriber_callback(self, data: Joy):
+    def _joy_subscriber_callback(self, data: Gamepad):
         inputs = self.translator.translate(data)
 
         with self.config_lock:
@@ -122,7 +123,7 @@ class Joystick5dofManipulator:
                 ]
                 message.effort = [
                     -1 * deadzone(inputs["left_stick_horizontal"], 0.15),
-                    (inputs["left_trigger"] - inputs["right_trigger"]) / 2,
+                    (inputs["left_trigger"] - inputs["right_trigger"]),
                     -1 * deadzone(inputs["left_stick_vertical"], 0.15),
                     -1 * deadzone(inputs["right_stick_vertical"], 0.15),
                     -1 * deadzone(inputs["right_stick_horizontal"], 0.15),
@@ -142,9 +143,7 @@ class Joystick5dofManipulator:
                 message.linear.z = -1 * deadzone(inputs["right_stick_vertical"], 0.15)
 
                 message.angular.x = -1 * deadzone(inputs["left_stick_horizontal"], 0.15)
-                message.angular.y = (
-                    inputs["right_trigger"] - inputs["left_trigger"]
-                ) / 2
+                message.angular.y = inputs["right_trigger"] - inputs["left_trigger"]
 
                 message.linear.x *= linear_multiplier
                 message.linear.y *= linear_multiplier

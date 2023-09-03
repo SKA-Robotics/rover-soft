@@ -1,6 +1,6 @@
 <launch>
 	<arg name="message_rate" default="20"/> <!-- in Hz -->
-	<arg name="joystick_type" default="XBOX_XS"/>
+	<arg name="joystick_type" default="STANDARD"/>
 		
 	<node name="joy_multiplexer" pkg="joystick_control" type="joy_multiplexer.py" output="screen">
         <!-- Input config -->

@@ -9,7 +9,7 @@ from dynamic_reconfigure.server import Server
 from dynamic_reconfigure.client import Client
 
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Joy
+from joystick_control.msg import Gamepad
 from joystick_control.cfg import JoyDiffDriveConfig
 
 from utils.translate_joystick import JoystickTranslator
@@ -26,7 +26,7 @@ class JoystickDifferentialDrive:
         # topics for main processing
         self.subscriber = rospy.Subscriber(
             "joy_diff_drive",
-            Joy,
+            Gamepad,
             self._joy_subscriber_callback,
         )
         self.publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
@@ -65,7 +65,7 @@ class JoystickDifferentialDrive:
     def run(self) -> None:
         rospy.spin()
 
-    def _joy_subscriber_callback(self, data: Joy):
+    def _joy_subscriber_callback(self, data: Gamepad):
         inputs = self.translator.translate(data)
 
         with self.config_lock:
@@ -109,15 +109,24 @@ class JoystickDifferentialDrive:
                 angular_speed = -1 * deadzone(inputs["right_stick_horizontal"], 0.15)
 
             if self.mode == self.MODES["car"]:
-                linear_speed = (inputs["right_trigger"] - inputs["left_trigger"]) / 2
+                linear_speed = inputs["right_trigger"] - inputs["left_trigger"]
                 angular_speed = -1 * deadzone(inputs["left_stick_horizontal"], 0.15)
 
             if self.mode == self.MODES["tank"]:
-                linear_speed = -1 * deadzone(
-                    inputs["right_stick_vertical"] + inputs["left_stick_vertical"], 0.15
+                linear_speed = (
+                    -1
+                    * deadzone(
+                        inputs["right_stick_vertical"] + inputs["left_stick_vertical"],
+                        0.15,
+                    )
+                    / 2
                 )
-                angular_speed = deadzone(
-                    inputs["left_stick_vertical"] - inputs["right_stick_vertical"], 0.15
+                angular_speed = (
+                    deadzone(
+                        inputs["left_stick_vertical"] - inputs["right_stick_vertical"],
+                        0.15,
+                    )
+                    / 2
                 )
 
             message = Twist()

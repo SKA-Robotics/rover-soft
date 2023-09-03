@@ -7,9 +7,7 @@ import rospy
 from threading import Lock
 from functools import partial
 
-from std_msgs.msg import String
-from sensor_msgs.msg import Joy
-from joystick_control.msg import Topic, TopicArray
+from joystick_control.msg import Topic, TopicArray, Gamepad
 from joystick_control.srv import GetTopic, GetTopicArray, SendTopic
 
 from utils.translate_joystick import JoystickTranslator
@@ -26,7 +24,7 @@ class JoystickMultiplexer:
         self.joystick_subscribers = {}
         self.active_output = "__none"
         self.output_publishers = {
-            name: rospy.Publisher(name, Joy, queue_size=10)
+            name: rospy.Publisher(name, Gamepad, queue_size=10)
             for name in self.STEERING_MODES.keys()
             if name != "emergency"
         }
@@ -60,7 +58,7 @@ class JoystickMultiplexer:
     def run(self) -> None:
         rospy.spin()
 
-    def _joy_subscriber_callback(self, data: Joy, topic_name=""):
+    def _joy_subscriber_callback(self, data: Gamepad, topic_name=""):
         inputs = self.translator.translate(data)
         debounce = Debouncing(inputs, self.prev_inputs[topic_name])
         self.prev_inputs[topic_name] = inputs
@@ -83,7 +81,7 @@ class JoystickMultiplexer:
                     self.set_output(config["topic"])
 
             # input handling
-            if topic_name == self.active_joystick and self.active_output != '__none':
+            if topic_name == self.active_joystick and self.active_output != "__none":
                 self.output_publishers[self.active_output].publish(data)
 
     def set_joystick(self, topic_name):
@@ -154,7 +152,7 @@ class JoystickMultiplexer:
             }
             self.joystick_subscribers[topic_name] = rospy.Subscriber(
                 topic_name,
-                Joy,
+                Gamepad,
                 partial(self._joy_subscriber_callback, topic_name=topic_name),
             )
 

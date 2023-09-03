@@ -53,6 +53,7 @@ add_message_files(
   FILES
   TopicArray.msg
   Topic.msg
+  Gamepad.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -73,6 +74,7 @@ add_service_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
    DEPENDENCIES
+   std_msgs
 #   geometry_msgs
 #   sensor_msgs
 )
