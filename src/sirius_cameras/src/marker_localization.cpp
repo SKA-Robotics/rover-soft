@@ -21,7 +21,6 @@ Camera* camera;
 ros::Publisher marker_publisher;
 ros::Publisher pose_publisher;
 tf2_ros::Buffer tf_buffer;
-tf2_ros::TransformListener tf_listener(tf_buffer);
 MarkerDetector<MarkerData> marker_detector;
 
 std::string base_link;
@@ -150,6 +149,7 @@ int main(int argc, char* argv[])
 
   ros::init(argc, argv, "marker_localization");
   ros::NodeHandle nh;
+  tf2_ros::TransformListener tf_listener(tf_buffer);
 
   nh.param("~marker_size", marker_size, 10.0);
   nh.param("~max_new_marker_error", max_new_marker_error, 0.08);
