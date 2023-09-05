@@ -23,12 +23,17 @@ class PanelTracker:
         lifetime = max(filter_size / message_rate, 1.0 / YOUR_RVIZ_SPEED)
         self.tags_lifetime = rospy.Duration.from_sec(lifetime)
 
+        self.base_frame: str = rospy.get_param("~base_frame", "base_link")
         objects: list[dict] = rospy.get_param("~visual_objects", {})
         self.objects = [
             VisulObject(obj_params, filter_size,
                         rospy.Duration.from_sec(lifetime))
-            for obj_params in objects
+            for obj_params in objects if obj_params['name'] != self.base_frame
         ]
+        base_objs = [obj for obj in objects if obj['name'] == self.base_frame]
+        self.base_object = VisulObject(
+            base_objs[0], 1,
+            rospy.Duration.from_sec(lifetime)) if len(base_objs) else None
 
         self.marker_size: float = rospy.get_param("~marker_length", 0.05)
         lengths: str = rospy.get_param("~marker_lengths_override", "")
@@ -48,7 +53,6 @@ class PanelTracker:
                                    MarkerArray,
                                    queue_size=10)
 
-        self.base_frame: str = rospy.get_param("~base_frame", "base_link")
         self.buffer = Buffer()
         TransformListener(self.buffer)
 
@@ -79,20 +83,37 @@ class PanelTracker:
         transforms: list[FiducialTransform] = msg.transforms
         transforms_dict = {t.fiducial_id: t for t in transforms}
 
-        try:
-            frame_transform: TransformStamped = self.buffer.lookup_transform(
-                self.base_frame, msg.header.frame_id, msg.header.stamp)
-        except Exception as ex:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(ex).__name__, ex.args)
-            rospy.logwarn(message)
-            return
+        if self.base_object is None:
+            try:
+                transform_msg: TransformStamped = self.buffer.lookup_transform(
+                    self.base_frame, msg.header.frame_id, msg.header.stamp)
+                frame_transform = transform_msg.transform
+            except Exception as ex:
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                rospy.logwarn(message)
+                return
+        else:
+            with self.base_object.get_lock():
+                self.base_object.update_pose(transforms_dict, None)
+                if self.base_object.is_ready():
+                    base_header = Header(stamp=msg.header.stamp,
+                                         frame_id=msg.header.frame_id)
+                    marker = self.base_object.generate_next_marker(base_header)
+                    if marker is not None:
+                        new_msg.markers.append(marker)
+                        self.base_object.publish_transform(
+                            msg.header.frame_id, True)
+
+                frame_transform = self.base_object.get_inverse_transform()
+            if frame_transform is None:
+                return
 
         new_header = Header(stamp=msg.header.stamp, frame_id=self.base_frame)
 
         for obj in self.objects:
             with obj.get_lock():
-                obj.update_pose(transforms_dict, frame_transform.transform)
+                obj.update_pose(transforms_dict, frame_transform)
                 if not obj.is_ready():
                     continue
 
@@ -162,7 +183,7 @@ class VisulObject:
         return self.mutex
 
     def update_pose(self, transform_msgs: 'dict[int, FiducialTransform]',
-                    camera_to_base: Transform):
+                    camera_to_base: 'Transform | None'):
         for tag in self.tags:
             if tag.id not in transform_msgs:
                 tag.update(None, 0.0)
@@ -174,21 +195,33 @@ class VisulObject:
             tag.update(pose_matrix, msg.object_error)
 
         pose, weight = self._calculate_pose()
-        t_c2b = self.ros_interface.matrix_from_ros_transform(camera_to_base)
 
         if pose is not None:
-            based_pose = np.matmul(t_c2b, pose)
+            if camera_to_base is not None:
+                t_c2b = self.ros_interface.matrix_from_ros_transform(
+                    camera_to_base)
+                based_pose = np.matmul(t_c2b, pose)
+            else:
+                based_pose = pose
             self.pose_buffer.append((based_pose, weight))
 
         self.counter += 1
         self.counter %= self.filter_size
 
-    def is_ready(self):
+    def is_ready(self) -> bool:
         return not self.counter
 
-    def publish_transform(self, frame_id: str) -> None:
+    def get_inverse_transform(self) -> 'Transform | None':
+        if self.last_pose is None:
+            return None
+
+        camera_pose = np.linalg.inv(self.last_pose)
+        return self.ros_interface.ros_transform_from_matrix(camera_pose)
+
+    def publish_transform(self, frame_id: str, inverse=False) -> None:
         if self.last_pose is not None:
-            self.ros_interface.publish_transform(frame_id, self.last_pose)
+            self.ros_interface.publish_transform(frame_id, self.last_pose,
+                                                 inverse)
 
     def generate_next_marker(self, header: Header) -> 'Marker | None':
         current_pose = self._get_average_pose()
@@ -379,12 +412,22 @@ class ROSInterface:
         transform.rotation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
         return transform
 
-    def publish_transform(self, frame_id: str, t_matrix: np.matrix) -> None:
+    def publish_transform(self,
+                          frame_id: str,
+                          t_matrix: np.matrix,
+                          inverse=False) -> None:
         msg = TransformStamped()
-        msg.header.frame_id = frame_id
         msg.header.stamp = rospy.Time.now()
-        msg.child_frame_id = self.name
-        msg.transform = self.ros_transform_from_matrix(t_matrix)
+        if not inverse:
+            msg.header.frame_id = frame_id
+            msg.child_frame_id = self.name
+            msg.transform = self.ros_transform_from_matrix(t_matrix)
+        else:
+            msg.header.frame_id = self.name
+            msg.child_frame_id = frame_id
+            inv_t_matrix = np.linalg.inv(t_matrix)
+            msg.transform = self.ros_transform_from_matrix(inv_t_matrix)
+
         self.broadcaster.sendTransform(msg)
 
     def create_marker(self, header: Header, color: ColorRGBA,
