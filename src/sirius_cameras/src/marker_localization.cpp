@@ -28,7 +28,7 @@ std::string world_frame;
 double max_new_marker_error;
 double max_track_error;
 double max_error;
-void calculatePose(const ar_track_alvar_msgs::AlvarMarkers& markers)
+void publishPose(const ar_track_alvar_msgs::AlvarMarkers& markers)
 {
   auto max_confidence_marker =
       std::max_element(markers.markers.begin(), markers.markers.end(),
@@ -134,6 +134,7 @@ void getCapCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::
       markers.header.stamp = image->header.stamp;
       markers.header.frame_id = base_link;
       marker_publisher.publish(markers);
+      publishPose(markers);
     }
     catch (const std::exception& e)
     {
