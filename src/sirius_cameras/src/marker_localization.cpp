@@ -77,7 +77,7 @@ void getCapCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::
 
       auto cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
       marker_detector.Detect(cv_image->image, camera, true, false, max_new_marker_error, max_track_error);
-      if (base_link.empty())
+      if (!base_link.empty())
       {
         try
         {
