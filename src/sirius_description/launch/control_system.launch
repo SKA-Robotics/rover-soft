@@ -1,0 +1,19 @@
+<launch>
+    <arg name="certificate_path" default="$(find sirius_description)/../../../certificates/sirius"/>
+
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <arg name="port" value="8081"/>
+        <arg name="certfile" value="$(arg certificate_path).crt"/>
+        <arg name="keyfile" value="$(arg certificate_path).key"/>
+        <arg name="ssl" value="true"/>
+    </include>
+
+    <node 
+        pkg="topic_tools" 
+        type="mux" 
+        name="manip_command_mux" 
+        args="/manip_interface/command /joy_5dof_manipulator/manip_command /manip_controller/manip_command mux:=manip_command_mux"
+    />
+
+    <include file="$(find joystick_control)/launch/remote_joystick_steering.launch"/>
+</launch>

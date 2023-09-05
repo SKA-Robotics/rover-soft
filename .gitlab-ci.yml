@@ -85,14 +85,3 @@ deploy-main-image:
     - docker buildx build --push -f ci/Dockerfile.stable -t $MAIN_IMAGE --platform "$PLATFORM" --cache-from $MAIN_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 $GIT_CLONE_PATH
   only:
     - main
-
-# This job triggers pipeline in ska_robotics.gitlab.io repo, so documentation is up to date
-update-documentation:
-  inherit:
-    variables: false
-  stage: .post
-  trigger:
-    project: ska_robotics/ska_robotics.gitlab.io
-    branch: main
-  only:
-    - main

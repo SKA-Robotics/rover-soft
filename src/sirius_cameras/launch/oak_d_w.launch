@@ -10,7 +10,9 @@
     <arg name="monoResolution"        default="720p"/> 
     <arg name="rgbResolution"        default="1080p"/> 
     <arg name="angularVelCovariance"  default="0"   />
-    <arg name="linearAccelCovariance" default="0"   />
+    <arg name="linearAccelCovariance" default="0.4"   /> <!-- Variance in m/s^2-->
+    <arg name="rotationCovariance"  default="$(eval pi/6)"   /> <!-- Variance in radians-->
+    <arg name="magneticCovariance" default="0"   />
 
 
     <node name="$(arg name)" pkg="sirius_cameras" type="sirius_cameras_oak_d_w" output="screen" required="true">
@@ -22,6 +24,8 @@
         <param name="rgbResolution"        value="$(arg rgbResolution)" />
         <param name="angularVelCovariance"  value="$(arg angularVelCovariance)" />
         <param name="linearAccelCovariance" value="$(arg linearAccelCovariance)" />
+        <param name="rotationCovariance"  value="$(arg rotationCovariance)" />
+        <param name="magneticCovariance" value="$(arg magneticCovariance)" />
     </node>      
    
     

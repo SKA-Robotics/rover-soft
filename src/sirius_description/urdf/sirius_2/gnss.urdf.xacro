@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Based on Sparkfun Multi-Band antenna. Mesh generated from step provided by Sparkfun
+     https://www.sparkfun.com/products/21801 -->
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+<xacro:macro name="gnss" params="material *gazebo_material package:=^ collisions:=^ inertial:=^ datum:=^ elevation:=^">
+  <link name="gnss">
+    <visual>
+      <material name="${material}">
+      </material>
+      <geometry>
+        <mesh filename="package://${package}/meshes/sirius_2/gnss.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 ${collisions['gnss_height']/2}" rpy="${pi/2} 0 0" />
+    </visual>
+    <inertial>
+      <mass value="${inertial['gnss_mass']}"/>
+      <inertia ixx="${inertial['gnss_inertia']['ixx']}" ixy="${inertial['gnss_inertia']['ixy']}" ixz="${inertial['gnss_inertia']['ixz']}" iyy="${inertial['gnss_inertia']['iyy']}" iyz="${inertial['gnss_inertia']['iyz']}" izz="${inertial['gnss_inertia']['izz']}"/>
+    </inertial>
+    <collision>    
+      <geometry>
+          <cylinder length="${collisions['gnss_height']}" radius="${collisions['gnss_radius']}"/>
+      </geometry>
+      <origin xyz="0 0 ${collisions['gnss_height']/2}" />
+    </collision>
+  </link>
+
+  <gazebo reference="gnss">
+    <sensor type="gps" name="gps_sensor">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <gps>
+        <position_sensing>
+          <horizontal>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.03</stddev>
+            </noise>
+          </horizontal>
+          <vertical>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.03</stddev>
+            </noise>
+          </vertical>
+        </position_sensing>
+        <velocity_sensing>
+          <horizontal>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.05</stddev>
+            </noise>
+          </horizontal>
+          <vertical>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.05</stddev>
+            </noise>
+          </vertical>
+        </velocity_sensing>
+      </gps>
+      <plugin filename="libgazebo_ros_gps_sensor.so" name="gps_plugin">
+        <topicName>/gps/fix</topicName>
+        <frameName>gnss</frameName>
+        <updateRateHZ>20.0</updateRateHZ>
+        <sphericalCoordinates>
+            <latitudeDeg>${datum[0]}</latitudeDeg>
+            <longitudeDeg>${datum[1]}</longitudeDeg>
+            <headingDeg>${datum[2]}</headingDeg>
+            <elevation>${elevation}</elevation>
+        </sphericalCoordinates>
+        <positionCovariance>0.03 0 0 0 0.03 0 0 0 0.03</positionCovariance>
+        <positionCovarianceType>diagonal_known</positionCovarianceType>
+      </plugin>
+    </sensor>
+  </gazebo>
+</xacro:macro>
+</robot>

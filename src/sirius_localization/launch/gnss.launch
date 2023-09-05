@@ -1,0 +1,27 @@
+<launch>
+  <!-- ERC: Marsyard -->
+  <arg name="spherical_coordinates" default="[50.878151, 20.642273, 144.41]"/>
+  <!-- URC: The Mars Desert Research Station  -->
+  <!-- <arg name="spherical_coordinates" default="[38.4190235, -110.7823884, 0.0]"/> -->
+
+  <node pkg="ublox_gps" type="ublox_gps" name="ublox_gps" output="screen">
+    <param name="device" value="/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_GNSS_receiver-if00"/>
+    <param name="frame_id" value="base_link"/>
+    <param name="config_on_startup" value="false"/>
+    <remap from="/ublox_gps/fix" to="/gps/fix"/>
+    <remap from="/ublox_gps/fix_velocity" to="/gps/fix_velocity"/>
+  </node>
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" clear_params="true">
+    <remap from="odometry/filtered" to="odometry/filtered_map"/>
+    <param name="frequency" value="20"/>
+    <param name="delay" value="0.0"/>
+    <param name="transform_timeout" value="0.05" />
+    <param name="zero_altitude" value="true"/>
+    <param name="broadcast_cartesian_transform" value="true"/>
+    <param name="broadcast_cartesian_transform_as_parent_frame" value="true"/>
+    <param name="publish_filtered_gps" value="true"/>
+    <param name="wait_for_datum" value="true"/>
+    <rosparam param="datum" subst_value="True">$(arg spherical_coordinates)</rosparam>
+  </node> 
+
+</launch>
