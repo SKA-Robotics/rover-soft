@@ -66,7 +66,7 @@ void publishPose(const ar_track_alvar_msgs::AlvarMarkers& markers)
   pose_publisher.publish(base_link_in_world_pose);
 }
 
-void getCapCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& camera_info)
+void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
   if (camera->getCamInfo_)
   {
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
   pose_publisher = nh.advertise<geometry_msgs::PoseStamped>("pose", 0);
 
   image_transport::ImageTransport it(nh);
-  auto camera_subscriber = it.subscribeCamera("image", 1, &getCapCallback);
+  auto camera_subscriber = it.subscribeCamera("image", 1, &camera_callback);
   camera = new Camera(nh, camera_subscriber.getInfoTopic());
 
   ros::Rate rate(update_rate);
