@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   ros::NodeHandle nh("~");
   tf2_ros::TransformListener tf_listener(tf_buffer);
 
-  nh.param("marker_size", marker_size, 10.0);
+  nh.param("marker_size", marker_size, 0.1);
   nh.param("max_new_marker_error", max_new_marker_error, 0.08);
   nh.param("max_track_error", max_track_error, 0.2);
   nh.param("update_rate", update_rate, 8.0);
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
   nh.param<std::string>("world_frame", world_frame, "map");
   max_error = std::max(max_new_marker_error, max_track_error);
 
-  marker_detector.SetMarkerSize(marker_size);
+  marker_detector.SetMarkerSize(marker_size * 100);
   marker_publisher = nh.advertise<ar_track_alvar_msgs::AlvarMarkers>("markers", 0);
   pose_publisher = nh.advertise<geometry_msgs::PoseStamped>("pose", 0);
 
