@@ -24,48 +24,48 @@
         <inertia ixx="${cameras_inertial['oak-d-w_inertia']['ixx']}" ixy="${cameras_inertial['oak-d-w_inertia']['ixy']}" ixz="${cameras_inertial['oak-d-w_inertia']['ixz']}" iyy="${cameras_inertial['oak-d-w_inertia']['iyy']}" iyz="${cameras_inertial['oak-d-w_inertia']['iyz']}" izz="${cameras_inertial['oak-d-w_inertia']['izz']}"/>
       </inertial>
     </link>
-    <link name="${prefix}_rgb_camera_optical_frame"/>
+    <link name="${prefix}_rgb_camera_optical"/>
 
-    <link name="${prefix}_left_camera_frame" />
-    <link name="${prefix}_left_camera_optical_frame"/>
+    <link name="${prefix}_left_camera" />
+    <link name="${prefix}_left_camera_optical"/>
 
-    <link name="${prefix}_right_camera_frame" />
-    <link name="${prefix}_right_camera_optical_frame"/>
-    <link name="${prefix}_camera_imu_frame"/>
+    <link name="${prefix}_right_camera" />
+    <link name="${prefix}_right_camera_optical"/>
+    <link name="${prefix}_camera_imu"/>
 
 
     <joint name="${prefix}_rgb_camera_optical_joint" type="fixed">
       <origin xyz="${optical_offset_x} 0 0" rpy="-${pi/2} 0.0 -${pi/2}"/>
       <parent link="${prefix}_camera_center"/>
-      <child link="${prefix}_rgb_camera_optical_frame"/>
+      <child link="${prefix}_rgb_camera_optical"/>
     </joint>
 
     <joint name="${prefix}_left_camera_joint" type="fixed">
       <parent link="${prefix}_camera_center"/>
-      <child link="${prefix}_left_camera_frame"/>
+      <child link="${prefix}_left_camera"/>
       <origin xyz="0 ${baseline/2} 0" rpy="0 0 0" />
     </joint>
     <joint name="${prefix}_left_camera_optical_joint" type="fixed">
       <origin xyz="${calibration.cam1.T_cn_cnm1[0][3]} ${calibration.cam1.T_cn_cnm1[1][3]} ${calibration.cam1.T_cn_cnm1[2][3]}" rpy="${atan2(calibration.cam1.T_cn_cnm1[2][1],calibration.cam1.T_cn_cnm1[2][2])} ${atan2(-calibration.cam1.T_cn_cnm1[2][0],sqrt(calibration.cam1.T_cn_cnm1[2][1]**2 + calibration.cam1.T_cn_cnm1[2][2]**2))} ${atan2(calibration.cam1.T_cn_cnm1[1][0],calibration.cam1.T_cn_cnm1[0][0])}"/>
-      <parent link="${prefix}_right_camera_optical_frame"/>
-      <child link="${prefix}_left_camera_optical_frame"/>
+      <parent link="${prefix}_right_camera_optical"/>
+      <child link="${prefix}_left_camera_optical"/>
     </joint>
 
     <joint name="${prefix}_right_camera_joint" type="fixed">
       <parent link="${prefix}_camera_center"/>
-      <child link="${prefix}_right_camera_frame"/>
+      <child link="${prefix}_right_camera"/>
       <origin xyz="0 -${baseline/2} 0" rpy="0 0 0" />
     </joint>
     <joint name="${prefix}_right_camera_optical_joint" type="fixed">
       <origin xyz="${optical_offset_x} 0 0" rpy="-${pi/2} 0.0 -${pi/2}"/>
-      <parent link="${prefix}_right_camera_frame"/>
-      <child link="${prefix}_right_camera_optical_frame"/>
+      <parent link="${prefix}_right_camera"/>
+      <child link="${prefix}_right_camera_optical"/>
     </joint>
-    <joint name="${prefix}_camera_imu_frame_joint" type="fixed">
+    <joint name="${prefix}_camera_imu_joint" type="fixed">
       <!-- IMU frame offset copied from ZED2 camera -->
       <origin xyz="${calibration.cam0.T_cam_imu[0][3]} ${calibration.cam0.T_cam_imu[1][3]} ${calibration.cam0.T_cam_imu[2][3]}" rpy="${atan2(calibration.cam0.T_cam_imu[2][1],calibration.cam0.T_cam_imu[2][2])} ${atan2(-calibration.cam0.T_cam_imu[2][0],sqrt(calibration.cam0.T_cam_imu[2][1]**2 + calibration.cam0.T_cam_imu[2][2]**2))} ${atan2(calibration.cam0.T_cam_imu[1][0],calibration.cam0.T_cam_imu[0][0])}"/>
-      <parent link="${prefix}_left_camera_optical_frame"/>
-      <child link="${prefix}_camera_imu_frame"/>
+      <parent link="${prefix}_left_camera_optical"/>
+      <child link="${prefix}_camera_imu"/>
     </joint>
 
     <!-- Left/Depth camera -->
@@ -134,8 +134,8 @@
           <cameraName>/${prefix}_camera</cameraName>
           <imageTopicName>image_rect_gray</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>${prefix}_left_camera_optical_frame</frameName>
-          <rightFrameName>${prefix}_right_camera_optical_frame</rightFrameName>
+          <frameName>${prefix}_left_camera_optical</frameName>
+          <rightFrameName>${prefix}_right_camera_optical</rightFrameName>
           <hackBaseline>${baseline}</hackBaseline>  
           <focalLength>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</focalLength>
           <Cx>${calibration.cam0.intrinsics[2]}</Cx>
@@ -184,7 +184,7 @@
           <pointCloudTopicName>point_cloud/cloud_registered</pointCloudTopicName>
           <pointCloudCutoff>0.35</pointCloudCutoff>
           <pointCloudCutoffMax>35.0</pointCloudCutoffMax>
-          <frameName>${prefix}_left_camera_optical_frame</frameName>
+          <frameName>${prefix}_left_camera_optical</frameName>
           <baseline>${baseline}</baseline>
           <focalLength>${(calibration.cam0.intrinsics[0] + calibration.cam0.intrinsics[1])/2}</focalLength>
           <Cx>${calibration.cam0.intrinsics[2]}</Cx>
@@ -195,7 +195,7 @@
     </gazebo>
 
     <!-- IMU -->
-    <gazebo reference="${prefix}_camera_imu_frame">
+    <gazebo reference="${prefix}_camera_imu">
       <sensor type="imu" name="imu_sensor">
         <always_on>true</always_on>
         <update_rate>${imu_frequency}</update_rate>
@@ -237,7 +237,7 @@
         </imu>
         <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
           <topicName>/${prefix}_camera/imu/data</topicName>
-          <frameName>${prefix}_camera_imu_frame</frameName>
+          <frameName>${prefix}_camera_imu</frameName>
           <updateRateHZ>${imu_frequency}</updateRateHZ>
           <initialOrientationAsReference>false</initialOrientationAsReference>
           <xyzOffset>0 0.0 0.0</xyzOffset>
@@ -246,7 +246,7 @@
       </sensor>
     </gazebo>
     <!-- MAGNETOMETER -->
-    <gazebo reference="${prefix}_camera_imu_frame">
+    <gazebo reference="${prefix}_camera_imu">
       <sensor type="magnetometer" name="magnetometer_sensor">
         <always_on>true</always_on>
         <update_rate>50</update_rate>
@@ -269,7 +269,7 @@
         </magnetometer>
         <plugin filename="libgazebo_ros_magnetometer_sensor.so" name="magnetometer_plugin">
           <topicName>/${prefix}_camera/imu/mag</topicName>
-          <frameName>${prefix}_camera_imu_frame</frameName>
+          <frameName>${prefix}_camera_imu</frameName>
           <updateRateHZ>50.0</updateRateHZ>
           <sphericalCoordinates>
             <latitudeDeg>${datum[0]}</latitudeDeg>
