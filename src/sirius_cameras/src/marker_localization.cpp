@@ -77,10 +77,15 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
 
       auto cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
       marker_detector.Detect(cv_image->image, camera, true, false, max_new_marker_error, max_track_error);
-      if (!base_link.empty())
+      auto camera_tf = image->header.frame_id;
+      if (!base_link.empty() || camera_tf.substr(camera_tf.length() - 7) == "_optical")
       {
         try
         {
+          if (base_link.empty())
+          {
+            base_link = camera_tf.substr(0, camera_tf.length() - 7);
+          }
           cam_to_base_link = tf_buffer.lookupTransform(base_link, image->header.frame_id, image->header.stamp);
         }
         catch (tf2::TransformException ex)
@@ -116,6 +121,9 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
                                  quat.at<double>(2, 0),   // qy
                                  quat.at<double>(3, 0),   // qz
                                  quat.at<double>(0, 0));  // qw
+
+        tf2::Quaternion optical_to_regular_orientation(-0.5, -0.5, -0.5, 0.5);
+        rotation = optical_to_regular_orientation * rotation;
 
         tf2::Transform marker_in_camera_tf(rotation, origin);
 
