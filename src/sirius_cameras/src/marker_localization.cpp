@@ -95,6 +95,11 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
         cam_to_base_link.transform.rotation.w = 1;
       }
 
+      // marker_detector.markers is empty
+      if (marker_detector.markers->empty())
+      {
+        return;
+      }
       for (size_t i = 0; i < marker_detector.markers->size(); i++)
       {
         int id = (*(marker_detector.markers))[i].GetId();
