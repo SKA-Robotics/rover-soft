@@ -1,3 +1,4 @@
+from math import pi
 from manip_interface import ManipInterface
 from motion_interpolation import InterpolationSettings, MotionInterpolator
 from ik import IKSolver, ManipPose
@@ -45,7 +46,6 @@ class InterpolatedMotion(MotionStrategy):
     def _move_to_position(self, position, manip_interface: ManipInterface):
         pass
 
-
 class CartesianMotion(InterpolatedMotion):
 
     def _calculate_start_coords(self, manip_interface: ManipInterface):
@@ -59,6 +59,8 @@ class CartesianMotion(InterpolatedMotion):
     def _move_to_position(self, position, manip_interface: ManipInterface):
         pose = ManipPose.from_list(position)
         jointstate = self.ik_solver.get_IK_solution(pose)
+        if jointstate=="-1":
+            raise Exception("IK solution outside of joints limits")
         manip_interface.set_jointstate(jointstate)
 
 
@@ -70,6 +72,8 @@ class JointspaceMotion(InterpolatedMotion):
 
     def _calculate_end_coords(self, manip_interface: ManipInterface):
         jointstate = self.ik_solver.get_IK_solution(self.target_pose)
+        if jointstate=="-1":
+            raise Exception("IK solution outside of joints limits")
         return jointstate.position
 
     def _move_to_position(self, position, manip_interface: ManipInterface):
@@ -77,6 +81,60 @@ class JointspaceMotion(InterpolatedMotion):
         jointstate.position = position
         manip_interface.set_jointstate(jointstate)
 
+class CartesianMotionExtRange(InterpolatedMotion):
+
+    def _calculate_start_coords(self, manip_interface: ManipInterface):
+        pose = self.ik_solver.get_FK_solution(manip_interface.get_jointstate())
+        return pose.to_list()
+
+    def _calculate_end_coords(self, manip_interface: ManipInterface):
+        jointstate = self.ik_solver.get_IK_solution(self.target_pose)
+
+        if jointstate=="-1":
+            pitch_angle=pi/180
+            while jointstate=="-1":
+                self.target_pose.pitch=pitch_angle
+                jointstate = self.ik_solver.get_IK_solution(self.target_pose)
+                pitch_angle=pitch_angle+pi/180
+                if pitch_angle>pi/2:
+                    raise Exception("IK solution outside of joints limits")
+
+        pose = self.target_pose
+        return pose.to_list()
+
+    def _move_to_position(self, position, manip_interface: ManipInterface):
+        pose = ManipPose.from_list(position)
+        jointstate = self.ik_solver.get_IK_solution(pose)
+        if jointstate=="-1":
+            raise Exception("IK solution outside of joints limits")
+        manip_interface.set_jointstate(jointstate)
+
+
+class JointspaceMotionExtRange(InterpolatedMotion):
+
+    def _calculate_start_coords(self, manip_interface: ManipInterface):
+        jointstate = manip_interface.get_jointstate()
+        return jointstate.position
+
+    def _calculate_end_coords(self, manip_interface: ManipInterface):
+        jointstate = self.ik_solver.get_IK_solution(self.target_pose)
+
+        if jointstate=="-1":
+            pitch_angle=pi/180
+            while jointstate=="-1":
+                self.target_pose.pitch=pitch_angle
+                jointstate = self.ik_solver.get_IK_solution(self.target_pose)
+                pitch_angle=pitch_angle+pi/180
+                if pitch_angle>pi/2:
+                    raise Exception("IK solution outside of joints limits")
+
+
+        return jointstate.position
+
+    def _move_to_position(self, position, manip_interface: ManipInterface):
+        jointstate = manip_interface.get_jointstate()
+        jointstate.position = position
+        manip_interface.set_jointstate(jointstate)
 
 class IncrementalMotion(MotionStrategy):
 
@@ -89,6 +147,8 @@ class IncrementalMotion(MotionStrategy):
         currentPose = self.solver.get_FK_solution(currentJointstate)
         targetPose = self._add_poses(currentPose, self.deltaPose)
         targetJointstate = self.solver.get_IK_solution(targetPose)
+        if targetJointstate=="-1":
+            raise Exception("IK solution outside of joints limits")
         manip_interface.set_jointstate(targetJointstate)
 
     def _add_poses(self, pose1, pose2):

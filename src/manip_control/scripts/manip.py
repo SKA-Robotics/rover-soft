@@ -1,7 +1,7 @@
 from ik import SiriusII_IKSolver, ManipPose
 from manip_interface import ManipInterface
 from motion_interpolation import InterpolationSettings
-from motion_strategies import CartesianMotion, JointspaceMotion, IncrementalMotion
+from motion_strategies import CartesianMotion, JointspaceMotion, IncrementalMotion, JointspaceMotionExtRange, CartesianMotionExtRange
 
 
 class SiriusManip:
@@ -19,6 +19,12 @@ class SiriusManip:
 
     def move_jointspace(self, target_pose: ManipPose):
         self._move(target_pose, JointspaceMotion, "jointspace")
+    
+    def move_cartesian_ext(self, target_pose: ManipPose):
+        self._move(target_pose, CartesianMotionExtRange, "cartesianextrange")
+
+    def move_jointspace_ext(self, target_pose: ManipPose):
+        self._move(target_pose, JointspaceMotionExtRange, "jointspaceextrange")
 
     def _get_controlmode_settings(self, mode_name: str):
         mode_params = self.params.control_mode_params(mode_name)

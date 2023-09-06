@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from ast import Return
 import math
 from abc import ABC, abstractmethod
 
@@ -58,6 +59,7 @@ class SiriusII_IKSolver(IKSolver):
             raise Exception("No IK solution! Possibly out of range")
         except Exception as e:
             raise e
+        
 
     def _calculate_IK_solution(self, target: ManipPose) -> ManipJointState:
 
@@ -98,8 +100,9 @@ class SiriusII_IKSolver(IKSolver):
         # Check if the calculated angles are within manipulator's limits
         if self._angles_within_constraints(solution):
             return ManipJointState.from_list(solution)
-
-        raise Exception("IK solution outside of joints limits")
+        else:
+            return "-1"
+        #raise Exception("IK solution outside of joints limits")
 
     def _get_link3_startposition(self, lengths, r_t, z_t, alpha):
         r_3 = r_t - lengths[3] * math.cos(alpha)

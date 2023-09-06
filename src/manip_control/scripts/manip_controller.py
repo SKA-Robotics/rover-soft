@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from math import pi
 import rospy
 from enum import Enum
 from queue import Queue
@@ -14,7 +15,8 @@ from ik import ManipPose
 class mode(Enum):
     CARTESIAN = 0
     JOINTSPACE = 1
-
+    CARTESIAN_EXT = 2
+    JOINTSPACE_EXT = 3
 
 class ManipController:
 
@@ -22,7 +24,7 @@ class ManipController:
         rospy.init_node("manip_controller")
         interface = ROSManipInterface()
         self.manip = SiriusManip(interface)
-        self.mode = mode.JOINTSPACE
+        self.mode = mode.CARTESIAN_EXT
         joystick_timeout = rospy.get_param("~joystick_timeout", 0.5)
         self.joystick_receiver = JoystickReceiver("/cmd_manip", joystick_timeout)
         self.rate = rospy.Rate(rospy.get_param("~control_modes/incremental/send_rate"))
@@ -62,8 +64,12 @@ class ManipController:
         target.yaw = 0
         if self.mode == mode.CARTESIAN:
             self._put_into_pending_moves((self.manip.move_cartesian, target))
-        else:
+        elif self.mode == mode.JOINTSPACE:
             self._put_into_pending_moves((self.manip.move_jointspace, target))
+        elif self.mode == mode.CARTESIAN_EXT:
+            self._put_into_pending_moves((self.manip.move_cartesian_ext, target))
+        else:
+            self._put_into_pending_moves((self.manip.move_jointspace_ext, target))
 
     def _put_into_pending_moves(self, move):
         if self.pending_moves.full():
@@ -79,9 +85,12 @@ class ManipController:
     def _toggle_mode(self):
         if self.mode == mode.CARTESIAN:
             self.mode = mode.JOINTSPACE
+        elif self.mode == mode.JOINTSPACE:
+            self.mode = mode.CARTESIAN_EXT
+        elif self.mode == mode.CARTESIAN_EXT:
+            self.mode = mode.JOINTSPACE_EXT
         else:
             self.mode = mode.CARTESIAN
-
 
 class JoystickReceiver:
 
