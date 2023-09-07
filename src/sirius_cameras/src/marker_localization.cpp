@@ -13,15 +13,17 @@
 #include <sensor_msgs/image_encodings.h>
 #include <tf2_ros/transform_listener.h>
 #include <ros/ros.h>
+#include <ArtagDetector.hpp>
+#include <tf_conversions/tf_eigen.h>
 
-using namespace alvar;
 using namespace std;
 
-Camera* camera;
+alvar::Camera* camera;
 ros::Publisher marker_publisher;
 ros::Publisher pose_publisher;
 tf2_ros::Buffer tf_buffer;
-MarkerDetector<MarkerData> marker_detector;
+alvar::MarkerDetector<alvar::MarkerData> marker_detector;
+ArtagDetector artag_detector;
 
 std::string base_link;
 std::string world_frame;
@@ -72,11 +74,15 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
   {
     try
     {
-      ar_track_alvar_msgs::AlvarMarkers markers;
+      ar_track_alvar_msgs::AlvarMarkers alvar_markers;
       geometry_msgs::TransformStamped cam_to_base_link;
 
-      auto cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
-      marker_detector.Detect(cv_image->image, camera, true, false, max_new_marker_error, max_track_error);
+      auto cv_image_copy = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
+      marker_detector.Detect(cv_image_copy->image, camera, true, false, max_new_marker_error, max_track_error);
+
+      auto cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
+      auto markers = artag_detector.detect(cv_image->image);
+
       auto camera_tf = image->header.frame_id;
       if (!base_link.empty() || camera_tf.substr(camera_tf.length() - 7) == "_optical")
       {
@@ -100,30 +106,16 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
         cam_to_base_link.transform.rotation.w = 1;
       }
 
-      // marker_detector.markers is empty
-      if (marker_detector.markers->empty())
+      if (markers.empty())
       {
         return;
       }
-      for (size_t i = 0; i < marker_detector.markers->size(); i++)
+
+      for (auto& marker : markers)
       {
-        int id = (*(marker_detector.markers))[i].GetId();
-        auto pose = (*(marker_detector.markers))[i].pose;
-        auto quat = cv::Mat(4, 1, CV_64F);
-        pose.GetQuaternion(quat);
-
-        tf2::Vector3 origin(pose.translation[0] / 100.0,  // x
-                            pose.translation[1] / 100.0,  // y
-                            pose.translation[2] / 100.0   // z
-        );
-
-        tf2::Quaternion rotation(quat.at<double>(1, 0),   // qx
-                                 quat.at<double>(2, 0),   // qy
-                                 quat.at<double>(3, 0),   // qz
-                                 quat.at<double>(0, 0));  // qw
-
-        tf2::Quaternion optical_to_regular_orientation(-0.5, -0.5, -0.5, 0.5);
-        rotation = rotation * optical_to_regular_orientation;
+        tf2::Vector3 origin(marker.position.x(), marker.position.y(), marker.position.z());
+        tf2::Quaternion rotation(marker.orientation.x(), marker.orientation.y(), marker.orientation.z(),
+                                 marker.orientation.w());
 
         tf2::Transform marker_in_camera_tf(rotation, origin);
 
@@ -135,19 +127,18 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
         tf2::toMsg(marker_in_base_link_tf, ar_pose_marker.pose.pose);
         ar_pose_marker.header.frame_id = base_link;
         ar_pose_marker.header.stamp = image->header.stamp;
-        ar_pose_marker.id = id;
+        ar_pose_marker.id = marker.id;
 
-        auto error = (*(marker_detector.markers))[i].GetError();
-        error = std::min(error, max_error) / max_error;
-        ar_pose_marker.confidence = 1.0 - error;
+        auto error = marker.error.x();
+        ar_pose_marker.confidence = 1.0 - std::min(error, max_error) / max_error;
 
-        markers.markers.push_back(ar_pose_marker);
+        alvar_markers.markers.push_back(ar_pose_marker);
       }
 
-      markers.header.stamp = image->header.stamp;
-      markers.header.frame_id = base_link;
-      marker_publisher.publish(markers);
-      publishPose(markers);
+      alvar_markers.header.stamp = image->header.stamp;
+      alvar_markers.header.frame_id = base_link;
+      marker_publisher.publish(alvar_markers);
+      publishPose(alvar_markers);
     }
     catch (const std::exception& e)
     {
@@ -179,7 +170,8 @@ int main(int argc, char* argv[])
 
   image_transport::ImageTransport it(nh);
   auto camera_subscriber = it.subscribeCamera("image", 1, &camera_callback);
-  camera = new Camera(nh, camera_subscriber.getInfoTopic());
+  camera = new alvar::Camera(nh, camera_subscriber.getInfoTopic());
+  artag_detector.init(nh, camera_subscriber.getInfoTopic(), marker_size, max_new_marker_error, max_track_error);
 
   ros::Rate rate(update_rate);
   while (ros::ok())
