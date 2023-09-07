@@ -2,7 +2,12 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="manipulator">
   <xacro:property name="package" value="sirius_description" />
   <xacro:property name="inertial" value="${xacro.load_yaml('manipulator_inertial.yaml')}" />
-  <!-- <xacro:include filename="materials.urdf.xacro" /> -->
+  <xacro:include filename="materials.urdf.xacro" />
+  <xacro:arg name="enable_gripper" default="True" />
+
+  <xacro:if value="${$(arg enable_gripper)}">
+    <xacro:include filename="gripper.urdf.xacro" />
+  </xacro:if>
 
   <xacro:property name="base_length" value="0.006" />
   <xacro:property name="cyl_length" value="0.0655" />
@@ -13,31 +18,33 @@
   <xacro:property name="tool_length" value="0.011" />
   <xacro:property name="base_size_x" value="0.2" />
 
-  <xacro:property name="arm1_home_angle" value="-0.7853981633974483"/>
-  <xacro:property name="arm2_home_angle" value="2.356194490192345"/>
-  <xacro:property name="arm3_home_angle" value="0.5"/>
+  <xacro:property name="arm1_home_angle" value="-0.7853981633974483" />
+  <xacro:property name="arm2_home_angle" value="2.356194490192345" />
+  <xacro:property name="arm3_home_angle" value="0.5" />
 
 
   <link name="root_link">
   </link>
   <joint name="root_base" type="fixed">
-    <parent link="root_link"/>
-    <child link="base_link"/>
+    <parent link="root_link" />
+    <child link="base_link" />
   </joint>
 
   <link name="base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/base.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/base.stl" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="grey">
         <color rgba=".5 .5 .5 1" />
       </material>
     </visual>
     <inertial>
-      <mass value="${inertial['base_mass']}"/>
-        <inertia ixx="${inertial['base_inertia']['ixx']}" ixy="${inertial['base_inertia']['ixy']}" ixz="${inertial['base_inertia']['ixz']}" iyy="${inertial['base_inertia']['iyy']}" iyz="${inertial['base_inertia']['iyz']}" izz="${inertial['base_inertia']['izz']}"/>
+      <mass value="${inertial['base_mass']}" />
+      <inertia ixx="${inertial['base_inertia']['ixx']}" ixy="${inertial['base_inertia']['ixy']}"
+        ixz="${inertial['base_inertia']['ixz']}" iyy="${inertial['base_inertia']['iyy']}"
+        iyz="${inertial['base_inertia']['iyz']}" izz="${inertial['base_inertia']['izz']}" />
     </inertial>
     <collision>
       <origin xyz="0 0 ${base_length / 2}" rpy="0 0 0" />
@@ -47,24 +54,26 @@
     </collision>
   </link>
   <gazebo reference="base_link">
-      <kinematic> true </kinematic>
-      <material>
-        Gazebo/Grey
-      </material>
+    <kinematic>true</kinematic>
+    <material>
+      Gazebo/Grey
+    </material>
   </gazebo>
 
   <link name="cylinder">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/cyl.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/cyl.stl" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="grey">
       </material>
     </visual>
     <inertial>
-      <mass value="${inertial['cyl_mass']}"/>
-        <inertia ixx="${inertial['cyl_inertia']['ixx']}" ixy="${inertial['cyl_inertia']['ixy']}" ixz="${inertial['cyl_inertia']['ixz']}" iyy="${inertial['cyl_inertia']['iyy']}" iyz="${inertial['cyl_inertia']['iyz']}" izz="${inertial['cyl_inertia']['izz']}"/>
+      <mass value="${inertial['cyl_mass']}" />
+      <inertia ixx="${inertial['cyl_inertia']['ixx']}" ixy="${inertial['cyl_inertia']['ixy']}"
+        ixz="${inertial['cyl_inertia']['ixz']}" iyy="${inertial['cyl_inertia']['iyy']}"
+        iyz="${inertial['cyl_inertia']['iyz']}" izz="${inertial['cyl_inertia']['izz']}" />
     </inertial>
     <collision>
       <origin xyz="0 0 ${cyl_length/2}" rpy="0 0 0" />
@@ -74,25 +83,25 @@
     </collision>
   </link>
   <gazebo reference="cylinder">
-      <material>
-        Gazebo/Grey
-      </material>
+    <material>
+      Gazebo/Grey
+    </material>
   </gazebo>
 
   <joint name="base_cyl" type="continuous">
-    <parent link="base_link"/>
-    <child link="cylinder"/>
-    <origin xyz="0 0 ${base_length}"/>
-    <axis xyz="0 0 1"/>
-  </joint>  
+    <parent link="base_link" />
+    <child link="cylinder" />
+    <origin xyz="0 0 ${base_length}" />
+    <axis xyz="0 0 1" />
+  </joint>
   <transmission name="trans_base_cyl">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="base_cyl">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor_base_cyl">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>150</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>150</mechanicalReduction>
     </actuator>
   </transmission>
 
@@ -100,15 +109,17 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/arm1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/arm1.stl" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1" />
       </material>
     </visual>
     <inertial>
-        <mass value="${inertial['arm1_mass']}"/>
-        <inertia ixx="${inertial['arm1_inertia']['ixx']}" ixy="${inertial['arm1_inertia']['ixy']}" ixz="${inertial['arm1_inertia']['ixz']}" iyy="${inertial['arm1_inertia']['iyy']}" iyz="${inertial['arm1_inertia']['iyz']}" izz="${inertial['arm1_inertia']['izz']}"/>
+      <mass value="${inertial['arm1_mass']}" />
+      <inertia ixx="${inertial['arm1_inertia']['ixx']}" ixy="${inertial['arm1_inertia']['ixy']}"
+        ixz="${inertial['arm1_inertia']['ixz']}" iyy="${inertial['arm1_inertia']['iyy']}"
+        iyz="${inertial['arm1_inertia']['iyz']}" izz="${inertial['arm1_inertia']['izz']}" />
     </inertial>
     <collision>
       <origin xyz="0 0 ${arm1_length/2}" rpy="0 0 0" />
@@ -118,16 +129,16 @@
     </collision>
   </link>
   <gazebo reference="arm1">
-      <material>
-        Gazebo/White
-      </material>
+    <material>
+      Gazebo/White
+    </material>
   </gazebo>
 
   <joint name="cyl_arm1" type="revolute">
-    <parent link="cylinder"/>
-    <child link="arm1"/>
-    <origin xyz="0 0 ${cyl_length}" rpy="0 ${arm1_home_angle} 0"/>
-    <axis xyz="0 1 0"/>
+    <parent link="cylinder" />
+    <child link="arm1" />
+    <origin xyz="0 0 ${cyl_length}" rpy="0 ${arm1_home_angle} 0" />
+    <axis xyz="0 1 0" />
     <limit
       lower="${-1.45 - arm1_home_angle}"
       upper="${1.45 - arm1_home_angle}"
@@ -137,11 +148,11 @@
   <transmission name="trans_cyl_arm1">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="cyl_arm1">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor_cyl_arm1">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>120</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>120</mechanicalReduction>
     </actuator>
   </transmission>
 
@@ -149,14 +160,16 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/arm2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/arm2.stl" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="grey">
       </material>
     </visual>
     <inertial>
-        <mass value="${inertial['arm2_mass']}"/>
-        <inertia ixx="${inertial['arm2_inertia']['ixx']}" ixy="${inertial['arm2_inertia']['ixy']}" ixz="${inertial['arm2_inertia']['ixz']}" iyy="${inertial['arm2_inertia']['iyy']}" iyz="${inertial['arm2_inertia']['iyz']}" izz="${inertial['arm2_inertia']['izz']}"/>
+      <mass value="${inertial['arm2_mass']}" />
+      <inertia ixx="${inertial['arm2_inertia']['ixx']}" ixy="${inertial['arm2_inertia']['ixy']}"
+        ixz="${inertial['arm2_inertia']['ixz']}" iyy="${inertial['arm2_inertia']['iyy']}"
+        iyz="${inertial['arm2_inertia']['iyz']}" izz="${inertial['arm2_inertia']['izz']}" />
     </inertial>
     <collision>
       <origin xyz="0 0 ${arm2_length/2 - arm2_lever}" rpy="0 0 0" />
@@ -166,16 +179,16 @@
     </collision>
   </link>
   <gazebo reference="arm2">
-      <material>
-        Gazebo/Grey
-      </material>
+    <material>
+      Gazebo/Grey
+    </material>
   </gazebo>
 
   <joint name="arm1_arm2" type="revolute">
-    <parent link="arm1"/>
-    <child link="arm2"/>
-    <origin xyz="0 0 ${arm1_length}" rpy="0 ${arm2_home_angle} 0"/>
-    <axis xyz="0 1 0"/>
+    <parent link="arm1" />
+    <child link="arm2" />
+    <origin xyz="0 0 ${arm1_length}" rpy="0 ${arm2_home_angle} 0" />
+    <axis xyz="0 1 0" />
     <limit
       lower="-1.6"
       upper="0.0"
@@ -185,11 +198,11 @@
   <transmission name="trans_arm1_arm2">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="arm1_arm2">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor_arm1_arm2">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>100</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>100</mechanicalReduction>
     </actuator>
   </transmission>
 
@@ -197,14 +210,16 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/arm3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/arm3.stl" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="white">
       </material>
     </visual>
     <inertial>
-        <mass value="${inertial['arm3_mass']}"/>
-        <inertia ixx="${inertial['arm3_inertia']['ixx']}" ixy="${inertial['arm3_inertia']['ixy']}" ixz="${inertial['arm3_inertia']['ixz']}" iyy="${inertial['arm3_inertia']['iyy']}" iyz="${inertial['arm3_inertia']['iyz']}" izz="${inertial['arm3_inertia']['izz']}"/>
+      <mass value="${inertial['arm3_mass']}" />
+      <inertia ixx="${inertial['arm3_inertia']['ixx']}" ixy="${inertial['arm3_inertia']['ixy']}"
+        ixz="${inertial['arm3_inertia']['ixz']}" iyy="${inertial['arm3_inertia']['iyy']}"
+        iyz="${inertial['arm3_inertia']['iyz']}" izz="${inertial['arm3_inertia']['izz']}" />
     </inertial>
 
     <collision>
@@ -215,16 +230,16 @@
     </collision>
   </link>
   <gazebo reference="arm3">
-      <material>
-        Gazebo/White
-      </material>
+    <material>
+      Gazebo/White
+    </material>
   </gazebo>
 
   <joint name="arm2_arm3" type="revolute">
-    <parent link="arm2"/>
-    <child link="arm3"/>
-    <origin xyz="0 0 ${arm2_length - arm2_lever}" rpy="0 ${arm3_home_angle} 0"/>
-    <axis xyz="0 1 0"/>
+    <parent link="arm2" />
+    <child link="arm3" />
+    <origin xyz="0 0 ${arm2_length - arm2_lever}" rpy="0 ${arm3_home_angle} 0" />
+    <axis xyz="0 1 0" />
     <limit
       lower="-1.57"
       upper="0"
@@ -234,11 +249,11 @@
   <transmission name="trans_arm2_arm3">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="arm2_arm3">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor_arm2_arm3">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
@@ -246,14 +261,16 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/tool.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://${package}/meshes/manipulator/tool.stl" scale="0.001 0.001 0.001" />
       </geometry>
       <material name="grey">
       </material>
     </visual>
     <inertial>
-        <mass value="${inertial['tool_mass']}"/>
-        <inertia ixx="${inertial['tool_inertia']['ixx']}" ixy="${inertial['tool_inertia']['ixy']}" ixz="${inertial['tool_inertia']['ixz']}" iyy="${inertial['tool_inertia']['iyy']}" iyz="${inertial['tool_inertia']['iyz']}" izz="${inertial['tool_inertia']['izz']}"/>
+      <mass value="${inertial['tool_mass']}" />
+      <inertia ixx="${inertial['tool_inertia']['ixx']}" ixy="${inertial['tool_inertia']['ixy']}"
+        ixz="${inertial['tool_inertia']['ixz']}" iyy="${inertial['tool_inertia']['iyy']}"
+        iyz="${inertial['tool_inertia']['iyz']}" izz="${inertial['tool_inertia']['izz']}" />
     </inertial>
     <collision>
       <origin xyz="0 0 ${tool_length/2}" rpy="0 0 0" />
@@ -263,36 +280,37 @@
     </collision>
   </link>
   <gazebo reference="tool">
-      <material>
-        Gazebo/Grey
-      </material>
+    <material>
+      Gazebo/Grey
+    </material>
   </gazebo>
 
   <joint name="arm3_tool" type="continuous">
-    <parent link="arm3"/>
-    <child link="tool"/>
-    <origin xyz="0 0 ${arm3_length}"/>
-    <axis xyz="0 0 1"/>
+    <parent link="arm3" />
+    <child link="tool" />
+    <origin xyz="0 0 ${arm3_length}" />
+    <axis xyz="0 0 1" />
   </joint>
   <transmission name="trans_arm3_tool">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="arm3_tool">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor_arm3_tool">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <joint name="tool_gripper" type="fixed">
-    <parent link="tool" />
-    <child link="gripper" />
-    <origin xyz="0 0 ${tool_length}" />
-  </joint>
+  <xacro:if value="${$(arg enable_gripper)}">
+    <joint name="tool_gripper" type="fixed">
+      <parent link="tool" />
+      <child link="gripper" />
+      <origin xyz="0 0 ${tool_length}" />
+    </joint>
+    <xacro:gripper package="${package}" inertial="${inertial}" />
+  </xacro:if>
 
-  <xacro:include filename="gripper.urdf.xacro"/>
-  
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>manipulator</robotNamespace>
