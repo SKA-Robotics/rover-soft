@@ -123,7 +123,7 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
                                  quat.at<double>(0, 0));  // qw
 
         tf2::Quaternion optical_to_regular_orientation(-0.5, -0.5, -0.5, 0.5);
-        rotation = optical_to_regular_orientation * rotation;
+        rotation = rotation * optical_to_regular_orientation;
 
         tf2::Transform marker_in_camera_tf(rotation, origin);
 
