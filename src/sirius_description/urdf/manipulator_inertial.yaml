@@ -51,3 +51,12 @@ tool_inertia:
   iyy: 0.000040
   iyz: 0.000000
   izz: 0.000041
+
+gripper_mass: 1.612832
+gripper_inertia:
+  ixx: 0.005569
+  ixy: -0.000004
+  ixz: -0.000445
+  iyy: 0.006401
+  iyz: 0.000004
+  izz: 0.002343

@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="package" value="sirius_description" />
+  <xacro:property name="inertial" value="${xacro.load_yaml('manipulator_inertial.yaml')}" />
+  <xacro:include filename="materials.urdf.xacro" />
+
+  <xacro:property name="beam_length" value="0.04" />
+  <xacro:property name="beam_distance" value="0.034" />
+  <xacro:property name="base_length" value="0.05385" />
+
+  <link name="gripper">
+    <visual>
+      <origin xyz="0 0 0" rpy="${pi} ${pi/2} 0" />
+      <geometry>
+        <mesh filename="package://${package}/meshes/gripper/gripper_base.stl"
+          scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="white">
+      </material>
+    </visual>
+    <inertial>
+      <mass value="${inertial['gripper_mass']/1000}" />
+      <inertia ixx="${inertial['gripper_inertia']['ixx']/1000}"
+        ixy="${inertial['gripper_inertia']['ixy']/1000}"
+        ixz="${inertial['gripper_inertia']['ixz']/1000}"
+        iyy="${inertial['gripper_inertia']['iyy']/1000}"
+        iyz="${inertial['gripper_inertia']['iyz']/1000}"
+        izz="${inertial['gripper_inertia']['izz']/1000}" />
+    </inertial>
+    <collision>
+      <origin xyz="0.015 0 0.025" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.05" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="gripper">
+    <material>
+      Gazebo/White
+    </material>
+  </gazebo>
+
+  <joint name="gripper_left_beams" type="revolute">
+    <parent link="gripper" />
+    <child link="left_beams" />
+    <origin xyz="0 ${beam_distance/2} ${base_length}" />
+    <axis xyz="1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="100"
+      velocity="50" />
+  </joint>
+  <transmission name="trans_gripper_claws">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="gripper_left_beams">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_gripper_claws">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>2</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <link name="left_beams">
+    <visual>
+      <origin xyz="0 ${-beam_distance/2} ${-base_length}" rpy="${pi/2} ${pi/2} ${-pi/2}" />
+      <geometry>
+        <mesh filename="package://${package}/meshes/gripper/left_beams.stl"
+          scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="grey">
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.001" />
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+    </inertial>
+  </link>
+  <gazebo reference="left_beams">
+    <material>
+      Gazebo/Grey
+    </material>
+  </gazebo>
+
+  <joint name="gripper_right_beams" type="revolute">
+    <parent link="gripper" />
+    <child link="right_beams" />
+    <origin xyz="0 ${-beam_distance/2} ${base_length}" />
+    <axis xyz="-1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="100"
+      velocity="50" />
+    <mimic joint="gripper_left_beams" multiplier="1" />
+  </joint>
+
+  <link name="right_beams">
+    <visual>
+      <origin xyz="0 ${beam_distance/2} ${-base_length}" rpy="${pi/2} ${pi/2} ${-pi/2}" />
+      <geometry>
+        <mesh filename="package://${package}/meshes/gripper/right_beams.stl"
+          scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="grey">
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.001" />
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+    </inertial>
+  </link>
+  <gazebo reference="right_beams">
+    <material>
+      Gazebo/Grey
+    </material>
+  </gazebo>
+
+  <joint name="left_beams_claw" type="revolute">
+    <parent link="left_beams" />
+    <child link="left_claw" />
+    <origin xyz="0 0 ${beam_length}" />
+    <axis xyz="-1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="100"
+      velocity="50" />
+    <mimic joint="gripper_left_beams" multiplier="1" />
+  </joint>
+
+  <link name="left_claw">
+    <visual>
+      <origin xyz="0 ${-beam_distance/2} ${-base_length-beam_length}" rpy="${pi/2} ${pi/2} ${-pi/2}" />
+      <geometry>
+        <mesh filename="package://${package}/meshes/gripper/left_claw.stl"
+          scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="white">
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.001" />
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+    </inertial>
+    <collision>
+      <origin xyz="-0.005 0.003 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.04 0.12" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="left_claw">
+    <material>
+      Gazebo/White
+    </material>
+  </gazebo>
+
+  <joint name="right_beams_claw" type="revolute">
+    <parent link="right_beams" />
+    <child link="right_claw" />
+    <origin xyz="0 0 ${beam_length}" />
+    <axis xyz="1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="100"
+      velocity="50" />
+    <mimic joint="gripper_right_beams" multiplier="1" />
+  </joint>
+
+  <link name="right_claw">
+    <visual>
+      <origin xyz="0 ${beam_distance/2} ${-base_length-beam_length}" rpy="${pi/2} ${pi/2} ${-pi/2}" />
+      <geometry>
+        <mesh filename="package://${package}/meshes/gripper/right_claw.stl"
+          scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="white">
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.001" />
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+    </inertial>
+    <collision>
+      <origin xyz="-0.005 -0.003 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.04 0.12" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="right_claw">
+    <material>
+      Gazebo/White
+    </material>
+  </gazebo>
+</robot>

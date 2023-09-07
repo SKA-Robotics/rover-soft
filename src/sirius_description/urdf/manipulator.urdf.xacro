@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="manipulator">
   <xacro:property name="package" value="sirius_description" />
   <xacro:property name="inertial" value="${xacro.load_yaml('manipulator_inertial.yaml')}" />
-  <xacro:include filename="materials.urdf.xacro" />
+  <!-- <xacro:include filename="materials.urdf.xacro" /> -->
 
   <xacro:property name="base_length" value="0.006" />
   <xacro:property name="cyl_length" value="0.0655" />
@@ -285,15 +285,14 @@
     </actuator>
   </transmission>
 
-  <link name="fake">
-  </link>
-  <joint name="tool_fake" type="continuous">
-    <parent link="tool"/>
-    <child link="fake"/>
-    <origin xyz="0 0 ${tool_length}"/>
-    <axis xyz="1 0 0"/>
+  <joint name="tool_gripper" type="fixed">
+    <parent link="tool" />
+    <child link="gripper" />
+    <origin xyz="0 0 ${tool_length}" />
   </joint>
 
+  <xacro:include filename="gripper.urdf.xacro"/>
+  
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>manipulator</robotNamespace>

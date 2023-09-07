@@ -78,4 +78,10 @@ manipulator:
     type: effort_controllers/JointPositionController
     joint: arm3_tool
     pid: {p: 0.01, i: 0.001, d: 0.01, antiwindup: True, i_clamp: 100.0}
+  # Gripper ----------------------------------------------------
+  # TODO: Set proper PID values
+  joint6_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: gripper_left_beams
+    pid: {p: 0.01, i: 0.001, d: 0.01, antiwindup: True, i_clamp: 100.0}
 
