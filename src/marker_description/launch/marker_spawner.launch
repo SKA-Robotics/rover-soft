@@ -17,9 +17,9 @@
     <param name="marker_description" command="$(find xacro)/xacro '$(find marker_description)/urdf/marker.urdf.xacro' sides:=$(arg sides) family:='$(arg family)' id:=$(arg id) name:='$(arg name)' marker_size:=$(arg marker_size) margin:=$(arg margin) pole_height:=$(arg pole_height) pole_radius:=$(arg pole_radius)" />
 
 
-    <node unless="$(eval name=='')" name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+    <node unless="$(eval name=='')" name="$(arg name)_spawner" pkg="gazebo_ros" type="spawn_model"
         args="-x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y) -unpause -urdf -model $(arg name) -param marker_description" respawn="false" output="screen" />
-    <node if="$(eval name=='')" name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+    <node if="$(eval name=='')" name="$(arg family)_$(arg id)_spawner" pkg="gazebo_ros" type="spawn_model"
         args="-x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y) -unpause -urdf -model $(arg family)_$(arg id) -param marker_description" respawn="false" output="screen" />
 
  
