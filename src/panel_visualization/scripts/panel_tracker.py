@@ -45,10 +45,11 @@ class PanelTracker:
             return
 
         for name in name_list[1:-1].split(','):
-            rospy.Subscriber(f'{name.strip()}/fiducial_transforms',
-                             FiducialTransformArray,
-                             self._callback,
-                             queue_size=10)
+            if len(name.strip()):
+                rospy.Subscriber(f'{name.strip()}/fiducial_transforms',
+                                 FiducialTransformArray,
+                                 self._callback,
+                                 queue_size=10)
         self.pub = rospy.Publisher("/visual_objects",
                                    MarkerArray,
                                    queue_size=10)
