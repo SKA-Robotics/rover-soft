@@ -7,7 +7,7 @@ from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import Header
 
 SCRIPT_DIR = dirname(__file__)
-GET_VIDEO = True
+GET_VIDEO = False
 
 
 class FakeCamera:
@@ -31,7 +31,7 @@ class FakeCamera:
         ## Choose images for testing
         self.path = f'{SCRIPT_DIR}/../temp'
         self.img_buff = [
-            cv.imread(f'{self.path}/test_{i}.jpg') for i in range(0, 5)
+            cv.imread(f'{self.path}/test_{i}.jpg') for i in range(5, 6)
         ]
         self.video = cv.VideoCapture(f'{self.path}/test_video.mp4')
 

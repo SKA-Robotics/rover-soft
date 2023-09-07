@@ -1,7 +1,7 @@
 <launch>
     <arg name="camera_name" default="/fake_camera" />
     <arg name="aruco_size" default="0.05" />
-    <arg name="aruco_size_override" default="13-14: 0.032" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
+    <arg name="aruco_size_override" default="" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
 
     <node name="aruco_detect" pkg="aruco_detect" type="aruco_detect" ns="$(arg camera_name)">
         <param name="dictionary" value="16" /> <!-- DICT_ARUCO_ORIGINAL -->

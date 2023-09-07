@@ -48,3 +48,26 @@ visual_objects:
           y: 0.0
           z: 0.0
           w: -0.70710678118
+  - name: arm3
+    file: arm3.dae
+    tags:
+      - id: 33
+        position:
+          x: 0.004
+          y: -0.038
+          z: 0.094
+        rotation:
+          x: 0.5
+          y: 0.5
+          z: -0.5
+          w: 0.5
+      - id: 32
+        position:
+          x: 0.0
+          y: 0.038
+          z: 0.043
+        rotation:
+          x: 0.0
+          y: 0.70710678118
+          z: 0.70710678118
+          w: 0.0

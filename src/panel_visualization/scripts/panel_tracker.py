@@ -103,6 +103,7 @@ class PanelTracker:
                     marker = self.base_object.generate_next_marker(base_header)
                     if marker is not None:
                         new_msg.markers.append(marker)
+                        marker.color = ColorRGBA(a=0.2)  # only object's shadow
                         self.base_object.publish_transform(
                             msg.header.frame_id, True)
 

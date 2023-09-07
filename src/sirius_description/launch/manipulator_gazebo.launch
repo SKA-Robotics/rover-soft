@@ -9,6 +9,7 @@
     <arg name="world_name" default="$(find gazebo_ros/worlds/empty.world" />
 
     <arg name="enable_gripper" default="true" />
+    <arg name="visualize_panel" default="true" />
     <arg name="rviz" default="true" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -75,5 +76,12 @@
     -->
     <node if="$(arg rviz)" type="rviz" name="rviz" pkg="rviz"
         args="-d $(find sirius_description)/rviz/manipulator.rviz" />
+
+    <include if="$(arg visualize_panel)"
+        file="$(find panel_visualization)/launch/panel_visualization.launch">
+        <arg name="rviz" value="false" />
+        <arg name="gazebo" value="true" />
+        <arg name="manip_frame" value="arm3" />
+    </include>
 
 </launch>

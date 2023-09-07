@@ -1,11 +1,12 @@
 <launch>
     <arg name="rviz" default="true" />
+    <arg name="gazebo" default="false" />
     <arg name="test" default="true" />
     <arg name="message_rate" default="10.0" />
     <arg name="camera_frame" default="camera_frame" />
     <arg name="manip_frame" default="base_link" />
     <arg name="aruco_size" default="0.05" />
-    <arg name="aruco_size_override" default="13-14: 0.032" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
+    <arg name="aruco_size_override" default="13-14: 0.032, 32-33: 0.04" />
 
     <!-- Package enable aruco detection from up to 6 cameras streams -->
     <arg name="camera_name_0" default="/fake_camera" />
@@ -18,26 +19,32 @@
     <!-- Each aruco_detect node is run only for configured stream -->
     <include file="$(find panel_visualization)/launch/aruco_detection.launch">
         <arg name="camera_name" default="$(arg camera_name_0)" />
+        <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
     <include if="$(eval arg('camera_name_1') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
         <arg name="camera_name" default="$(arg camera_name_1)" />
+        <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
     <include if="$(eval arg('camera_name_2') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
         <arg name="camera_name" default="$(arg camera_name_2)" />
+        <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
     <include if="$(eval arg('camera_name_3') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
         <arg name="camera_name" default="$(arg camera_name_3)" />
+        <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
     <include if="$(eval arg('camera_name_4') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
         <arg name="camera_name" default="$(arg camera_name_4)" />
+        <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
     <include if="$(eval arg('camera_name_5') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
         <arg name="camera_name" default="$(arg camera_name_5)" />
+        <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
 
     <node name="panel_tracker" pkg="panel_visualization" type="panel_tracker.py"
@@ -46,7 +53,7 @@
         <param name="cameras_names"
             value="[$(arg camera_name_0), $(arg camera_name_1), $(arg camera_name_2), $(arg camera_name_3), $(arg camera_name_4), $(arg camera_name_5)]" />
         <param name="message_rate" value="$(arg message_rate)" /> <!-- for marker life time-->
-        <param name="filter_size" value="5" /> <!-- number of images to average -->
+        <param name="filter_size" value="1" /> <!-- number of images to average -->
         <param name="marker_length" value="$(arg aruco_size)" />
         <param name="marker_lengths_override" value="$(arg aruco_size_override)" />
         <rosparam file="$(find panel_visualization)/config/visual_objects.yaml" command="load" />
@@ -63,7 +70,8 @@
         <param name="camera_name" value="$(arg camera_name_0)" />
     </node>
 
-    <node if="$(arg test)" name="static_transform_publisher_0" pkg="tf2_ros"
+    <node if="$(eval arg('test') and not arg('gazebo'))" name="static_transform_publisher_0"
+        pkg="tf2_ros"
         type="static_transform_publisher"
         args="0 0 0 0.5 -0.5 0.5 -0.5 $(arg manip_frame) $(arg camera_frame)" />
 
