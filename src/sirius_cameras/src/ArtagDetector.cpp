@@ -5,9 +5,8 @@
 void ArtagDetector::init(ros::NodeHandle& nh, const std::string& camera_info_topic, double marker_size,
                          double max_new_marker_error, double max_track_error)
 {
-  nh_ = nh;
   marker_detector.SetMarkerSize(marker_size * 100);
-  camera_ = alvar::Camera(nh, camera_info_topic);
+  camera_ = std::make_unique<alvar::Camera>(nh, camera_info_topic);
   max_new_marker_error_ = max_new_marker_error;
   max_track_error_ = max_track_error;
 }
@@ -17,7 +16,7 @@ Markers<AlignedMarker> ArtagDetector::detect(const cv::Mat& image)
 {
   Markers<AlignedMarker> markers;
   auto image_copy = image.clone();
-  marker_detector.Detect(image_copy, &camera_, true, false, max_new_marker_error_, max_track_error_);
+  marker_detector.Detect(image_copy, camera_.get(), true, false, max_new_marker_error_, max_track_error_);
 
   for (auto& alvar_marker : *marker_detector.markers)
   {
