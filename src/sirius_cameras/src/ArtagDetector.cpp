@@ -29,12 +29,12 @@ Markers<AlignedMarker> ArtagDetector::detect(const cv::Mat& image)
                       alvar_pose.translation[1] / 100.0,  // y
                       alvar_pose.translation[2] / 100.0   // z
     );
-    Quaterniond orientation(alvar_quaternion.at<double>(1, 0),   // qx
+      Quaterniond orientation(alvar_quaternion.at<double>(0, 0),   // qw
+                              alvar_quaternion.at<double>(1, 0),   // qx
                             alvar_quaternion.at<double>(2, 0),   // qy
-                            alvar_quaternion.at<double>(3, 0),   // qz
-                            alvar_quaternion.at<double>(0, 0));  // qw
+                              alvar_quaternion.at<double>(3, 0));  // qz
 
-    Quaterniond optical_to_regular_orientation(-0.5, -0.5, -0.5, 0.5);
+      Quaterniond optical_to_regular_orientation(0.5, -0.5, -0.5, -0.5);
     orientation = orientation * optical_to_regular_orientation;
 
     auto alvar_error = alvar_marker.GetError();
