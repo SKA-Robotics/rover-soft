@@ -59,7 +59,9 @@ public:
   AlignedMarker(unsigned int id, Vector3d position, Quaterniond orientation, Vector3d error = Vector3d::Zero())
     : Marker(id, position, error), orientation(orientation)
   {
-    transform = Isometry3d(position * orientation);
+    transform = Isometry3d::Identity();
+    transform.translate(position);
+    transform.rotate(orientation);
   }
   Quaterniond orientation;
   Isometry3d transform;
