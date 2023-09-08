@@ -9,7 +9,7 @@ find_package(
              depthai_ros_msgs
              roscpp
              sensor_msgs
-             tf_conversions)
+             tf2_eigen)
 find_package(depthai CONFIG REQUIRED)
 
 catkin_package(
@@ -20,7 +20,7 @@ catkin_package(
   depthai_ros_msgs
   roscpp
   sensor_msgs
-  tf_conversions)
+  tf2_eigen)
 include_directories(include/ ${catkin_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME}_oak_d_w src/oak_d_w.cpp)
