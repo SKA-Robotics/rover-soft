@@ -103,9 +103,8 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
 
     for (auto& marker : markers)
     {
-      auto marker_in_camera = tf2::eigenToTransform(marker.transform);
-      geometry_msgs::TransformStamped marker_in_base_link;
-      tf2::doTransform(marker_in_camera, marker_in_base_link, cam_to_base_link);
+      marker.changeReferenceFrame(tf2::transformToEigen(cam_to_base_link));
+      auto marker_in_base_link = tf2::eigenToTransform(marker.transform);
 
       ar_track_alvar_msgs::AlvarMarker ar_pose_marker;
       tf2::Transform marker_in_base_link_tf;

@@ -41,7 +41,10 @@ public:
   {
     position = (position + other.position) / 2;
   }
-
+  void changeReferenceFrame(const Isometry3d& transform)
+  {
+    position = transform * position;
+  }
   operator int() const
   {
     return id;
@@ -56,6 +59,8 @@ public:
 class AlignedMarker : public Marker
 {
 public:
+  Quaterniond orientation;
+  Isometry3d transform;
   AlignedMarker(unsigned int id, Vector3d position, Quaterniond orientation, Vector3d error = Vector3d::Zero())
     : Marker(id, position, error), orientation(orientation)
   {
@@ -63,8 +68,12 @@ public:
     transform.translate(position);
     transform.rotate(orientation);
   }
-  Quaterniond orientation;
-  Isometry3d transform;
+  void changeReferenceFrame(const Isometry3d& transform)
+  {
+    this->transform = transform * this->transform;
+    position = this->transform.translation();
+    orientation = this->transform.rotation();
+  }
 };
 // Marker with offset
 class OffsetMarker : public Marker
