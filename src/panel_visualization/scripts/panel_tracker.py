@@ -102,13 +102,19 @@ class PanelTracker:
                                          frame_id=msg.header.frame_id)
                     marker = self.base_object.generate_next_marker(base_header)
                     if marker is not None:
+                        marker.color.a = 0.1  # only object's shadow
+                        # TODO: Decide if remove this marker
+                        # Now base object shadows show delayed position from
+                        # the time of last sight of this object
                         new_msg.markers.append(marker)
-                        marker.color = ColorRGBA(a=0.2)  # only object's shadow
                         self.base_object.publish_transform(
                             msg.header.frame_id, True)
 
                 frame_transform = self.base_object.get_inverse_transform()
-            if frame_transform is None:
+                is_visible = self.base_object.is_visible()
+
+            # Ignore obsolete object positions
+            if frame_transform is None or not is_visible:
                 return
 
         new_header = Header(stamp=msg.header.stamp, frame_id=self.base_frame)
@@ -212,6 +218,9 @@ class VisulObject:
 
     def is_ready(self) -> bool:
         return not self.counter
+
+    def is_visible(self) -> bool:
+        return not self.duration_of_no_pose
 
     def get_inverse_transform(self) -> 'Transform | None':
         if self.last_pose is None:

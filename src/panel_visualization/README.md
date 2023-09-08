@@ -20,7 +20,7 @@ This package provides visualization of panel used in maintance task in European 
     roslaunch panel_visualization aruco_detection.launch
     ```
 
-    Runs `panel_tracker` and a few instances of `aruco_detect` node. Publishes objects position obtained by averaging data from all connected camera streams.
+    Runs `panel_tracker` and up to 6 instances of `aruco_detect` node. Publishes objects position obtained by averaging data from all connected camera streams.
 
 ### Nodes
 
@@ -31,22 +31,63 @@ This package provides visualization of panel used in maintance task in European 
     Parameters:
 
   - `~base_frame`
+    - Type: `string`
+    - Default: `base_link`
+
+    Parent frame to `/tf` publishing. When it is a one of the visual objects, cameras frames do not have to be known.
+
   - `~cameras_names`
+    - Type: `string`
+    - Default: `[]`
+
+    Name spaces for image transport written in list format. Each one should have an appropriate `aruco_detect` node.
+
   - `~message_rate`
+    - Type: `double`
+    - Default: `1.0`
+
+    Set marker life time, and fake stream speed in case of test mode.
+
   - `~filter_size`
+    - Type: `int`
+    - Default: `3`
+
+    Number of frames used to averaging visual objects pose.
+
   - `~marker_length`
+    - Type: `double`
+    - Default: `0.05`
+    - Unit: `meters`
+
+    Physical length of black part of aruco tags.
+
   - `~marker_lengths_override`
+    - Type: `string`
+    - Default: `""`
+
+    Tags IDs with lengths different than others. Written in format compatible with `aruco_detect` node parameter.
   
 - `aruco_detect`
 
-    Detects aruco markers and published data via `/fiducial_transforms` and many other topics.
+    Detects aruco markers and published data via `/fiducial_transforms` and many other topics. For more informations see <https://wiki.ros.org/aruco_detect>.
 
     Parameters:
 
   - `~dictionary`
+    - Type: `int`
+    - Default: `7`
+
   - `~publish_images`
+    - Type: `bool`
+    - Default: `false`
+
   - `~fiducial_len`
+    - Type: `double`
+    - Default: `0.14`
+
   - `~fiducial_len_override`
+    - Type: `string`
+    - Default: `""`
 
 ### Config files
 
