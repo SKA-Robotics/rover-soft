@@ -70,8 +70,6 @@ void publishPose(const ar_track_alvar_msgs::AlvarMarkers& markers)
 
 void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
-  if (camera->getCamInfo_)
-  {
     try
     {
       ar_track_alvar_msgs::AlvarMarkers alvar_markers;
@@ -145,7 +143,6 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
       ROS_ERROR("%s", e.what());
     }
   }
-}
 
 int main(int argc, char* argv[])
 {

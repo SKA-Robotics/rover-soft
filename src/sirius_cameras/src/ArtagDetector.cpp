@@ -15,6 +15,8 @@ void ArtagDetector::init(ros::NodeHandle& nh, const std::string& camera_info_top
 Markers<AlignedMarker> ArtagDetector::detect(const cv::Mat& image)
 {
   Markers<AlignedMarker> markers;
+  if (camera_->getCamInfo_)
+  {
   auto image_copy = image.clone();
   marker_detector.Detect(image_copy, camera_.get(), true, false, max_new_marker_error_, max_track_error_);
 
@@ -43,6 +45,7 @@ Markers<AlignedMarker> ArtagDetector::detect(const cv::Mat& image)
     AlignedMarker marker(id, position, orientation, error);
 
     markers.add(marker, true);
+  }
   }
   return markers;
 }
