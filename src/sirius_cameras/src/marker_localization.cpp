@@ -100,10 +100,10 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
       cam_to_base_link = geometry_msgs::TransformStamped();
       cam_to_base_link.transform.rotation.w = 1;
     }
+    markers.changeReferenceFrame(tf2::transformToEigen(cam_to_base_link));
 
     for (auto& marker : markers)
     {
-      marker.changeReferenceFrame(tf2::transformToEigen(cam_to_base_link));
       auto marker_in_base_link = tf2::eigenToTransform(marker.transform);
 
       ar_track_alvar_msgs::AlvarMarker ar_pose_marker;
@@ -119,7 +119,6 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
 
       alvar_markers.markers.push_back(ar_pose_marker);
     }
-
     alvar_markers.header.stamp = image->header.stamp;
     alvar_markers.header.frame_id = base_link;
     marker_publisher.publish(alvar_markers);

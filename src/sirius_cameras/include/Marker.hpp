@@ -94,7 +94,7 @@ private:
   std::vector<T> markers;
 
 public:
-  void add(T marker, bool average = false)
+  Markers<T>& add(T marker, bool average = false)
   {
     auto it =
         std::lower_bound(markers.begin(), markers.end(), marker.id, [](const T& a, const int& b) { return a.id < b; });
@@ -111,18 +111,28 @@ public:
     {
       *it = marker;
     }
+    return *this;
   }
   int size() const
   {
     return markers.size();
   }
-  void clear()
+  Markers<T>& clear()
   {
     markers.clear();
+    return *this;
   }
   bool empty() const
   {
     return markers.empty();
+  }
+  Markers<T>& changeReferenceFrame(const Isometry3d& transform)
+  {
+    for (auto& marker : markers)
+    {
+      marker.changeReferenceFrame(transform);
+    }
+    return *this;
   }
   T& operator[](const int index)
   {
