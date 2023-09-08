@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="gripper" params="package inertial">
-    <xacro:property name="beam_length" value="0.04" />
-    <xacro:property name="beam_distance" value="0.034" />
+  <xacro:macro name="inertial" params="inertial">
+    <inertial>
+      <mass value="${inertial['mass']}" />
+      <origin
+        xyz="${inertial['mass_center']['x']} ${inertial['mass_center']['y']} ${inertial['mass_center']['z']}"
+        rpy="0.0 0.0 0.0" />
+      <inertia ixx="${inertial['inertia']['ixx']}"
+        ixy="${inertial['inertia']['ixy']}"
+        ixz="${inertial['inertia']['ixz']}"
+        iyy="${inertial['inertia']['iyy']}"
+        iyz="${inertial['inertia']['iyz']}"
+        izz="${inertial['inertia']['izz']}" />
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="gripper" params="package">
+    <xacro:property name="inertial" value="${xacro.load_yaml('manipulator/gripper_inertial.yaml')}" />
     <xacro:property name="base_length" value="0.05385" />
+    <xacro:property name="beam_distance" value="0.034" />
+    <xacro:property name="beam_length" value="0.04" />
 
     <link name="gripper">
       <visual>
@@ -15,15 +31,7 @@
         <material name="white">
         </material>
       </visual>
-      <inertial>
-        <mass value="${inertial['gripper_mass']/1000}" />
-        <inertia ixx="${inertial['gripper_inertia']['ixx']/1000}"
-          ixy="${inertial['gripper_inertia']['ixy']/1000}"
-          ixz="${inertial['gripper_inertia']['ixz']/1000}"
-          iyy="${inertial['gripper_inertia']['iyy']/1000}"
-          iyz="${inertial['gripper_inertia']['iyz']/1000}"
-          izz="${inertial['gripper_inertia']['izz']/1000}" />
-      </inertial>
+      <xacro:inertial inertial="${inertial['gripper']}" />
       <collision>
         <origin xyz="0.015 0 0.025" rpy="0 0 0" />
         <geometry>
@@ -61,7 +69,7 @@
 
     <link name="left_beams">
       <visual>
-        <origin xyz="0 ${-beam_distance/2} ${-base_length}" rpy="${pi/2} ${pi/2} ${-pi/2}" />
+        <origin xyz="0 ${-beam_distance/2} ${-base_length}" rpy="${pi} ${pi/2} 0" />
         <geometry>
           <mesh filename="package://${package}/meshes/gripper/left_beams.stl"
             scale="0.001 0.001 0.001" />
@@ -69,10 +77,7 @@
         <material name="grey">
         </material>
       </visual>
-      <inertial>
-        <mass value="0.001" />
-        <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
-      </inertial>
+      <xacro:inertial inertial="${inertial['left_beams']}" />
     </link>
     <gazebo reference="left_beams">
       <material>
@@ -95,7 +100,7 @@
 
     <link name="right_beams">
       <visual>
-        <origin xyz="0 ${beam_distance/2} ${-base_length}" rpy="${pi/2} ${pi/2} ${-pi/2}" />
+        <origin xyz="0 ${beam_distance/2} ${-base_length}" rpy="${pi} ${pi/2} 0" />
         <geometry>
           <mesh filename="package://${package}/meshes/gripper/right_beams.stl"
             scale="0.001 0.001 0.001" />
@@ -103,10 +108,7 @@
         <material name="grey">
         </material>
       </visual>
-      <inertial>
-        <mass value="0.001" />
-        <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
-      </inertial>
+      <xacro:inertial inertial="${inertial['right_beams']}" />
     </link>
     <gazebo reference="right_beams">
       <material>
@@ -130,7 +132,7 @@
     <link name="left_claw">
       <visual>
         <origin xyz="0 ${-beam_distance/2} ${-base_length-beam_length}"
-          rpy="${pi/2} ${pi/2} ${-pi/2}" />
+          rpy="${pi} ${pi/2} 0" />
         <geometry>
           <mesh filename="package://${package}/meshes/gripper/left_claw.stl"
             scale="0.001 0.001 0.001" />
@@ -138,10 +140,7 @@
         <material name="white">
         </material>
       </visual>
-      <inertial>
-        <mass value="0.001" />
-        <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
-      </inertial>
+      <xacro:inertial inertial="${inertial['left_claw']}" />
       <collision>
         <origin xyz="-0.005 0.003 0.058" rpy="0 0 0" />
         <geometry>
@@ -171,7 +170,7 @@
     <link name="right_claw">
       <visual>
         <origin xyz="0 ${beam_distance/2} ${-base_length-beam_length}"
-          rpy="${pi/2} ${pi/2} ${-pi/2}" />
+          rpy="${pi} ${pi/2} 0" />
         <geometry>
           <mesh filename="package://${package}/meshes/gripper/right_claw.stl"
             scale="0.001 0.001 0.001" />
@@ -179,10 +178,7 @@
         <material name="white">
         </material>
       </visual>
-      <inertial>
-        <mass value="0.001" />
-        <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
-      </inertial>
+      <xacro:inertial inertial="${inertial['right_claw']}" />
       <collision>
         <origin xyz="-0.005 -0.003 0.058" rpy="0 0 0" />
         <geometry>

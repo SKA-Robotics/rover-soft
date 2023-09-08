@@ -1,0 +1,69 @@
+gripper:
+  mass: 1.353965
+  mass_center:
+    x: 0.019814
+    y: -0.000140
+    z: 0.033413
+  inertia:
+    ixx: 0.000982
+    ixy: -0.000011
+    ixz: 0.000271
+    iyy: 0.001262
+    iyz: 0.000000
+    izz: 0.001548
+
+left_beams:
+  mass: 0.013777
+  mass_center:
+    x: -0.009621
+    y: -0.001696
+    z: 0.031503
+  inertia:
+    ixx: 0.000006
+    ixy: 0.000000
+    ixz: -0.000002
+    iyy: 0.000007
+    iyz: 0.000000
+    izz: 0.000004
+
+right_beams:
+  mass: 0.013777
+  mass_center:
+    x: -0.009621
+    y: 0.001796
+    z: 0.031503
+  inertia:
+    ixx: 0.000006
+    ixy: 0.000000
+    ixz: -0.000002
+    iyy: 0.000007
+    iyz: 0.000000
+    izz: 0.000004
+
+left_claw:
+  mass: 0.057644
+  mass_center:
+    x: -0.004756
+    y: 0.003655
+    z: 0.051455
+  inertia:
+    ixx: 0.000066
+    ixy: 0.000000
+    ixz: -0.000001
+    iyy: 0.000063
+    iyz: 0.000005
+    izz: 0.000006
+
+right_claw:
+  mass: 0.057644
+  mass_center:
+    x: -0.004756
+    y: 0.037655
+    z: 0.051455
+  inertia:
+    ixx: 0.000066
+    ixy: 0.000000
+    ixz: -0.000001
+    iyy: 0.000063
+    iyz: -0.000005
+    izz: 0.000006

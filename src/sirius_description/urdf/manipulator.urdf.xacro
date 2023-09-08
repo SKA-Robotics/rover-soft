@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="manipulator">
   <xacro:property name="package" value="sirius_description" />
-  <xacro:property name="inertial" value="${xacro.load_yaml('manipulator_inertial.yaml')}" />
+  <xacro:property name="inertial"
+    value="${xacro.load_yaml('manipulator/manipulator_inertial.yaml')}" />
   <xacro:include filename="materials.urdf.xacro" />
+  <xacro:include filename="manipulator/gripper.urdf.xacro" />
   <xacro:arg name="enable_gripper" default="True" />
-
-  <xacro:if value="${$(arg enable_gripper)}">
-    <xacro:include filename="gripper.urdf.xacro" />
-  </xacro:if>
 
   <xacro:property name="base_length" value="0.006" />
   <xacro:property name="cyl_length" value="0.0655" />
@@ -23,8 +21,7 @@
   <xacro:property name="arm3_home_angle" value="0.5" />
 
 
-  <link name="root_link">
-  </link>
+  <link name="root_link" />
   <joint name="root_base" type="fixed">
     <parent link="root_link" />
     <child link="base_link" />
@@ -40,12 +37,7 @@
         <color rgba=".5 .5 .5 1" />
       </material>
     </visual>
-    <inertial>
-      <mass value="${inertial['base_mass']}" />
-      <inertia ixx="${inertial['base_inertia']['ixx']}" ixy="${inertial['base_inertia']['ixy']}"
-        ixz="${inertial['base_inertia']['ixz']}" iyy="${inertial['base_inertia']['iyy']}"
-        iyz="${inertial['base_inertia']['iyz']}" izz="${inertial['base_inertia']['izz']}" />
-    </inertial>
+    <xacro:inertial inertial="${inertial['base']}"/>
     <collision>
       <origin xyz="0 0 ${base_length / 2}" rpy="0 0 0" />
       <geometry>
@@ -55,34 +47,6 @@
   </link>
   <gazebo reference="base_link">
     <kinematic>true</kinematic>
-    <material>
-      Gazebo/Grey
-    </material>
-  </gazebo>
-
-  <link name="cylinder">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/cyl.stl" scale="0.001 0.001 0.001" />
-      </geometry>
-      <material name="grey">
-      </material>
-    </visual>
-    <inertial>
-      <mass value="${inertial['cyl_mass']}" />
-      <inertia ixx="${inertial['cyl_inertia']['ixx']}" ixy="${inertial['cyl_inertia']['ixy']}"
-        ixz="${inertial['cyl_inertia']['ixz']}" iyy="${inertial['cyl_inertia']['iyy']}"
-        iyz="${inertial['cyl_inertia']['iyz']}" izz="${inertial['cyl_inertia']['izz']}" />
-    </inertial>
-    <collision>
-      <origin xyz="0 0 ${cyl_length/2}" rpy="0 0 0" />
-      <geometry>
-        <cylinder length="${cyl_length}" radius="0.06" />
-      </geometry>
-    </collision>
-  </link>
-  <gazebo reference="cylinder">
     <material>
       Gazebo/Grey
     </material>
@@ -105,32 +69,26 @@
     </actuator>
   </transmission>
 
-  <link name="arm1">
+  <link name="cylinder">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/arm1.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="package://${package}/meshes/manipulator/cyl.stl" scale="0.001 0.001 0.001" />
       </geometry>
-      <material name="white">
-        <color rgba="1 1 1 1" />
+      <material name="grey">
       </material>
     </visual>
-    <inertial>
-      <mass value="${inertial['arm1_mass']}" />
-      <inertia ixx="${inertial['arm1_inertia']['ixx']}" ixy="${inertial['arm1_inertia']['ixy']}"
-        ixz="${inertial['arm1_inertia']['ixz']}" iyy="${inertial['arm1_inertia']['iyy']}"
-        iyz="${inertial['arm1_inertia']['iyz']}" izz="${inertial['arm1_inertia']['izz']}" />
-    </inertial>
+    <xacro:inertial inertial="${inertial['cyl']}"/>
     <collision>
-      <origin xyz="0 0 ${arm1_length/2}" rpy="0 0 0" />
+      <origin xyz="0 0 ${cyl_length/2}" rpy="0 0 0" />
       <geometry>
-        <box size="0.07 0.07 ${arm1_length}" />
+        <cylinder length="${cyl_length}" radius="0.06" />
       </geometry>
     </collision>
   </link>
-  <gazebo reference="arm1">
+  <gazebo reference="cylinder">
     <material>
-      Gazebo/White
+      Gazebo/Grey
     </material>
   </gazebo>
 
@@ -156,31 +114,27 @@
     </actuator>
   </transmission>
 
-  <link name="arm2">
+  <link name="arm1">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/arm2.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="package://${package}/meshes/manipulator/arm1.stl" scale="0.001 0.001 0.001" />
       </geometry>
-      <material name="grey">
+      <material name="white">
+        <color rgba="1 1 1 1" />
       </material>
     </visual>
-    <inertial>
-      <mass value="${inertial['arm2_mass']}" />
-      <inertia ixx="${inertial['arm2_inertia']['ixx']}" ixy="${inertial['arm2_inertia']['ixy']}"
-        ixz="${inertial['arm2_inertia']['ixz']}" iyy="${inertial['arm2_inertia']['iyy']}"
-        iyz="${inertial['arm2_inertia']['iyz']}" izz="${inertial['arm2_inertia']['izz']}" />
-    </inertial>
+    <xacro:inertial inertial="${inertial['arm1']}"/>
     <collision>
-      <origin xyz="0 0 ${arm2_length/2 - arm2_lever}" rpy="0 0 0" />
+      <origin xyz="0 0 ${arm1_length/2}" rpy="0 0 0" />
       <geometry>
-        <box size="0.06 0.06 ${arm2_length}" />
+        <box size="0.07 0.07 ${arm1_length}" />
       </geometry>
     </collision>
   </link>
-  <gazebo reference="arm2">
+  <gazebo reference="arm1">
     <material>
-      Gazebo/Grey
+      Gazebo/White
     </material>
   </gazebo>
 
@@ -206,32 +160,26 @@
     </actuator>
   </transmission>
 
-  <link name="arm3">
+  <link name="arm2">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/arm3.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="package://${package}/meshes/manipulator/arm2.stl" scale="0.001 0.001 0.001" />
       </geometry>
-      <material name="white">
+      <material name="grey">
       </material>
     </visual>
-    <inertial>
-      <mass value="${inertial['arm3_mass']}" />
-      <inertia ixx="${inertial['arm3_inertia']['ixx']}" ixy="${inertial['arm3_inertia']['ixy']}"
-        ixz="${inertial['arm3_inertia']['ixz']}" iyy="${inertial['arm3_inertia']['iyy']}"
-        iyz="${inertial['arm3_inertia']['iyz']}" izz="${inertial['arm3_inertia']['izz']}" />
-    </inertial>
-
+    <xacro:inertial inertial="${inertial['arm2']}"/>
     <collision>
-      <origin xyz="0 0 ${arm3_length/2}" rpy="0 0 0" />
+      <origin xyz="0 0 ${arm2_length/2 - arm2_lever}" rpy="0 0 0" />
       <geometry>
-        <box size="0.06 0.076 ${arm3_length}" />
+        <box size="0.06 0.06 ${arm2_length}" />
       </geometry>
     </collision>
   </link>
-  <gazebo reference="arm3">
+  <gazebo reference="arm2">
     <material>
-      Gazebo/White
+      Gazebo/Grey
     </material>
   </gazebo>
 
@@ -257,31 +205,26 @@
     </actuator>
   </transmission>
 
-  <link name="tool">
+  <link name="arm3">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://${package}/meshes/manipulator/tool.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="package://${package}/meshes/manipulator/arm3.stl" scale="0.001 0.001 0.001" />
       </geometry>
-      <material name="grey">
+      <material name="white">
       </material>
     </visual>
-    <inertial>
-      <mass value="${inertial['tool_mass']}" />
-      <inertia ixx="${inertial['tool_inertia']['ixx']}" ixy="${inertial['tool_inertia']['ixy']}"
-        ixz="${inertial['tool_inertia']['ixz']}" iyy="${inertial['tool_inertia']['iyy']}"
-        iyz="${inertial['tool_inertia']['iyz']}" izz="${inertial['tool_inertia']['izz']}" />
-    </inertial>
+    <xacro:inertial inertial="${inertial['arm3']}"/>
     <collision>
-      <origin xyz="0 0 ${tool_length/2}" rpy="0 0 0" />
+      <origin xyz="0 0 ${arm3_length/2}" rpy="0 0 0" />
       <geometry>
-        <cylinder length="${tool_length}" radius="0.03" />
+        <box size="0.06 0.076 ${arm3_length}" />
       </geometry>
     </collision>
   </link>
-  <gazebo reference="tool">
+  <gazebo reference="arm3">
     <material>
-      Gazebo/Grey
+      Gazebo/White
     </material>
   </gazebo>
 
@@ -302,13 +245,36 @@
     </actuator>
   </transmission>
 
+  <link name="tool">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://${package}/meshes/manipulator/tool.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="grey">
+      </material>
+    </visual>
+    <xacro:inertial inertial="${inertial['tool']}"/>
+    <collision>
+      <origin xyz="0 0 ${tool_length/2}" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="${tool_length}" radius="0.03" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="tool">
+    <material>
+      Gazebo/Grey
+    </material>
+  </gazebo>
+
   <xacro:if value="${$(arg enable_gripper)}">
     <joint name="tool_gripper" type="fixed">
       <parent link="tool" />
       <child link="gripper" />
       <origin xyz="0 0 ${tool_length}" />
     </joint>
-    <xacro:gripper package="${package}" inertial="${inertial}" />
+    <xacro:gripper package="${package}" />
   </xacro:if>
 
   <gazebo>
