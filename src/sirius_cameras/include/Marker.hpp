@@ -8,7 +8,9 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
+#include "Eigen/src/Geometry/Transform.h"
 
+using Eigen::Isometry3d;
 using Eigen::Quaterniond;
 using Eigen::Vector3d;
 
@@ -57,8 +59,10 @@ public:
   AlignedMarker(unsigned int id, Vector3d position, Quaterniond orientation, Vector3d error = Vector3d::Zero())
     : Marker(id, position, error), orientation(orientation)
   {
+    transform = Isometry3d(position * orientation);
   }
   Quaterniond orientation;
+  Isometry3d transform;
 };
 // Marker with offset
 class OffsetMarker : public Marker
