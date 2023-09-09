@@ -113,6 +113,16 @@ public:
     }
     return *this;
   }
+  Markers<T>& removeById(const unsigned int id)
+  {
+    auto it = std::lower_bound(markers.begin(), markers.end(), id, [](const T& a, const int& b) { return a.id < b; });
+    if (it != markers.end() && it->id == id)
+    {
+      markers.erase(it);
+    }
+    return *this;
+  }
+
   int size() const
   {
     return markers.size();
