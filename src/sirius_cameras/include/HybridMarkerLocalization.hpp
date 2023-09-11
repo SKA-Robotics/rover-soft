@@ -5,12 +5,13 @@
 #include <MarkerLocalization.hpp>
 #include <opencv2/core.hpp>
 #include <boost/optional.hpp>
+#include "Eigen/src/Geometry/Translation.h"
 
 class HybridMarkerLocalization : public MarkerLocalization<OffsetMarker>
 {
 public:
   Markers<OffsetMarker> markers_in_world_frame;
-  Eigen::Quaterniond robot_orientation;
+  Eigen::Quaterniond robot_orientation_in_world_frame;
   HybridMarkerLocalization()
   {
   }
@@ -24,9 +25,9 @@ public:
     return *this;
   }
   
-  HybridMarkerLocalization& setRobotOrientation(const Eigen::Quaterniond& robot_orientation)
+  HybridMarkerLocalization& setRobotOrientation(const Eigen::Quaterniond& robot_orientation_in_world_frame)
   {
-    this->robot_orientation = robot_orientation;
+    this->robot_orientation_in_world_frame = robot_orientation_in_world_frame;
     return *this;
   }
 
@@ -62,21 +63,27 @@ public:
     auto closest_marker =
         *std::min_element(markers_min_error.begin(), markers_min_error.end(),
                           [](const auto& a, const auto& b) { return a.distance() < b.distance(); });
-    // camera in marker frame
-    auto camera_in_marker = closest_marker.transform.inverse();
+    
 
-    // marker object from world container
     auto marker_world = markers_in_world_frame.getById(closest_marker.id);
     if (!marker_world)
     {
       return boost::none;
     }
 
+    // offset from robot to marker in robot frame
+    Eigen::Isometry3d marker_in_robot = Eigen::Translation3d(closest_marker.position) * Eigen::Quaterniond::Identity();
+    // offset from robot to marker in world frame
+    Eigen::Isometry3d marker_robot_offset_in_world = robot_orientation_in_world_frame * marker_in_robot;
+    // offset from marker to robot in world frame
+    Eigen::Isometry3d robot_marker_offset_in_world = marker_robot_offset_in_world.inverse();
     // marker in world frame
-    auto marker_in_world = marker_world->transform;
-
-    // camera in world frame
-    return marker_in_world * camera_in_marker;
+    Eigen::Isometry3d marker_in_world = Eigen::Translation3d(marker_world->position) * Eigen::Quaterniond::Identity();
+    // robot in world frame
+    Eigen::Isometry3d robot_in_world = marker_in_world * robot_marker_offset_in_world;
+    // robot in world with orientation
+    Eigen::Isometry3d robot_in_world_with_orientation = robot_in_world * robot_orientation_in_world_frame;
+    return robot_in_world_with_orientation;
   };
 };
 
