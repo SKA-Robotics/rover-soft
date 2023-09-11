@@ -23,6 +23,12 @@ public:
     : id(id), position(position), error(error)
   {
   }
+  Marker(unsigned int id, Vector3d position, Quaterniond orientation, Vector3d offset,
+               Vector3d error = Vector3d::Zero())
+    : Marker(id, position, error)
+  {
+    this->position += orientation * offset;
+  }
   unsigned int id;
   Vector3d position;
   // Error, preferably variance in meters
@@ -79,16 +85,13 @@ public:
     position = this->transform.translation();
     orientation = this->transform.rotation();
   }
-};
-// Marker with offset
-class OffsetMarker : public Marker
-{
-public:
-  OffsetMarker(unsigned int id, Vector3d position, Quaterniond orientation, Vector3d offset,
-               Vector3d error = Vector3d::Zero())
-    : Marker(id, position, error)
+  Marker toMarker() const
   {
-    this->position += orientation * offset;
+    return Marker(id, position, error);
+  }
+  Marker toMarker(Quaterniond orientation, Vector3d offset) const
+  {
+    return Marker(id, position, orientation, offset, error);
   }
 };
 

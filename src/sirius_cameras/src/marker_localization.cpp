@@ -1,3 +1,4 @@
+#include "HybridMarkerLocalization.hpp"
 #include "geometry_msgs/Transform.h"
 #include "image_transport/camera_subscriber.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
@@ -16,6 +17,10 @@
 #include <ArtagDetector.hpp>
 #include <tf2_eigen/tf2_eigen.h>
 #include <AlignedMarkerLocalization.hpp>
+#include <HybridMarkerLocalization.hpp>
+#include <string>
+#include <boost/optional.hpp>
+#include <nav_msgs/Odometry.h>
 
 using namespace std;
 
@@ -23,69 +28,98 @@ ros::Publisher marker_publisher;
 ros::Publisher pose_publisher;
 tf2_ros::Buffer tf_buffer;
 ArtagDetector artag_detector;
+HybridMarkerLocalization hybrid_marker_localization;
 
 std::string base_link;
 std::string world_frame;
 double max_error;
+Eigen::Vector3d offset{-0.09,0,0};
 
+boost::optional<geometry_msgs::TransformStamped> get_cam_to_base_link_transform(std::string camera_tf, std::string base_link, ros::Time stamp)
+{
+  geometry_msgs::TransformStamped cam_to_base_link;
+  if(!base_link.empty() || camera_tf.substr(camera_tf.length() - 7) == "_optical")
+  {
+    try
+    {
+      if (base_link.empty())
+      {
+        base_link = camera_tf.substr(0, camera_tf.length() - 7);
+      }
+      cam_to_base_link = tf_buffer.lookupTransform(base_link, camera_tf, stamp);
+      return cam_to_base_link;
+    }
+    catch (tf2::TransformException ex)
+    {
+      ROS_WARN("%s", ex.what());
+      return boost::none;
+    }
+  }
+  cam_to_base_link = geometry_msgs::TransformStamped();
+  cam_to_base_link.transform.rotation.w = 1;
+  return cam_to_base_link;
+}
+
+// lookup markers_in_world_frame 
+Markers<AlignedMarker> lookup_markers_in_world_frame(const Markers<AlignedMarker>& markers_in_camera_frame, const std::string& world_frame, const ros::Time& stamp)
+{
+  Markers<AlignedMarker> markers_in_world_frame;
+  for (auto& marker : markers_in_camera_frame)
+  {
+    // Look for marker pose in world frame in tf
+    std::string marker_frame = "artag_" + std::to_string(marker.id);
+    geometry_msgs::TransformStamped marker_in_world;
+    try
+    {
+      marker_in_world = tf_buffer.lookupTransform(world_frame, marker_frame, stamp);
+    }
+    catch (tf2::TransformException ex)
+    {
+      ROS_WARN("%s", ex.what());
+      continue;
+    }
+    markers_in_world_frame.add({marker.id,tf2::transformToEigen(marker_in_world)});
+  }
+  return markers_in_world_frame;
+}
+void odom_callback(const nav_msgs::OdometryConstPtr &msg)
+{
+  hybrid_marker_localization.setRobotOrientation(Eigen::Quaterniond(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z));
+}
 void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
   try
   {
     ar_track_alvar_msgs::AlvarMarkers alvar_markers;
-    geometry_msgs::TransformStamped cam_to_base_link;
     AlignedMarkerLocalization marker_localization;
-    Markers<AlignedMarker> markers_in_world_frame;
+    Markers<AlignedMarker> aligned_markers_in_world_frame;
+    Markers<Marker> markers_in_world_frame;
+    Markers<Marker> markers;
 
     auto cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
-    auto markers = artag_detector.detect(cv_image->image);
-    if (markers.empty())
-    {
-      return;
-    }
+    auto aligned_markers = artag_detector.detect(cv_image->image);
+    if (aligned_markers.empty()){ return; }
 
-    auto camera_tf = image->header.frame_id;
-    if (!base_link.empty() || camera_tf.substr(camera_tf.length() - 7) == "_optical")
-    {
-      try
-      {
-        if (base_link.empty())
-        {
-          base_link = camera_tf.substr(0, camera_tf.length() - 7);
-        }
-        cam_to_base_link = tf_buffer.lookupTransform(base_link, image->header.frame_id, image->header.stamp);
-      }
-      catch (tf2::TransformException ex)
-      {
-        ROS_WARN("%s", ex.what());
-        return;
-      }
-    }
-    else
-    {
-      cam_to_base_link = geometry_msgs::TransformStamped();
-      cam_to_base_link.transform.rotation.w = 1;
-    }
-    markers.changeReferenceFrame(tf2::transformToEigen(cam_to_base_link));
+    auto cam_to_base_link = get_cam_to_base_link_transform(image->header.frame_id, base_link, image->header.stamp);
+    if (!cam_to_base_link){ return; }
+    aligned_markers.changeReferenceFrame(tf2::transformToEigen(*cam_to_base_link));
 
-    for (auto& marker : markers)
+    for (auto& marker : aligned_markers)
     {
-      // Look for marker pose in world frame in tf
-      std::string marker_frame = "artag_" + std::to_string(marker.id);
-      geometry_msgs::TransformStamped marker_in_world;
-      try
-      {
-        marker_in_world = tf_buffer.lookupTransform(world_frame, marker_frame, image->header.stamp);
-      }
-      catch (tf2::TransformException ex)
-      {
-        ROS_WARN("%s", ex.what());
-        continue;
-      }
-      markers_in_world_frame.add({marker.id,tf2::transformToEigen(marker_in_world)});
+      markers.add({marker.id,marker.position,marker.orientation, offset, marker.error});
     }
-    marker_localization.setWorldFrames(markers_in_world_frame);
-    auto pose = marker_localization.localize(markers);
+    
+    aligned_markers_in_world_frame = lookup_markers_in_world_frame(aligned_markers, world_frame, image->header.stamp);
+    marker_localization.setWorldFrames(aligned_markers_in_world_frame);
+    auto pose2 = marker_localization.localize(aligned_markers);
+
+    for (auto& marker : aligned_markers_in_world_frame)
+    {
+      markers_in_world_frame.add({marker.id,marker.position,marker.orientation, offset, marker.error});
+    }
+    hybrid_marker_localization.setWorldFrames(markers_in_world_frame);
+    auto pose = hybrid_marker_localization.localize(markers);
+
 
     // publish pose
     if (pose)
@@ -97,7 +131,7 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
       pose_publisher.publish(pose_msg);
     }
 
-    for (auto& marker : markers)
+    for (auto& marker : aligned_markers)
     {
       auto marker_in_base_link = tf2::eigenToTransform(marker.transform);
 
@@ -149,7 +183,8 @@ int main(int argc, char* argv[])
   image_transport::ImageTransport it(nh);
   auto camera_subscriber = it.subscribeCamera("image", 1, &camera_callback);
   artag_detector.init(nh, camera_subscriber.getInfoTopic(), marker_size, max_new_marker_error, max_track_error);
-
+  // subscribe to IMU message
+  auto imu_subscriber = nh.subscribe("odom", 1, odom_callback);
   ros::Rate rate(update_rate);
   while (ros::ok())
   {

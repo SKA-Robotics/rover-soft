@@ -6,20 +6,21 @@
 #include <opencv2/core.hpp>
 #include <boost/optional.hpp>
 #include "Eigen/src/Geometry/Translation.h"
+#include "ros/ros.h"
 
-class HybridMarkerLocalization : public MarkerLocalization<OffsetMarker>
+class HybridMarkerLocalization : public MarkerLocalization<Marker>
 {
 public:
-  Markers<OffsetMarker> markers_in_world_frame;
+  Markers<Marker> markers_in_world_frame;
   Eigen::Quaterniond robot_orientation_in_world_frame;
   HybridMarkerLocalization()
   {
   }
-  HybridMarkerLocalization(const Markers<OffsetMarker>& markers_in_world_frame)
+  HybridMarkerLocalization(const Markers<Marker>& markers_in_world_frame)
     : markers_in_world_frame(markers_in_world_frame)
   {
   }
-  HybridMarkerLocalization& setWorldFrames(const Markers<OffsetMarker>& markers_in_world_frame)
+  HybridMarkerLocalization& setWorldFrames(const Markers<Marker>& markers_in_world_frame)
   {
     this->markers_in_world_frame = markers_in_world_frame;
     return *this;
@@ -33,20 +34,20 @@ public:
 
   virtual ~HybridMarkerLocalization() = default;
 
-  boost::optional<Eigen::Isometry3d> localize(const Markers<OffsetMarker>& markers_in_camera_frame) const override
+  boost::optional<Eigen::Isometry3d> localize(const Markers<Marker>& markers_in_camera_frame) const override
   {
     return localize(markers_in_camera_frame, markers_in_world_frame);
   };
 
-  boost::optional<Eigen::Isometry3d> localize(const Markers<OffsetMarker>& markers_in_camera_frame,
-                                              const Markers<OffsetMarker>& markers_in_world_frame) const override
+  boost::optional<Eigen::Isometry3d> localize(const Markers<Marker>& markers_in_camera_frame,
+                                              const Markers<Marker>& markers_in_world_frame) const override
   {
     if (markers_in_camera_frame.empty() || markers_in_world_frame.empty())
     {
       return boost::none;
     }
 
-    Markers<OffsetMarker> markers_min_error = markers_in_camera_frame;
+    Markers<Marker> markers_min_error = markers_in_camera_frame;
 
     auto min_error =
         std::min_element(markers_min_error.begin(), markers_min_error.end(),
@@ -73,16 +74,22 @@ public:
 
     // offset from robot to marker in robot frame
     Eigen::Isometry3d marker_in_robot = Eigen::Translation3d(closest_marker.position) * Eigen::Quaterniond::Identity();
+    ROS_INFO("marker_in_robot: %f %f %f", marker_in_robot.translation().x(), marker_in_robot.translation().y(), marker_in_robot.translation().z());
     // offset from robot to marker in world frame
     Eigen::Isometry3d marker_robot_offset_in_world = robot_orientation_in_world_frame * marker_in_robot;
+    ROS_INFO("marker_robot_offset_in_world: %f %f %f", marker_robot_offset_in_world.translation().x(), marker_robot_offset_in_world.translation().y(), marker_robot_offset_in_world.translation().z());
     // offset from marker to robot in world frame
-    Eigen::Isometry3d robot_marker_offset_in_world = marker_robot_offset_in_world.inverse();
+    Eigen::Isometry3d robot_marker_offset_in_world = (Eigen::Translation3d(marker_robot_offset_in_world.translation()) * Eigen::Quaterniond::Identity()).inverse();
+    ROS_INFO("robot_marker_offset_in_world: %f %f %f", robot_marker_offset_in_world.translation().x(), robot_marker_offset_in_world.translation().y(), robot_marker_offset_in_world.translation().z());
     // marker in world frame
     Eigen::Isometry3d marker_in_world = Eigen::Translation3d(marker_world->position) * Eigen::Quaterniond::Identity();
+    ROS_INFO("marker_in_world: %f %f %f", marker_in_world.translation().x(), marker_in_world.translation().y(), marker_in_world.translation().z());
     // robot in world frame
     Eigen::Isometry3d robot_in_world = marker_in_world * robot_marker_offset_in_world;
+    ROS_INFO("robot_in_world: %f %f %f", robot_in_world.translation().x(), robot_in_world.translation().y(), robot_in_world.translation().z());
     // robot in world with orientation
     Eigen::Isometry3d robot_in_world_with_orientation = robot_in_world * robot_orientation_in_world_frame;
+    ROS_INFO("robot_in_world_with_orientation: %f %f %f", robot_in_world_with_orientation.translation().x(), robot_in_world_with_orientation.translation().y(), robot_in_world_with_orientation.translation().z());
     return robot_in_world_with_orientation;
   };
 };
