@@ -15,6 +15,7 @@
 #include <ros/ros.h>
 #include <ArtagDetector.hpp>
 #include <tf2_eigen/tf2_eigen.h>
+#include <AlignedMarkerLocalization.hpp>
 
 using namespace std;
 
@@ -26,43 +27,6 @@ ArtagDetector artag_detector;
 std::string base_link;
 std::string world_frame;
 double max_error;
-void publishPose(const ar_track_alvar_msgs::AlvarMarkers& markers)
-{
-  auto max_confidence_marker =
-      std::max_element(markers.markers.begin(), markers.markers.end(),
-                       [](const ar_track_alvar_msgs::AlvarMarker& a, const ar_track_alvar_msgs::AlvarMarker& b) {
-                         return a.confidence < b.confidence;
-                       });
-  // Extract the marker pose from the message
-  auto pose = max_confidence_marker->pose.pose;
-  // Pose to tf transform
-  tf2::Transform marker_in_base_link_tf;
-  tf2::fromMsg(pose, marker_in_base_link_tf);
-  auto base_link_in_marker_tf = marker_in_base_link_tf.inverse();
-
-  std::string marker_frame = "artag_" + std::to_string(max_confidence_marker->id);
-
-  geometry_msgs::TransformStamped marker_to_world;
-  try
-  {
-    marker_to_world = tf_buffer.lookupTransform(world_frame, marker_frame, max_confidence_marker->header.stamp);
-  }
-  catch (tf2::TransformException ex)
-  {
-    ROS_WARN("%s", ex.what());
-    return;
-  }
-  tf2::Stamped<tf2::Transform> marker_to_world_tf;
-  tf2::fromMsg(marker_to_world, marker_to_world_tf);
-  tf2::Transform base_link_in_world_tf = marker_to_world_tf * base_link_in_marker_tf;
-
-  geometry_msgs::PoseStamped base_link_in_world_pose;
-  tf2::toMsg(base_link_in_world_tf, base_link_in_world_pose.pose);
-  base_link_in_world_pose.header.frame_id = world_frame;
-  base_link_in_world_pose.header.stamp = max_confidence_marker->header.stamp;
-
-  pose_publisher.publish(base_link_in_world_pose);
-}
 
 void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
@@ -70,6 +34,8 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
   {
     ar_track_alvar_msgs::AlvarMarkers alvar_markers;
     geometry_msgs::TransformStamped cam_to_base_link;
+    AlignedMarkerLocalization marker_localization;
+    Markers<AlignedMarker> markers_in_world_frame;
 
     auto cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
     auto markers = artag_detector.detect(cv_image->image);
@@ -104,6 +70,35 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
 
     for (auto& marker : markers)
     {
+      // Look for marker pose in world frame in tf
+      std::string marker_frame = "artag_" + std::to_string(marker.id);
+      geometry_msgs::TransformStamped marker_in_world;
+      try
+      {
+        marker_in_world = tf_buffer.lookupTransform(world_frame, marker_frame, image->header.stamp);
+      }
+      catch (tf2::TransformException ex)
+      {
+        ROS_WARN("%s", ex.what());
+        continue;
+      }
+      markers_in_world_frame.add({marker.id,tf2::transformToEigen(marker_in_world)});
+    }
+    marker_localization.setWorldFrames(markers_in_world_frame);
+    auto pose = marker_localization.localize(markers);
+
+    // publish pose
+    if (pose)
+    {
+      geometry_msgs::PoseStamped pose_msg;
+      pose_msg.header.frame_id = world_frame;
+      pose_msg.header.stamp = image->header.stamp;
+      pose_msg.pose = tf2::toMsg(*pose);
+      pose_publisher.publish(pose_msg);
+    }
+
+    for (auto& marker : markers)
+    {
       auto marker_in_base_link = tf2::eigenToTransform(marker.transform);
 
       ar_track_alvar_msgs::AlvarMarker ar_pose_marker;
@@ -122,7 +117,6 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
     alvar_markers.header.stamp = image->header.stamp;
     alvar_markers.header.frame_id = base_link;
     marker_publisher.publish(alvar_markers);
-    publishPose(alvar_markers);
   }
   catch (const std::exception& e)
   {

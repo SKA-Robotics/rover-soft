@@ -1,43 +1,51 @@
-#ifndef ALIGNEDMARKERLOCALIZATION_HPP
-#define ALIGNEDMARKERLOCALIZATION_HPP
+#ifndef HYBRIDMARKERLOCALIZATION_HPP
+#define HYBRIDMARKERLOCALIZATION_HPP
 
 #include <Marker.hpp>
 #include <MarkerLocalization.hpp>
 #include <opencv2/core.hpp>
 #include <boost/optional.hpp>
 
-class AlignedMarkerLocalization : public MarkerLocalization<AlignedMarker>
+class HybridMarkerLocalization : public MarkerLocalization<OffsetMarker>
 {
 public:
-  Markers<AlignedMarker> markers_in_world_frame;
-  AlignedMarkerLocalization()
+  Markers<OffsetMarker> markers_in_world_frame;
+  Eigen::Quaterniond robot_orientation;
+  HybridMarkerLocalization()
   {
   }
-  AlignedMarkerLocalization(const Markers<AlignedMarker>& markers_in_world_frame)
+  HybridMarkerLocalization(const Markers<OffsetMarker>& markers_in_world_frame)
     : markers_in_world_frame(markers_in_world_frame)
   {
   }
-  AlignedMarkerLocalization& setWorldFrames(const Markers<AlignedMarker>& markers_in_world_frame)
+  HybridMarkerLocalization& setWorldFrames(const Markers<OffsetMarker>& markers_in_world_frame)
   {
     this->markers_in_world_frame = markers_in_world_frame;
     return *this;
   }
-  virtual ~AlignedMarkerLocalization() = default;
+  
+  HybridMarkerLocalization& setRobotOrientation(const Eigen::Quaterniond& robot_orientation)
+  {
+    this->robot_orientation = robot_orientation;
+    return *this;
+  }
 
-  boost::optional<Eigen::Isometry3d> localize(const Markers<AlignedMarker>& markers_in_camera_frame) const override
+  virtual ~HybridMarkerLocalization() = default;
+
+  boost::optional<Eigen::Isometry3d> localize(const Markers<OffsetMarker>& markers_in_camera_frame) const override
   {
     return localize(markers_in_camera_frame, markers_in_world_frame);
   };
 
-  boost::optional<Eigen::Isometry3d> localize(const Markers<AlignedMarker>& markers_in_camera_frame,
-                                              const Markers<AlignedMarker>& markers_in_world_frame) const override
+  boost::optional<Eigen::Isometry3d> localize(const Markers<OffsetMarker>& markers_in_camera_frame,
+                                              const Markers<OffsetMarker>& markers_in_world_frame) const override
   {
     if (markers_in_camera_frame.empty() || markers_in_world_frame.empty())
     {
       return boost::none;
     }
 
-    Markers<AlignedMarker> markers_min_error = markers_in_camera_frame;
+    Markers<OffsetMarker> markers_min_error = markers_in_camera_frame;
 
     auto min_error =
         std::min_element(markers_min_error.begin(), markers_min_error.end(),
@@ -71,4 +79,5 @@ public:
     return marker_in_world * camera_in_marker;
   };
 };
-#endif // ALIGNEDMARKERLOCALIZATION_HPP
+
+#endif // HYBRIDMARKERLOCALIZATION_HPP
