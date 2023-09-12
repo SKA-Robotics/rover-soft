@@ -74,31 +74,17 @@ public:
       return boost::none;
     }
 
-    // offset from robot to marker in robot frame
-    Eigen::Isometry3d marker_in_robot = closest_marker.transform;
-    ROS_INFO("marker_in_robot: %f %f %f", marker_in_robot.translation().x(), marker_in_robot.translation().y(),
-             marker_in_robot.translation().z());
     // offset from robot to marker in world frame
-    Eigen::Isometry3d marker_robot_offset_in_world = robot_orientation_in_world_frame * marker_in_robot;
-    ROS_INFO("marker_robot_offset_in_world: %f %f %f", marker_robot_offset_in_world.translation().x(),
-             marker_robot_offset_in_world.translation().y(), marker_robot_offset_in_world.translation().z());
+    Eigen::Isometry3d marker_robot_offset_in_world = robot_orientation_in_world_frame * closest_marker.transform;
     // offset from marker to robot in world frame
     Eigen::Isometry3d robot_marker_offset_in_world =
         (Eigen::Translation3d(marker_robot_offset_in_world.translation()) * Eigen::Quaterniond::Identity()).inverse();
-    ROS_INFO("robot_marker_offset_in_world: %f %f %f", robot_marker_offset_in_world.translation().x(),
-             robot_marker_offset_in_world.translation().y(), robot_marker_offset_in_world.translation().z());
     // marker in world frame
     Eigen::Isometry3d marker_in_world = marker_world->transform;
-    ROS_INFO("marker_in_world: %f %f %f", marker_in_world.translation().x(), marker_in_world.translation().y(),
-             marker_in_world.translation().z());
     // robot in world frame
     Eigen::Isometry3d robot_in_world = marker_in_world * robot_marker_offset_in_world;
-    ROS_INFO("robot_in_world: %f %f %f", robot_in_world.translation().x(), robot_in_world.translation().y(),
-             robot_in_world.translation().z());
     // robot in world with orientation
     Eigen::Isometry3d robot_in_world_with_orientation = robot_in_world * robot_orientation_in_world_frame;
-    ROS_INFO("robot_in_world_with_orientation: %f %f %f", robot_in_world_with_orientation.translation().x(),
-             robot_in_world_with_orientation.translation().y(), robot_in_world_with_orientation.translation().z());
     return robot_in_world_with_orientation;
   };
 };

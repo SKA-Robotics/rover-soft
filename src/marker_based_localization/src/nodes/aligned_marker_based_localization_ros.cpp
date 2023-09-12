@@ -1,4 +1,5 @@
 #include <marker_based_localization/localization/hybrid_localization.hpp>
+#include "Eigen/src/Core/Matrix.h"
 #include "geometry_msgs/Transform.h"
 #include "image_transport/camera_subscriber.h"
 #include "marker_based_localization/detection/artag_detection.hpp"
@@ -6,8 +7,6 @@
 #include "tf2/LinearMath/Transform.h"
 #include "tf2/transform_datatypes.h"
 #include <algorithm>
-#include <ar_track_alvar_msgs/AlvarMarker.h>
-#include <ar_track_alvar_msgs/AlvarMarkers.h>
 #include <ar_track_alvar/MarkerDetector.h>
 #include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -31,29 +30,20 @@ ros::Publisher marker_publisher;
 ros::Publisher pose_publisher;
 tf2_ros::Buffer tf_buffer;
 ArtagDetection artag_detector;
-HybridMarkerLocalization marker_localization;
 
 std::string base_link;
 std::string world_frame;
 double max_error;
-Eigen::Translation3d offset{ -0.09, 0, 0 };
 
-void odom_callback(const nav_msgs::OdometryConstPtr& msg)
-{
-  marker_localization.setRobotOrientation(Eigen::Quaterniond(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x,
-                                                             msg->pose.pose.orientation.y,
-                                                             msg->pose.pose.orientation.z));
-}
 void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
   try
   {
-    MarkerContainer<Marker> markers_in_world_frame;
-    MarkerContainer<Marker> markers;
-
+    AlignedMarkerLocalization marker_localization;
+    MarkerContainer<AlignedMarker> markers_in_world_frame;
     auto cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
-    auto aligned_markers = artag_detector.detect(cv_image->image);
-    if (aligned_markers.empty())
+    auto markers = artag_detector.detect(cv_image->image);
+    if (markers.empty())
     {
       return;
     }
@@ -64,17 +54,14 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
     {
       return;
     }
-    aligned_markers.changeReferenceFrame(tf2::transformToEigen(*cam_to_base_link));
 
-    for (auto& marker : aligned_markers)
-    {
-      markers.add(marker.toMarker(offset));
-    }
+    markers.changeReferenceFrame(tf2::transformToEigen(*cam_to_base_link));
 
     markers_in_world_frame = lookup_markers_in_world_frame(tf_buffer, markers, world_frame, image->header.stamp);
     marker_localization.setWorldFrames(markers_in_world_frame);
     auto pose = marker_localization.localize(markers);
 
+    // publish pose
     if (pose)
     {
       geometry_msgs::PoseStamped pose_msg;
@@ -83,7 +70,8 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
       pose_msg.pose = tf2::toMsg(*pose);
       pose_publisher.publish(pose_msg);
     }
-    auto markers_msg = toMsg(markers, image->header.stamp, image->header.frame_id, Eigen::Vector3d::Ones());
+
+    auto markers_msg = toMsg(markers, image->header.stamp, image->header.frame_id);
     marker_publisher.publish(markers_msg);
   }
   catch (const std::exception& e)
@@ -117,8 +105,7 @@ int main(int argc, char* argv[])
   image_transport::ImageTransport it(nh);
   auto camera_subscriber = it.subscribeCamera("image", 1, &camera_callback);
   artag_detector.init(nh, camera_subscriber.getInfoTopic(), marker_size, max_new_marker_error, max_track_error);
-  // subscribe to IMU message
-  auto imu_subscriber = nh.subscribe("odom", 1, odom_callback);
+
   ros::Rate rate(update_rate);
   while (ros::ok())
   {
