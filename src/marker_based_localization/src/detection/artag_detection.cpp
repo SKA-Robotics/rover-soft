@@ -1,9 +1,8 @@
-#include <ArtagDetector.hpp>
-#include <opencv2/core/mat.hpp>
+#include <marker_based_localization/detection/artag_detection.hpp>
 
 // constructor
-void ArtagDetector::init(ros::NodeHandle& nh, const std::string& camera_info_topic, double marker_size,
-                         double max_new_marker_error, double max_track_error)
+void ArtagDetection::init(ros::NodeHandle& nh, const std::string& camera_info_topic, double marker_size,
+                          double max_new_marker_error, double max_track_error)
 {
   marker_detector.SetMarkerSize(marker_size * 100);
   camera_ = std::make_unique<alvar::Camera>(nh, camera_info_topic);
@@ -12,9 +11,9 @@ void ArtagDetector::init(ros::NodeHandle& nh, const std::string& camera_info_top
 }
 
 // detect method
-Markers<AlignedMarker> ArtagDetector::detect(const cv::Mat& image)
+MarkerContainer<AlignedMarker> ArtagDetection::detect(const cv::Mat& image)
 {
-  Markers<AlignedMarker> markers;
+  MarkerContainer<AlignedMarker> markers;
   if (camera_->getCamInfo_)
   {
     auto image_copy = image.clone();
@@ -27,9 +26,9 @@ Markers<AlignedMarker> ArtagDetector::detect(const cv::Mat& image)
       auto alvar_quaternion = cv::Mat(4, 1, CV_64F);
       alvar_pose.GetQuaternion(alvar_quaternion);
 
-      Vector3d position(alvar_pose.translation[0] / 100.0,  // x
-                        alvar_pose.translation[1] / 100.0,  // y
-                        alvar_pose.translation[2] / 100.0   // z
+      Translation3d position(alvar_pose.translation[0] / 100.0,  // x
+                             alvar_pose.translation[1] / 100.0,  // y
+                             alvar_pose.translation[2] / 100.0   // z
       );
       Quaterniond orientation(alvar_quaternion.at<double>(0, 0),   // qw
                               alvar_quaternion.at<double>(1, 0),   // qx
@@ -42,7 +41,7 @@ Markers<AlignedMarker> ArtagDetector::detect(const cv::Mat& image)
       auto alvar_error = alvar_marker.GetError();
       auto error = Vector3d::Constant(alvar_error);
 
-      AlignedMarker marker(id, position, orientation, error);
+      AlignedMarker marker(id, Isometry3d(position * orientation), error);
 
       markers.add(marker, true);
     }
