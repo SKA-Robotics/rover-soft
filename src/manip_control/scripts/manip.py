@@ -1,8 +1,8 @@
 from ik import SiriusII_IKSolver, ManipPose
 from manip_interface import ManipInterface
 from motion_interpolation import InterpolationSettings
-from motion_strategies import CartesianMotion, JointspaceMotion, IncrementalMotion, JointspaceMotionExtRange, CartesianMotionExtRange
-
+from motion_strategies import CartesianMotion, JointspaceMotion, IncrementalMotion, JointspaceMotionExtRange, CartesianMotionExtRange, IncrementalMotionExtRange
+import rospy
 
 class SiriusManip:
 
@@ -15,16 +15,17 @@ class SiriusManip:
         return SiriusII_IKSolver(params.joint_names(), params.link_lengths(), params.joint_limits())
 
     def move_cartesian(self, target_pose: ManipPose):
-        self._move(target_pose, CartesianMotion, "cartesian")
+        if rospy.get_param("~extended_range_mode")==False:
+            self._move(target_pose, CartesianMotion, "cartesian")
+        else:
+            self._move(target_pose, CartesianMotionExtRange, "cartesianextrange")
+
 
     def move_jointspace(self, target_pose: ManipPose):
-        self._move(target_pose, JointspaceMotion, "jointspace")
-    
-    def move_cartesian_ext(self, target_pose: ManipPose):
-        self._move(target_pose, CartesianMotionExtRange, "cartesianextrange")
-
-    def move_jointspace_ext(self, target_pose: ManipPose):
-        self._move(target_pose, JointspaceMotionExtRange, "jointspaceextrange")
+        if rospy.get_param("~extended_range_mode")==False:
+            self._move(target_pose, JointspaceMotion, "jointspace")
+        else:
+            self._move(target_pose, JointspaceMotionExtRange, "jointspaceextrange")
 
     def _get_controlmode_settings(self, mode_name: str):
         mode_params = self.params.control_mode_params(mode_name)
@@ -41,5 +42,8 @@ class SiriusManip:
         return self.solver
 
     def move_incremental(self, pose_delta: ManipPose):
-        motion = IncrementalMotion(pose_delta, self.solver)
+        if rospy.get_param("~extended_range_mode")==False:
+            motion = IncrementalMotion(pose_delta, self.solver)
+        else:
+            motion = IncrementalMotionExtRange(pose_delta, self.solver)
         motion.execute(self.manip_interface)

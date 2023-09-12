@@ -153,3 +153,49 @@ class IncrementalMotion(MotionStrategy):
 
     def _add_poses(self, pose1, pose2):
         return ManipPose.from_list([x1 + x2 for x1, x2 in zip(pose1.to_list(), pose2.to_list())])
+    
+class IncrementalMotionExtRange(MotionStrategy):
+    
+    def __init__(self, delta: ManipPose, ik_solver: IKSolver):
+        self.deltaPose = delta
+        self.solver = ik_solver
+        
+
+    def execute(self, manip_interface: ManipInterface):
+        currentJointstate = manip_interface.get_jointstate()
+        currentPose = self.solver.get_FK_solution(currentJointstate)
+        targetPose = self._add_poses(currentPose, self.deltaPose)
+        targetPose.pitch=0
+        targetJointstate = self.solver.get_IK_solution(targetPose)
+        
+        if targetJointstate=="-1":
+            pitch_angle=0
+            while targetJointstate=="-1":
+                pitch_angle = pitch_angle+pi/180
+                targetPose.pitch = pitch_angle
+                targetJointstate = self.solver.get_IK_solution(targetPose)
+                if pitch_angle>pi/2:
+                    raise Exception("IK solution outside of joints limits")
+                
+            auxAngle=pi/180/2
+            count=0
+            pitch_angle=pitch_angle-auxAngle
+            lastSuccesfulSolution=targetJointstate
+
+            while count <200:
+                count=count+1
+                targetPose.pitch=pitch_angle
+                targetJointstate = self.solver.get_IK_solution(targetPose)
+                auxAngle=auxAngle/2
+                if targetJointstate=="-1":
+                    pitch_angle=pitch_angle+auxAngle
+                else:
+                    pitch_angle=pitch_angle-auxAngle
+                    lastSuccesfulSolution=targetJointstate
+            
+            targetJointstate=lastSuccesfulSolution
+                
+        manip_interface.set_jointstate(targetJointstate)
+
+    def _add_poses(self, pose1, pose2):
+            return ManipPose.from_list([x1 + x2 for x1, x2 in zip(pose1.to_list(), pose2.to_list())])

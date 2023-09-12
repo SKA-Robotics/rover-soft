@@ -1,5 +1,6 @@
 jointstate_topic: /manipulator/joint_states
 queue_size: 16
+extended_range_mode: false
 command_topics:
     base_cyl: manipulator/joint1_position_controller/command
     cyl_arm1: manipulator/joint2_position_controller/command
