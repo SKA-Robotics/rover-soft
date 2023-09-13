@@ -91,7 +91,7 @@ odom0_config: [false,  false,  false,
                false, false, true,
                false, false, false]
 odom0_queue_size: 2
-odom0_nodelay: false
+odom0_nodelay: true
 odom0_differential: false
 odom0_relative: false
 odom0_twist_rejection_threshold: 0.2
@@ -107,6 +107,17 @@ odom1_nodelay: true
 odom1_differential: false
 odom1_relative: false
 
+# marker_based_localization/pose
+pose0: marker_based_localization/pose
+pose0_config: [true,  true,  true,
+                false, false, false,
+                false, false, false,
+                false, false, false,
+                false, false, false]
+pose0_queue_size: 10
+pose0_nodelay: true
+pose0_differential: false
+
 imu0: imu_transformed/data
 imu0_config: [false, false, false,
               true,  true,  true,
@@ -115,5 +126,6 @@ imu0_config: [false, false, false,
               false,  false,  false]
 imu0_differential: false
 imu0_relative: false
+imu0_nodelay: true
 imu0_queue_size: 10
 imu0_remove_gravitational_acceleration: true

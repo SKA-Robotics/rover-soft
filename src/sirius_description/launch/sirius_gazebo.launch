@@ -1,5 +1,5 @@
 <launch>
-    <arg name="world_name" default="$(find leo_gazebo_worlds)/worlds/marsyard2022.world"/>
+    <arg name="world_name" default="$(find sirius_description)/worlds/marsyard2023.world"/>
     <arg name="paused" default="false"/>
     <arg name="use_sim_time" default="true"/>
     <arg name="gui" default="true"/>
@@ -9,7 +9,8 @@
     <arg name="imu_frequency"         default="200.0" />
     <arg name="stereo_fps"            default="30"  />
     <!-- ERC: Marsyard -->
-    <arg name="spherical_coordinates" default="[50.878151, 20.642273, 144.41]"/>
+    <!-- <arg name="spherical_coordinates" default="[50.878151, 20.642273, 144.41]"/> -->
+    <arg name="spherical_coordinates" default="[50.878151, 20.642273, 0]"/>
     <arg name="elevation" default="308.1445"/>
     <!-- URC: The Mars Desert Research Station  -->
     <!-- <arg name="spherical_coordinates" default="[38.4190235, -110.7823884, 0.0]"/> -->
@@ -65,4 +66,7 @@
     <rosparam param="datum" subst_value="True">$(eval ','.join(spherical_coordinates.split(',')[0:2]) + ', 0]')</rosparam>
     </node> 
 
+    <include file="$(find sirius_description)/launch/sirius_gazebo_markers_erc_2023.launch" />
+
+    <include file="$(find sirius_description)/launch/markers_erc_2023.launch" />
 </launch>

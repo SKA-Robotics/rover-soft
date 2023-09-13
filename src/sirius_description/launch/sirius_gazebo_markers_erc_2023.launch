@@ -1,0 +1,107 @@
+<launch>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="1"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-9.77"/>
+    <arg name="y" value="5.59"/>
+    <arg name="z" value="0.04"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="2"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-11.67"/>
+    <arg name="y" value="17.43"/>
+    <arg name="z" value="-0.11"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="3"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-14.55"/>
+    <arg name="y" value="11.66"/>
+    <arg name="z" value="-0.19"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="4"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-15.24"/>
+    <arg name="y" value="5.31"/>
+    <arg name="z" value="-0.16"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="5"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-3.43"/>
+    <arg name="y" value="9.67"/>
+    <arg name="z" value="0.24"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="6"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-0.66"/>
+    <arg name="y" value="6.10"/>
+    <arg name="z" value="-0.03"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="7"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="4.96"/>
+    <arg name="y" value="11.70"/>
+    <arg name="z" value="0.08"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="8"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="5.29"/>
+    <arg name="y" value="19.04"/>
+    <arg name="z" value="0.39"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="9"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="13.22"/>
+    <arg name="y" value="18.18"/>
+    <arg name="z" value="0.54"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="10"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="17.54"/>
+    <arg name="y" value="9.39"/>
+    <arg name="z" value="0.55"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="11"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="4.14"/>
+    <arg name="y" value="27.16"/>
+    <arg name="z" value="0.12"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="12"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="11.43"/>
+    <arg name="y" value="28.91"/>
+    <arg name="z" value="0.40"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="13"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-0.84"/>
+    <arg name="y" value="22.44"/>
+    <arg name="z" value="-0.06"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="14"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="-9.60"/>
+    <arg name="y" value="27.71"/>
+    <arg name="z" value="-0.44"/>
+    </include>
+    <include file="$(find marker_description)/launch/marker_spawner.launch" >
+    <arg name="id" value="15"/>
+    <arg name="sides" default="4"/>
+    <arg name="x" value="10.65"/>
+    <arg name="y" value="7.25"/>
+    <arg name="z" value="0.02"/>
+    </include>
+</launch>

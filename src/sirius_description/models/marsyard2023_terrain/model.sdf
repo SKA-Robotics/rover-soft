@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-model href="http://sdformat.org/schemas/root.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<sdf version="1.7">
+  <model name="marsyard2023_terrain">
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+
+    <link name="marsyard_terrain">
+
+      <collision name="terrain_collision">
+        <geometry>
+          <heightmap>
+            <uri>model://marsyard2023_terrain/dem/marsyard2023_terrain_hm.tif</uri>
+            <pos>2.616 12.901 -0.200</pos>
+            <size>37.165 29.646 2.886</size>
+          </heightmap>
+        </geometry>
+      </collision>
+
+      <visual name="terrain_visual">
+        <geometry>
+          <heightmap>
+            <use_terrain_paging>false</use_terrain_paging>
+            <uri>model://marsyard2023_terrain/dem/marsyard2023_terrain_hm.tif</uri>
+            <pos>2.616 12.901 -0.200</pos>
+            <size>37.165 29.646 2.886</size>
+            <texture>
+              <diffuse>model://marsyard2023_terrain/dem/marsyard2023_terrain_texture.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>37.165</size>
+            </texture>
+          </heightmap>
+        </geometry>
+      </visual>
+
+    </link>
+
+  </model>
+</sdf>
