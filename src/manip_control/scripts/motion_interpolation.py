@@ -92,8 +92,8 @@ class MotionInterpolator:
         self.acceleration_distance += self.velocity * timestep
 
     def _decrement_velocity(self, timestep: float):
-        self.velocity = self.decceleration_velocity * \
-            ((self.distance / self.decceleration_distance))**0.5
+        distance_ratio = self.distance / self.decceleration_distance
+        self.velocity = self.decceleration_velocity * distance_ratio**0.5
 
     def _stop_accelerating(self):
         self.accelerate = False

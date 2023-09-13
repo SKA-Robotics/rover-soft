@@ -5,13 +5,20 @@ from abc import ABC, abstractmethod
 
 class ManipParams:
 
+    def __init__(self, joint_names: 'list[str]', joint_limits: 'list[float]', link_lengths: 'list[tuple[float, float]]',
+                 control_modes: 'dict[str, float]') -> None:
+        self._joint_names = joint_names
+        self._joint_limits = joint_limits
+        self._link_lengths = link_lengths
+        self._control_modes = control_modes
+
     def from_dict(dict: 'dict[str, dict[str, float | list[str | float | tuple[float, float]]]]'):
-        result = ManipParams()
         link_dict = dict["links"]
-        result._joint_names = link_dict["names"]
-        result._joint_limits = link_dict["limits"]
-        result._link_lengths = link_dict["lengths"]
-        result._control_modes = dict["control_modes"]
+        joint_names = link_dict["names"]
+        joint_limits = link_dict["limits"]
+        link_lengths = link_dict["lengths"]
+        control_modes = dict["control_modes"]
+        result = ManipParams(joint_names, joint_limits, link_lengths, control_modes)
         return result
 
     def joint_names(self) -> 'list[str]':

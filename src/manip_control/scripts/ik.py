@@ -51,6 +51,25 @@ class IKSolver(ABC):
 # Class implementing kinematics of SiriusII manipulator
 class SiriusII_IKSolver(IKSolver):
 
+    def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
+        l = self.lengths
+        angles = jointstate.position
+        fi1 = angles[1]
+        fi2 = fi1 + angles[2]
+        fi3 = fi2 + angles[3]
+        solution = ManipPose()
+
+        # Calculate solution using SiriusII-specific FK formula
+        r = l[1] * math.sin(fi1) + l[2] * math.sin(fi2) + l[3] * math.sin(fi3)
+        z = l[1] * math.cos(fi1) + l[2] * math.cos(fi2) + l[3] * math.cos(fi3)
+        solution.z = z + l[0]
+        solution.x = r * math.cos(angles[0])
+        solution.y = r * math.sin(angles[0])
+        solution.pitch = fi3 - 0.5 * math.pi
+        solution.roll = angles[4]
+
+        return solution
+
     def get_IK_solution(self, target: ManipPose) -> ManipJointState:
         try:
             return self._calculate_IK_solution(target)
@@ -62,8 +81,6 @@ class SiriusII_IKSolver(IKSolver):
     def _calculate_IK_solution(self, target: ManipPose) -> ManipJointState:
 
         solution = self._initialize_solution()
-        limits = self.limits
-        lengths = self.lengths
         x_t = target.x
         y_t = target.y
 
@@ -71,84 +88,77 @@ class SiriusII_IKSolver(IKSolver):
 
         # Last joint value simply equals to its target value
         solution[4] = target.roll
+
         # First joint angle can be easily obtained as it is
         # the only joint allowing for movement along y-axis
         solution[0] = math.atan2(y_t, x_t)
-        if not checkBounds(solution[0], limits[0]):
-            raise Exception("IK solution outside of joint limits!")
-
         # Project target position to manip plane
         r_t = math.sqrt(x_t * x_t + y_t * y_t)
+        alpha = target.pitch
+
         # Translate, so link 0 length does not need to be considered
         # in formulas below
-        z_t = target.z - lengths[0]
+        z_t = target.z - self.lengths[0]
 
+        solution[1], solution[2], solution[3] = self._get_3_links_solution(self.lengths, r_t, z_t, alpha)
+
+        # Check if the calculated angles are within manipulator's limits
+        if self._angles_within_constraints(solution):
+            return ManipJointState.from_list(solution)
+
+        raise Exception("IK solution outside of joints limits!")
+
+    def _angles_within_constraints(self, solution: 'list[float]'):
+        return all([checkBounds(s, b) for s, b in zip(solution, self.limits)])
+
+    def _get_3_links_solution(self, lengths: 'list[float]', r_t: float, z_t: float, alpha: float):
         # Find 3rd link's start position given its absolute angle
         # (target.alpha) and end position (target position)
-        alpha = target.pitch
         r_3, z_3 = self._get_link3_startposition(lengths, r_t, z_t, alpha)
 
         # Find 2nd link's start position
         # The geometry constraints lead to equation system with
         # two solutions. Due to physical constraints of the manipulator
         # only one of these solutions will be possible to reach
-        r_2, z_2 = self._find_middlepoint_solution1(lengths, r_3, z_3)
+        r_2, z_2 = self._find_middlepoint_solution(lengths[1], lengths[2], r_3, z_3)
         # Given the position, angles of the joints can be calculated
-        solution[1], solution[2], solution[3] = self._calculate_angles(r_3, z_3, r_2, z_2, alpha)
-        # Check if the calculated angles are within manipulator's limits
-        if self._angles_within_constraints(solution):
-            return ManipJointState.from_list(solution)
+        solution = self._calculate_angles(r_3, z_3, r_2, z_2, alpha)
 
-        raise Exception("IK solution outside of joints limits")
+        return solution
 
-    def _get_link3_startposition(self, lengths: 'list[float]', r_t: float, z_t: float, alpha: float):
-        r_3 = r_t - lengths[3] * math.cos(alpha)
-        z_3 = z_t + lengths[3] * math.sin(alpha)
+    def _get_link3_startposition(self, r_t: float, z_t: float, alpha: float):
+        r_3 = r_t - self.lengths[3] * math.cos(alpha)
+        z_3 = z_t + self.lengths[3] * math.sin(alpha)
         return r_3, z_3
 
-    def _angles_within_constraints(self, solution: 'list[float]'):
-        return all([checkBounds(solution[i], self.limits[i]) for i in range(1, len(solution))])
+    def _find_middlepoint_solution(a: float, b: float, x: float, y: float):
+        # Standard names for triangle with vertexes ACB in subsequent joints
+        c_2 = x * x + y * y
+        u = ((a - b) * (a + b) + c_2) / 2  # u = a*c*cos(beta)
+        ## v = a*b*sin(gamma) = a*c*sin(beta)
+        v = math.sqrt((a * (b + a) - u) * (a * (b - a) + u))
 
-    def _calculate_angles(self, r_3: float, z_3: float, r_2: float, z_2: float, alpha: float):
-        beta = math.atan2(z_2, r_2)
-        gamma = math.atan2(z_2 - z_3, r_3 - r_2)
-        angle1 = math.pi / 2 - beta
-        angle2 = beta + gamma
-        angle3 = alpha - gamma
-        return angle1, angle2, angle3
-
-    def _find_middlepoint_solution1(self, l: 'list[float]', x: float, y: float):
-        r_2 = (x * x + l[1] * l[1] - l[2] * l[2] + y * y -
-               (y * (x * math.sqrt((l[1] * l[2] * 2.0 - x * x + l[1] * l[1] + l[2] * l[2] - y * y) *
-                                   (l[1] * l[2] * 2.0 + x * x - l[1] * l[1] - l[2] * l[2] + y * y)) + (x * x) * y +
-                     (l[1] * l[1]) * y - (l[2] * l[2]) * y + y * y * y)) / (x * x + y * y)) / (x * 2.0)
-        z_2 = (x * math.sqrt((l[1] * l[2] * 2.0 - x * x + l[1] * l[1] + l[2] * l[2] - y * y) *
-                             (l[1] * l[2] * 2.0 + x * x - l[1] * l[1] - l[2] * l[2] + y * y)) + (x * x) * y +
-               (l[1] * l[1]) * y - (l[2] * l[2]) * y + y * y * y) / ((x * x) * 2.0 + (y * y) * 2.0)
+        ## First solution
+        r_2 = (x * u - y * v) / c_2
+        z_2 = (x * v + y * u) / c_2
+        ## Second solution
+        # r_2 = (x * u + y * v) / c_2
+        # z_2 = (-x * v + y * u) / c_2
 
         return r_2, z_2
 
+    def _calculate_angles(self, r_3: float, z_3: float, r_2: float, z_2: float, alpha: float):
+        angle1 = math.atan2(r_2, z_2)
+        angle2 = math.atan2(r_3 - r_2, z_3 - z_2) - angle1
+        angle3 = alpha + math.pi / 2 - angle1 - angle2
+        angles = [angle1, angle2, angle3]
+        return [self._normalize_angle_range(fi) for fi in angles]
+
+    def _normalize_angle_range(angle: float):
+        return math.pi * (((angle / math.pi % 2) + 3) % 2 - 1)
+
     def _initialize_solution(self):
         solution = [0.0] * len(self.limits)
-        return solution
-
-    def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
-        angles = jointstate.position
-
-        l = self.lengths
-        solution = ManipPose()
-
-        # Calculate solution using SiriusII-specific FK formula
-        d = l[1] * math.sin(
-            angles[1]) + l[2] * math.sin(angles[1] + angles[2]) + l[3] * math.sin(angles[1] + angles[2] + angles[3])
-        z = l[1] * math.cos(
-            angles[1]) + l[2] * math.cos(angles[1] + angles[2]) + l[3] * math.cos(angles[1] + angles[2] + angles[3])
-        solution.z = z + l[0]
-        solution.x = d * math.cos(angles[0])
-        solution.y = d * math.sin(angles[0])
-        solution.pitch = angles[1] + angles[2] + angles[3] - 0.5 * math.pi
-        solution.roll = angles[4]
-
         return solution
 
 
