@@ -25,7 +25,8 @@ class CanbusInterface(ABC):
         if frame is None:
             frame = Frame()
             frame.id = (self.device_id << 5) | command_id
-            frame.data = data
+            frame.data = [data[i] if i < len(data) else 0 for i in range(8)]
+            frame.dlc = len(data)
 
         self.send_publisher.publish(frame)
 

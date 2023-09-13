@@ -8,6 +8,7 @@ from threading import Lock
 from dynamic_reconfigure.server import Server
 from dynamic_reconfigure.client import Client
 
+from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
 from joystick_control.msg import Gamepad
@@ -16,6 +17,7 @@ from topic_tools.srv import MuxSelect
 
 from utils.translate_joystick import JoystickTranslator
 from utils.axis_transformations import deadzone
+from utils.debouncing import Debouncing
 
 
 class Joystick5dofManipulator:
@@ -25,6 +27,9 @@ class Joystick5dofManipulator:
         self.MAX_JOINT_EFFORT = rospy.get_param("~max_joint_effort", None)
         self.MAX_LINEAR_RATE = rospy.get_param("~max_linear_rate", None)
         self.MAX_ANGULAR_RATE = rospy.get_param("~max_angular_rate", None)
+        self.GRIPPER_STEP = rospy.get_param("~gripper_step", 5.0)
+        self.GRIPPER_MAX_ANGLE = rospy.get_param("~gripper_max_angle", 90.0)
+        self.GRIPPER_MIN_ANGLE = rospy.get_param("~gripper_min_angle", -10.0)
 
         # topics for main processing
         self.subscriber = rospy.Subscriber(
@@ -36,6 +41,9 @@ class Joystick5dofManipulator:
         self.fk_publisher = rospy.Publisher(
             "/joy_5dof_manipulator/manip_command", JointState, queue_size=10
         )
+        self.gripper_publisher = rospy.Publisher(
+            "/gripper_canbus/cmd", Float32, queue_size=10
+        )
 
         self.multiplexer_select_service = rospy.ServiceProxy(
             "/manip_command_mux/select", MuxSelect
@@ -45,6 +53,8 @@ class Joystick5dofManipulator:
 
         # key debouncing
         self.prev_inputs = {key: 0 for key in self.translator.BUTTONS_ID.keys()}
+
+        self.gripper_angle = rospy.get_param("~default_gripper_angle", 45.0)
 
         # dynamic parameters
         self.mode = 0
@@ -77,25 +87,24 @@ class Joystick5dofManipulator:
 
     def _joy_subscriber_callback(self, data: Gamepad):
         inputs = self.translator.translate(data)
+        debounce = Debouncing(inputs, self.prev_inputs)
+        self.prev_inputs = inputs
 
         with self.config_lock:
             # gear up button
-            if inputs["right_bumper"] == 1 and self.prev_inputs["right_bumper"] == 0:
+            if debounce.is_leading_edge("right_bumper"):
                 self.config_lock.release()
                 self.config_client.update_configuration({"gear": self.gear + 1})
                 self.config_lock.acquire()
 
             # gear down button
-            if inputs["left_bumper"] == 1 and self.prev_inputs["left_bumper"] == 0:
+            if debounce.is_leading_edge("left_bumper"):
                 self.config_lock.release()
                 self.config_client.update_configuration({"gear": self.gear - 1})
                 self.config_lock.acquire()
 
             # mode change
-            if (
-                inputs[self.CHANGE_MODE_BUTTON] == 1
-                and self.prev_inputs[self.CHANGE_MODE_BUTTON] == 0
-            ):
+            if debounce.is_leading_edge(self.CHANGE_MODE_BUTTON):
                 next_mode = self.mode + 1
                 if next_mode > self.config_server.type.max["mode"]:
                     next_mode = self.config_server.type.min["mode"]
@@ -108,6 +117,16 @@ class Joystick5dofManipulator:
             effort_multiplier = self.MAX_JOINT_EFFORT * multiplier
             linear_multiplier = self.MAX_LINEAR_RATE * multiplier
             angular_multiplier = self.MAX_ANGULAR_RATE * multiplier
+
+            # gripper control
+            if debounce.is_leading_edge("up_cross"):
+                self.gripper_angle -= self.GRIPPER_STEP
+                self.gripper_angle = max(self.gripper_angle, self.GRIPPER_MIN_ANGLE)
+            if debounce.is_leading_edge("down_cross"):
+                self.gripper_angle += self.GRIPPER_STEP
+                self.gripper_angle = min(self.gripper_angle, self.GRIPPER_MAX_ANGLE)
+
+            self.gripper_publisher.publish(self.gripper_angle)
 
             # calculate movement based on the current mode
             if self.mode == self.MODES["forward"]:
@@ -152,8 +171,6 @@ class Joystick5dofManipulator:
                 message.angular.x *= angular_multiplier
                 message.angular.y *= angular_multiplier
                 self.ik_publisher.publish(message)
-
-        self.prev_inputs = inputs
 
     def _dynamic_reconfigure(self, config, level):
         if hasattr(self, "MODES"):
