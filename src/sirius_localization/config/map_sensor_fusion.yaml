@@ -94,7 +94,7 @@ odom0_queue_size: 2
 odom0_nodelay: true
 odom0_differential: false
 odom0_relative: false
-odom0_twist_rejection_threshold: 0.2
+odom0_twist_rejection_threshold: 0.875
 
 odom1: odometry/gps
 odom1_config: [true,  true,  true,
