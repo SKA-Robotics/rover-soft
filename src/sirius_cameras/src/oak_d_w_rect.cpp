@@ -134,10 +134,10 @@ std::tuple<dai::Pipeline, int, int> createPipeline(int fps, int imu_frequency, s
   std::tie(stereoWidth, stereoHeight, monoResolution) = getMonoResolution(stereoResolution);
   auto rgbResolution = std::get<2>(getRGBResolution(colorResolution));
 
-  auto left_pipe = addMonoPipeline(pipeline, fps, monoResolution, "left", dai::CameraBoardSocket::LEFT);
-  auto right_pipe = addMonoPipeline(pipeline, fps, monoResolution, "right", dai::CameraBoardSocket::RIGHT);
-  addRGBPipeline(pipeline, fps, rgbResolution, "rgb", dai::CameraBoardSocket::RGB);
-  auto depth_pipe = addDepthPipeline(pipeline, fps, rgbResolution, "depth", dai::CameraBoardSocket::RGB);
+  auto left_pipe = addMonoPipeline(pipeline, fps, monoResolution, "left", dai::CameraBoardSocket::CAM_B);
+  auto right_pipe = addMonoPipeline(pipeline, fps, monoResolution, "right", dai::CameraBoardSocket::CAM_C);
+  addRGBPipeline(pipeline, fps, rgbResolution, "rgb", dai::CameraBoardSocket::CAM_A);
+  auto depth_pipe = addDepthPipeline(pipeline, fps, rgbResolution, "depth", dai::CameraBoardSocket::CAM_A);
   addIMUPipeline(pipeline, imu_frequency, "imu");
 
   auto xOutLeft = pipeline.create<dai::node::XLinkOut>();
@@ -151,8 +151,10 @@ std::tuple<dai::Pipeline, int, int> createPipeline(int fps, int imu_frequency, s
   auto xOutDepth = pipeline.create<dai::node::XLinkOut>();
   xOutDepth->setStreamName("depth");
   depth_pipe->depth.link(xOutDepth->input);
-  depth_pipe->syncedLeft.link(xOutLeft->input);
-  depth_pipe->syncedRight.link(xOutRight->input);
+  // depth_pipe->syncedLeft.link(xOutLeft->input);
+  depth_pipe->rectifiedLeft.link(xOutLeft->input);
+  // depth_pipe->syncedRight.link(xOutRight->input);
+  depth_pipe->rectifiedRight.link(xOutRight->input);
 
   return std::make_tuple(pipeline, stereoWidth, stereoHeight);
 }
@@ -258,11 +260,11 @@ int main(int argc, char** argv)
                                             angularVelCovariance, rotationCovariance, magneticCovariance, true);
 
   auto leftCameraInfo =
-      converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::LEFT, width, height);
+      converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::CAM_B, width, height);
   auto rightCameraInfo =
-      converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, width, height);
+      converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::CAM_C, width, height);
   auto rgbCameraInfo =
-      rgbConverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RGB, width, height);
+      rgbConverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::CAM_A, width, height);
 
   auto leftQueue = device->getOutputQueue("left", 30, false);
   auto rightQueue = device->getOutputQueue("right", 30, false);
@@ -271,11 +273,11 @@ int main(int argc, char** argv)
   auto depthQueue = device->getOutputQueue("depth", 30, false);
 
   dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> leftPublish(
-      leftQueue, nh, "left_raw/image_raw_gray", [&](auto in, auto& out) { converter.toRosMsg(in, out); }, 30,
-      leftCameraInfo, "left_raw");
+      leftQueue, nh, "left/image_rect_gray", [&](auto in, auto& out) { converter.toRosMsg(in, out); }, 30,
+      leftCameraInfo, "left");
   dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> rightPublish(
-      rightQueue, nh, "right_raw/image_raw_gray", [&](auto in, auto& out) { rightconverter.toRosMsg(in, out); }, 30,
-      rightCameraInfo, "right_raw");
+      rightQueue, nh, "right/image_rect_gray", [&](auto in, auto& out) { rightconverter.toRosMsg(in, out); }, 30,
+      rightCameraInfo, "right");
   dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> rgbPublish(
       imgQueue, nh, std::string("rgb/image_raw_rgb"), [&](auto in, auto& out) { rgbConverter.toRosMsg(in, out); }, 30,
       rgbCameraInfo, "rgb");

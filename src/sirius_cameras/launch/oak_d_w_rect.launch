@@ -15,7 +15,7 @@
     <arg name="magneticCovariance" default="0"   />
 
 
-    <node name="$(arg name)" pkg="sirius_cameras" type="sirius_cameras_oak_d_w" output="screen" required="true">
+    <node name="$(arg name)" pkg="sirius_cameras" type="sirius_cameras_oak_d_w_rect" output="screen" required="true">
         <param name="mxId"                  value="$(arg mxId)"/>
         <param name="imu_frequency"            value="$(arg imu_frequency)" />
         <param name="tf"            value="$(arg tf)" />
