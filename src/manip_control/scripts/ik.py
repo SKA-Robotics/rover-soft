@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 class ManipPose:
 
-    def __init__(self, x=0, y=0, z=0, roll=0, pitch=0, yaw=0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, roll=0.0, pitch=0.0, yaw=0.0):
         self.x = x
         self.y = y
         self.z = z
@@ -13,7 +13,7 @@ class ManipPose:
         self.pitch = pitch
         self.yaw = yaw
 
-    def from_list(data):
+    def from_list(data: 'list[float]'):
         return ManipPose(*data)
 
     def to_list(self):
@@ -22,10 +22,10 @@ class ManipPose:
 
 class ManipJointState:
 
-    def __init__(self, joint_value_list):
+    def __init__(self, joint_value_list: 'list[float]'):
         self.position = joint_value_list
 
-    def from_list(data):
+    def from_list(data: 'list[float]'):
         return ManipJointState(data)
 
     def to_list(self):
@@ -34,7 +34,7 @@ class ManipJointState:
 
 class IKSolver(ABC):
 
-    def __init__(self, names, lengths, limits):
+    def __init__(self, names: 'list[str]', lengths: 'list[float]', limits: 'list[tuple[float, float]]'):
         self.joint_names = names
         self.limits = limits
         self.lengths = lengths
@@ -101,15 +101,15 @@ class SiriusII_IKSolver(IKSolver):
 
         raise Exception("IK solution outside of joints limits")
 
-    def _get_link3_startposition(self, lengths, r_t, z_t, alpha):
+    def _get_link3_startposition(self, lengths: 'list[float]', r_t: float, z_t: float, alpha: float):
         r_3 = r_t - lengths[3] * math.cos(alpha)
         z_3 = z_t + lengths[3] * math.sin(alpha)
         return r_3, z_3
 
-    def _angles_within_constraints(self, solution):
+    def _angles_within_constraints(self, solution: 'list[float]'):
         return all([checkBounds(solution[i], self.limits[i]) for i in range(1, len(solution))])
 
-    def _calculate_angles(self, r_3, z_3, r_2, z_2, alpha):
+    def _calculate_angles(self, r_3: float, z_3: float, r_2: float, z_2: float, alpha: float):
         beta = math.atan2(z_2, r_2)
         gamma = math.atan2(z_2 - z_3, r_3 - r_2)
         angle1 = math.pi / 2 - beta
@@ -117,7 +117,7 @@ class SiriusII_IKSolver(IKSolver):
         angle3 = alpha - gamma
         return angle1, angle2, angle3
 
-    def _find_middlepoint_solution1(self, l, x, y):
+    def _find_middlepoint_solution1(self, l: 'list[float]', x: float, y: float):
         r_2 = (x * x + l[1] * l[1] - l[2] * l[2] + y * y -
                (y * (x * math.sqrt((l[1] * l[2] * 2.0 - x * x + l[1] * l[1] + l[2] * l[2] - y * y) *
                                    (l[1] * l[2] * 2.0 + x * x - l[1] * l[1] - l[2] * l[2] + y * y)) + (x * x) * y +
@@ -129,7 +129,7 @@ class SiriusII_IKSolver(IKSolver):
         return r_2, z_2
 
     def _initialize_solution(self):
-        solution = [0] * len(self.limits)
+        solution = [0.0] * len(self.limits)
         return solution
 
     def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
@@ -152,5 +152,5 @@ class SiriusII_IKSolver(IKSolver):
         return solution
 
 
-def checkBounds(value, bounds):
+def checkBounds(value: float, bounds: 'tuple[float, float]'):
     return value >= bounds[0] and value <= bounds[1]

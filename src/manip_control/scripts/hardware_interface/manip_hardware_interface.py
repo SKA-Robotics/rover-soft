@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 
 
 class ManipHardwareInterface(ABC):
+
     def __init__(self) -> None:
         super().__init__()
         rospy.init_node("manip_interface")
@@ -22,7 +23,7 @@ class ManipHardwareInterface(ABC):
         self._pre_run()
         rospy.spin()
 
-    def _dynamic_reconfigure(self, config, level):
+    def _dynamic_reconfigure(self, config: 'dict[str, float]', level):
         self.offsets = {
             "base_cyl": config["offset_base_cyl"],
             "cyl_arm1": config["offset_cyl_arm1"],
@@ -34,20 +35,12 @@ class ManipHardwareInterface(ABC):
         return config
 
     def _load_params(self):
-        self.manip_command_topic = rospy.get_param(
-            "~command_topic", "/manip_interface/command"
-        )
-        self.manip_state_topic = rospy.get_param(
-            "~state_topic", "/manip_interface/state"
-        )
+        self.manip_command_topic: str = rospy.get_param("~command_topic", "/manip_interface/command")
+        self.manip_state_topic: str = rospy.get_param("~state_topic", "/manip_interface/state")
 
     def _initialize_ros_topics(self):
-        self.manip_state = rospy.Publisher(
-            self.manip_state_topic, JointState, queue_size=10
-        )
-        self.manip_command = rospy.Subscriber(
-            self.manip_command_topic, JointState, self._send_command
-        )
+        self.manip_state = rospy.Publisher(self.manip_state_topic, JointState, queue_size=10)
+        self.manip_command = rospy.Subscriber(self.manip_command_topic, JointState, self._send_command)
 
     def _publish_state(self, joint_state: JointState):
         self.manip_state.publish(self._transform_jointstate(joint_state, 1))
@@ -55,7 +48,7 @@ class ManipHardwareInterface(ABC):
     def _send_command(self, joint_state: JointState):
         self._send_hardware_command(self._transform_jointstate(joint_state, -1))
 
-    def _transform_jointstate(self, joint_state: JointState, multiplier):
+    def _transform_jointstate(self, joint_state: JointState, multiplier: float):
         new_jointstate = JointState()
         for index, position in enumerate(joint_state.position):
             name = joint_state.name[index]

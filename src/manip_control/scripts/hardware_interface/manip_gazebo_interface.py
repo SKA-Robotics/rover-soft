@@ -5,33 +5,27 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 
 from hardware_interface.manip_hardware_interface import (
-    ManipHardwareInterface,
-)
+    ManipHardwareInterface,)
 
 
 class ManipGazeboInterface(ManipHardwareInterface):
+
     def __init__(self):
         super().__init__()
 
     def _initialize_hardware_connection(self):
-        self.command_topics = rospy.get_param("~command_topics", {})
-        self.feedback_topic = rospy.get_param(
-            "~feedback_topic", "/manipulator/joint_states"
-        )
+        self.command_topics: dict[str, str] = rospy.get_param("~command_topics", {})
+        self.feedback_topic: str = rospy.get_param("~feedback_topic", "/manipulator/joint_states")
 
         # subscribers
-        self.feedback_subscriber = rospy.Subscriber(
-            self.feedback_topic, JointState, self._publish_state
-        )
+        self.feedback_subscriber = rospy.Subscriber(self.feedback_topic, JointState, self._publish_state)
         rospy.loginfo(f"Initialized subscriber: {self.feedback_topic}")
 
         # publishers
-        self.command_publishers = {}
+        self.command_publishers: dict[str, rospy.Publisher] = {}
         info = "Initialized publishers:"
         for joint, topic in self.command_topics.items():
-            self.command_publishers[joint] = rospy.Publisher(
-                topic, Float64, queue_size=10
-            )
+            self.command_publishers[joint] = rospy.Publisher(topic, Float64, queue_size=10)
             info = info + f"\n    - {joint}: {topic}"
 
         rospy.loginfo(info)
@@ -40,9 +34,7 @@ class ManipGazeboInterface(ManipHardwareInterface):
         for index, position in enumerate(joint_state.position):
             name = joint_state.name[index]
             if name not in self.command_topics.keys():
-                rospy.logwarn(
-                    f"Recieved joint_state command for unsupported joint: {name}"
-                )
+                rospy.logwarn(f"Recieved joint_state command for unsupported joint: {name}")
                 continue
 
             self.command_publishers[name].publish(Float64(position))

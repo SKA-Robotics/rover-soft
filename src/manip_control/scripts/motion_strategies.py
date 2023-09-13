@@ -15,7 +15,7 @@ class MotionStrategy(ABC):
 class InterpolatedMotion(MotionStrategy):
 
     def __init__(self, target_pose: ManipPose, interpolation_settings: InterpolationSettings, ik_solver: IKSolver,
-                 rate):
+                 rate: float):
         self.motion_interpolator = MotionInterpolator(interpolation_settings)
         self.ik_solver = ik_solver
         self.target_pose = target_pose
@@ -56,7 +56,7 @@ class CartesianMotion(InterpolatedMotion):
         pose = self.target_pose
         return pose.to_list()
 
-    def _move_to_position(self, position, manip_interface: ManipInterface):
+    def _move_to_position(self, position: 'list[float]', manip_interface: ManipInterface):
         pose = ManipPose.from_list(position)
         jointstate = self.ik_solver.get_IK_solution(pose)
         manip_interface.set_jointstate(jointstate)
@@ -72,7 +72,7 @@ class JointspaceMotion(InterpolatedMotion):
         jointstate = self.ik_solver.get_IK_solution(self.target_pose)
         return jointstate.position
 
-    def _move_to_position(self, position, manip_interface: ManipInterface):
+    def _move_to_position(self, position: 'list[float]', manip_interface: ManipInterface):
         jointstate = manip_interface.get_jointstate()
         jointstate.position = position
         manip_interface.set_jointstate(jointstate)
@@ -91,5 +91,5 @@ class IncrementalMotion(MotionStrategy):
         targetJointstate = self.solver.get_IK_solution(targetPose)
         manip_interface.set_jointstate(targetJointstate)
 
-    def _add_poses(self, pose1, pose2):
+    def _add_poses(self, pose1: ManipPose, pose2: ManipPose):
         return ManipPose.from_list([x1 + x2 for x1, x2 in zip(pose1.to_list(), pose2.to_list())])

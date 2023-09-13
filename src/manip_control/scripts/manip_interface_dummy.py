@@ -9,7 +9,7 @@ class DummyManipInterface(ManipInterface):
     def __init__(self):
         self.jointstate = None
         self._params = None
-        self._time_scale = 0
+        self._time_scale = 0.0
 
     def get_jointstate(self) -> ManipJointState:
         return self.jointstate
@@ -17,7 +17,7 @@ class DummyManipInterface(ManipInterface):
     def set_jointstate(self, jointstate: ManipJointState):
         self.jointstate = jointstate
 
-    def sleep(self, t):
+    def sleep(self, t: float):
         if self._time_scale > 0:
             time.sleep(t * self._time_scale)
 
@@ -27,6 +27,6 @@ class DummyManipInterface(ManipInterface):
     def set_manip_params(self, params: ManipParams):
         self._params = params
 
-    def set_time_scale(self, value):
+    def set_time_scale(self, value: float):
         assert value >= 0
         self._time_scale = value

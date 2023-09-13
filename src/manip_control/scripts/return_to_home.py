@@ -15,17 +15,21 @@ publishers = [rospy.Publisher(topic, JointState, queue_size=10) for topic in top
 zero_message = JointState()
 zero_message.position = [0]
 
-def start_periodic_call(func):
+
+def start_periodic_call(func: function):
     rospy.Timer(rospy.Duration(0.1), func)
+
 
 def publish_first(_):
     zero_message.header.stamp = rospy.Time.now()
     publishers[0].publish(zero_message)
 
+
 def publish_the_rest(_):
     zero_message.header.stamp = rospy.Time.now()
     for publisher in publishers[0:]:
         publisher.publish(zero_message)
+
 
 rospy.init_node("return_to_home")
 rospy.loginfo("Return to home procedure started...")
@@ -33,10 +37,7 @@ rospy.loginfo("Return to home procedure started...")
 try:
     rospy.loginfo("Feel free to terminate when satisfied")
     start_periodic_call(publish_first)
-    rospy.Timer(
-        rospy.Duration(8),
-        lambda x: start_periodic_call(publish_the_rest),
-        oneshot=True)
+    rospy.Timer(rospy.Duration(8), lambda x: start_periodic_call(publish_the_rest), oneshot=True)
     rospy.spin()
 except KeyboardInterrupt:
     rospy.loginfo("Done. I'm back home")

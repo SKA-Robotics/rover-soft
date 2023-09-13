@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 
 
 class ManipParams:
-    def from_dict(dict):
+
+    def from_dict(dict: 'dict[str, dict[str, float | list[str | float | tuple[float, float]]]]'):
         result = ManipParams()
         link_dict = dict["links"]
         result._joint_names = link_dict["names"]
@@ -13,20 +14,21 @@ class ManipParams:
         result._control_modes = dict["control_modes"]
         return result
 
-    def joint_names(self):
+    def joint_names(self) -> 'list[str]':
         return self._joint_names
 
-    def joint_limits(self):
+    def joint_limits(self) -> 'list[float]':
         return self._joint_limits
 
-    def link_lengths(self):
+    def link_lengths(self) -> 'list[tuple[float, float]]':
         return self._link_lengths
 
-    def control_mode_params(self, name):
+    def control_mode_params(self, name: str) -> dict:
         return self._control_modes[name]
 
 
 class ManipInterface(ABC):
+
     @abstractmethod
     def get_jointstate(self) -> ManipJointState:
         pass
@@ -36,7 +38,7 @@ class ManipInterface(ABC):
         pass
 
     @abstractmethod
-    def sleep(self, time):
+    def sleep(self, time: float):
         pass
 
     @abstractmethod

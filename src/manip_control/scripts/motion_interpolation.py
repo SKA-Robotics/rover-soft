@@ -3,13 +3,13 @@ import math
 
 class InterpolationSettings:
 
-    def __init__(self, acceleration, max_velocity, max_error, weights):
+    def __init__(self, acceleration: float, max_velocity: float, max_error: float, weights: 'list[float]'):
         self.acceleration = acceleration
         self.max_velocity = max_velocity
         self.max_error = max_error
         self.weights = weights
 
-    def from_params(params: dict):
+    def from_params(params: 'dict[str, float | list[float]]'):
         interpolation_settings = InterpolationSettings(
             acceleration=params["acceleration"],
             max_velocity=params["max_velocity"],
@@ -27,50 +27,50 @@ class MotionInterpolator:
         self.max_error = settings.max_error
         self.weights = settings.weights
 
-    def set_movement(self, start, end):
+    def set_movement(self, start: 'list[float]', end: 'list[float]'):
         self.direction = self._calculate_movement_vector(start, end)
-        self.velocity = 0
-        self.acceleration_distance = 0
-        self.decceleration_distance = 0
-        self.decceleration_velocity = 0
-        self.accelerate = True
-        self.deccelerate = False
+        self.velocity = 0.0
+        self.acceleration_distance = 0.0
+        self.decceleration_distance = 0.0
+        self.decceleration_velocity = 0.0
+        self.accelerate: bool = True
+        self.deccelerate: bool = False
 
         self.position = start
         self.end = end
         self.distance = self._calculate_distance(start, end)
 
-    def _calculate_movement_vector(self, start, end):
+    def _calculate_movement_vector(self, start: 'list[float]', end: 'list[float]'):
         if len(start) != len(end):
             raise Exception("Cannot compare lists of different sizes!")
         vector = self._subtract_positions(start, end)
         return self._normalize_movement_vector(vector)
 
-    def _subtract_positions(self, start, end):
+    def _subtract_positions(self, start: 'list[float]', end: 'list[float]'):
         return [y - x for x, y in zip(start, end)]
 
-    def _normalize_movement_vector(self, vector):
+    def _normalize_movement_vector(self, vector: 'list[float]'):
         norm = self._vector_norm(vector)
         return [x / norm for x in vector]
 
-    def _vector_norm(self, vector):
+    def _vector_norm(self, vector: 'list[float]'):
         return math.sqrt(sum([x * x * w for x, w in zip(vector, self.weights)]))
 
-    def _calculate_distance(self, start, end):
+    def _calculate_distance(self, start: 'list[float]', end: 'list[float]'):
         delta_vector = self._subtract_positions(start, end)
         return self._vector_norm(delta_vector)
 
-    def movement_step(self, timestep):
+    def movement_step(self, timestep: float):
         self._update_velocity(timestep)
         self._update_position(timestep)
         self.distance = self._calculate_distance(self.position, self.end)
         return self.position
 
-    def _update_position(self, timestep):
+    def _update_position(self, timestep: float):
         for index, direction in enumerate(self.direction):
             self.position[index] += direction * self.velocity * timestep
 
-    def _update_velocity(self, timestep):
+    def _update_velocity(self, timestep: float):
         if self.accelerate:
             self._increment_velocity(timestep)
             self._increment_acceleration_distance(timestep)
@@ -85,13 +85,13 @@ class MotionInterpolator:
         if self.deccelerate:
             self._decrement_velocity(timestep)
 
-    def _increment_velocity(self, timestep):
+    def _increment_velocity(self, timestep: float):
         self.velocity += self.acceleration * timestep
 
-    def _increment_acceleration_distance(self, timestep):
+    def _increment_acceleration_distance(self, timestep: float):
         self.acceleration_distance += self.velocity * timestep
 
-    def _decrement_velocity(self, timestep):
+    def _decrement_velocity(self, timestep: float):
         self.velocity = self.decceleration_velocity * \
             ((self.distance / self.decceleration_distance))**0.5
 

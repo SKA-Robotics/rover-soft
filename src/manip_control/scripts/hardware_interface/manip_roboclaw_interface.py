@@ -6,23 +6,22 @@ from functools import partial
 from sensor_msgs.msg import JointState
 from sirius_msgs.msg import JointState as SiriusJointState
 
-from hardware_interface.manip_hardware_interface import (
-    ManipHardwareInterface,
-)
+from hardware_interface.manip_hardware_interface import ManipHardwareInterface
 
 
 class ManipRoboclawInterface(ManipHardwareInterface):
+
     def __init__(self):
         super().__init__()
 
     def _initialize_hardware_connection(self):
-        self.command_topics = rospy.get_param("~command_topics", {})
-        self.feedback_topics = rospy.get_param("~feedback_topics", {})
-        self._rate = rospy.get_param("~rate", 10)
-        self.joint_positions = {key: 0.0 for key in self.feedback_topics.keys()}
+        self.command_topics: dict[str, str] = rospy.get_param("~command_topics", {})
+        self.feedback_topics: dict[str, str] = rospy.get_param("~feedback_topics", {})
+        self._rate: float = rospy.get_param("~rate", 10)
+        self.joint_positions: dict[str, float] = {key: 0.0 for key in self.feedback_topics.keys()}
 
         # subscribers
-        self.feedback_subscribers = {}
+        self.feedback_subscribers: dict[str, rospy.Subscriber] = {}
         info = "Initialized subscribers:"
         for joint, topic in self.feedback_topics.items():
             self.feedback_subscribers[joint] = rospy.Subscriber(
@@ -35,12 +34,10 @@ class ManipRoboclawInterface(ManipHardwareInterface):
         rospy.loginfo(info)
 
         # publishers
-        self.command_publishers = {}
+        self.command_publishers: dict[str, rospy.Publisher] = {}
         info = "Initialized publishers:"
         for joint, topic in self.command_topics.items():
-            self.command_publishers[joint] = rospy.Publisher(
-                topic, SiriusJointState, queue_size=10
-            )
+            self.command_publishers[joint] = rospy.Publisher(topic, SiriusJointState, queue_size=10)
             info = info + f"\n    - {joint}: {topic}"
 
         rospy.loginfo(info)
@@ -68,15 +65,10 @@ class ManipRoboclawInterface(ManipHardwareInterface):
     def _send_hardware_command(self, joint_state: JointState):
         for index, name in enumerate(joint_state.name):
             if name not in self.command_topics.keys():
-                rospy.logwarn(
-                    f"Recieved joint_state command for unsupported joint: {name}"
-                )
+                rospy.logwarn(f"Recieved joint_state command for unsupported joint: {name}")
                 continue
 
-            if (
-                not hasattr(self, "command_publishers")
-                or name not in self.command_publishers.keys()
-            ):
+            if (not hasattr(self, "command_publishers") or name not in self.command_publishers.keys()):
                 continue
 
             msg = SiriusJointState()
