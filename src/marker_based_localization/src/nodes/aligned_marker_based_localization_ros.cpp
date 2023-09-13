@@ -10,7 +10,7 @@
 #include <ar_track_alvar/MarkerDetector.h>
 #include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <sensor_msgs/image_encodings.h>
 #include <tf2_ros/transform_listener.h>
 #include <ros/ros.h>
@@ -64,10 +64,10 @@ void camera_callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs:
     // publish pose
     if (pose)
     {
-      geometry_msgs::PoseStamped pose_msg;
+      geometry_msgs::PoseWithCovarianceStamped pose_msg;
       pose_msg.header.frame_id = world_frame;
       pose_msg.header.stamp = image->header.stamp;
-      pose_msg.pose = tf2::toMsg(*pose);
+      pose_msg.pose.pose = tf2::toMsg(*pose);
       pose_publisher.publish(pose_msg);
     }
 
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
   double max_track_error;
   double update_rate;
 
-  ros::init(argc, argv, "marker_localization");
+  ros::init(argc, argv, "marker_based_localization");
   ros::NodeHandle nh("~");
   tf2_ros::TransformListener tf_listener(tf_buffer);
 
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
   max_error = std::max(max_new_marker_error, max_track_error);
 
   marker_publisher = nh.advertise<marker_msgs::MarkerWithCovarianceArray>("markers", 0);
-  pose_publisher = nh.advertise<geometry_msgs::PoseStamped>("pose", 0);
+  pose_publisher = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("pose", 0);
 
   image_transport::ImageTransport it(nh);
   auto camera_subscriber = it.subscribeCamera("image", 1, &camera_callback);
