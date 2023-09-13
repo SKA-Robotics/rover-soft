@@ -8,6 +8,7 @@
     <arg name="model" default="$(find sirius_description)/urdf/sirius_2.urdf.xacro"/>
     <arg name="imu_frequency"         default="200.0" />
     <arg name="stereo_fps"            default="30"  />
+    <arg name="gnss"            default="true"  />
     <!-- ERC: Marsyard -->
     <!-- <arg name="spherical_coordinates" default="[50.878151, 20.642273, 144.41]"/> -->
     <arg name="spherical_coordinates" default="[50.878151, 20.642273, 0]"/>
@@ -53,7 +54,7 @@
     "/>
     <node if="$(arg rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find sirius_description)/rviz/sirius_gazebo.rviz" />
         
-    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" clear_params="true">
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" clear_params="true" if="$(arg gnss)">
         <remap from="odometry/filtered" to="odometry/filtered_map"/>
         <param name="frequency" value="20"/>
         <param name="delay" value="0.0"/>
