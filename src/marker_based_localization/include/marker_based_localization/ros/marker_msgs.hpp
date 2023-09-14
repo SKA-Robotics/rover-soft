@@ -46,20 +46,22 @@ marker_msgs::MarkerWithCovarianceStamped toMsg(const T& marker, ros::Time stamp,
 template <typename T>
 marker_msgs::MarkerWithCovarianceArray toMsg(const MarkerContainer<T>& markers, ros::Time stamp,
                                              const std::string& camera_frame = {},
-                                             Eigen::Vector3d confidence = Eigen::Vector3d())
+                                             std::vector<double> confidence = {})
 {
   auto msg = marker_msgs::MarkerWithCovarianceArray();
   msg.header.stamp = stamp;
   msg.header.frame_id = camera_frame;
 
-  if (confidence.size() < markers.size())
-  {
-    confidence.resize(markers.size());
-    confidence = Eigen::Vector3d::Constant(1.0);
-  }
   for (int i = 0; i < markers.size(); i++)
   {
-    msg.markers.push_back(toMsg(markers[i], confidence[i]));
+    if (confidence.size() <= i)
+    {
+      msg.markers.push_back(toMsg(markers[i], 1));
+    }
+    else
+    {
+      msg.markers.push_back(toMsg(markers[i], confidence[i]));
+    }
   }
   return msg;
 }
