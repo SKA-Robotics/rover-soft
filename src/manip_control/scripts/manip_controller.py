@@ -4,7 +4,7 @@ from enum import Enum
 from queue import Queue
 
 from geometry_msgs.msg import PointStamped, Twist
-from std_srvs.srv import Empty, EmptyResponse, EmptyRequest
+from std_srvs.srv import Empty, EmptyResponse, EmptyRequest, SetBool, SetBoolRequest, SetBoolResponse
 
 from manip import SiriusManip
 from manip_interface_ros import ROSManipInterface
@@ -30,6 +30,8 @@ class ManipController:
 
         rospy.Subscriber("/cmd_manip_pos", PointStamped, self.callback, queue_size=10)
         rospy.Service("~toggle_mode", Empty, self._handle_toggle_mode)
+        rospy.Service("~set_tilt", SetBool, self._handle_set_tilt)
+        rospy.Service("~set_elbow", SetBool, self._handle_set_elbow)
 
     def run(self):
         while not rospy.is_shutdown():
@@ -75,6 +77,28 @@ class ManipController:
         self._toggle_mode()
         rospy.loginfo(f"Switched to {self.mode.name} mode")
         return EmptyResponse()
+
+    def _handle_set_tilt(self, req: SetBoolRequest):
+        solver = self.manip.get_ik_solver()
+        if req.data:
+            mode = "tilt_forward"
+        else:
+            mode = "tilt_backward"
+        ok = solver.set_mode(mode)
+        if ok:
+            rospy.loginfo(f"Switched to {mode} mode")
+        return SetBoolResponse(success=ok)
+
+    def _handle_set_elbow(self, req: SetBoolRequest):
+        solver = self.manip.get_ik_solver()
+        if req.data:
+            mode = "elbow_up"
+        else:
+            mode = "elbow_down"
+        ok = solver.set_mode(mode)
+        if ok:
+            rospy.loginfo(f"Switched to {mode} mode")
+        return SetBoolResponse(success=ok)
 
     def _toggle_mode(self):
         if self.mode == mode.CARTESIAN:
