@@ -47,9 +47,32 @@ class IKSolver(ABC):
     def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
         pass
 
+    @abstractmethod
+    def set_mode(self, mode) -> None:
+        pass
+
 
 # Class implementing kinematics of SiriusII manipulator
 class SiriusII_IKSolver(IKSolver):
+
+    def __init__(self, names: 'list[str]', lengths: 'list[float]', limits: 'list[tuple[float, float]]'):
+        super().__init__(names, lengths, limits)
+        # For now, due to physical constraints of the manipulator only one of four IK solutions is reasonable
+        self.elbow_up = True
+        self.tilt_forward = True
+
+    def set_mode(self, mode: str) -> bool:
+        if mode == "elbow_up":
+            self.elbow_up = True
+        elif mode == "elbow_down":
+            self.elbow_up = False
+        elif mode == "tilt_forward":
+            self.tilt_forward = True
+        elif mode == "tilt_backward":
+            self.tilt_forward = False
+        else:
+            return False
+        return True
 
     def get_FK_solution(self, jointstate: ManipJointState) -> ManipPose:
         l = self.lengths
@@ -89,18 +112,23 @@ class SiriusII_IKSolver(IKSolver):
         # Last joint value simply equals to its target value
         solution[4] = target.roll
 
-        # First joint angle can be easily obtained as it is
-        # the only joint allowing for movement along y-axis
-        solution[0] = math.atan2(y_t, x_t)
-        # Project target position to manip plane
-        r_t = math.sqrt(x_t * x_t + y_t * y_t)
-        alpha = target.pitch
+        # TODO: Resolve problem with step change of angle (now: 179 deg + 2 deg = -179 deg)
+        if self.tilt_forward:
+            # First joint angle can be easily obtained as it is the only joint allowing for movement along y-axis
+            solution[0] = math.atan2(y_t, x_t)
+            # Project target position onto manip plane reducing the issue to finding the pose of 3 planar links
+            r_t = math.sqrt(x_t * x_t + y_t * y_t)
+            alpha = target.pitch
+        else:
+            # Reverse manip and tilt back
+            solution[0] = math.atan2(-y_t, -x_t)
+            r_t = -math.sqrt(x_t * x_t + y_t * y_t)
+            alpha = math.pi - target.pitch
 
-        # Translate, so link 0 length does not need to be considered
-        # in formulas below
+        # Translate, so link 0 length does not need to be considered in formulas below
         z_t = target.z - self.lengths[0]
 
-        solution[1], solution[2], solution[3] = self._get_3_links_solution(self.lengths, r_t, z_t, alpha)
+        solution[1], solution[2], solution[3] = self._get_3_links_solution(self.lengths, r_t, z_t, alpha, self.elbow_up)
 
         # Check if the calculated angles are within manipulator's limits
         if self._angles_within_constraints(solution):
@@ -111,16 +139,13 @@ class SiriusII_IKSolver(IKSolver):
     def _angles_within_constraints(self, solution: 'list[float]'):
         return all([checkBounds(s, b) for s, b in zip(solution, self.limits)])
 
-    def _get_3_links_solution(self, lengths: 'list[float]', r_t: float, z_t: float, alpha: float):
-        # Find 3rd link's start position given its absolute angle
-        # (target.alpha) and end position (target position)
+    def _get_3_links_solution(self, lengths: 'list[float]', r_t: float, z_t: float, alpha: float, elbow_up: bool):
+        # Find 3rd link's start position given its absolute angle (alpha) and end position (r_t, z_t)
         r_3, z_3 = self._get_link3_startposition(lengths, r_t, z_t, alpha)
-
         # Find 2nd link's start position
-        # The geometry constraints lead to equation system with
-        # two solutions. Due to physical constraints of the manipulator
-        # only one of these solutions will be possible to reach
-        r_2, z_2 = self._find_middlepoint_solution(lengths[1], lengths[2], r_3, z_3)
+        # The geometry constraints lead to equation system with two solutions
+        # One of them is chosen by 'elbow_up' argumet
+        r_2, z_2 = self._find_middlepoint_solution(lengths[1], lengths[2], r_3, z_3, elbow_up)
         # Given the position, angles of the joints can be calculated
         solution = self._calculate_angles(r_3, z_3, r_2, z_2, alpha)
 
@@ -131,19 +156,19 @@ class SiriusII_IKSolver(IKSolver):
         z_3 = z_t + self.lengths[3] * math.sin(alpha)
         return r_3, z_3
 
-    def _find_middlepoint_solution(a: float, b: float, x: float, y: float):
-        # Standard names for triangle with vertexes ACB in subsequent joints
+    def _find_middlepoint_solution(a: float, b: float, x: float, y: float, middle_joint_up: bool):
+        # Standard names for elements of triangle with vertices A,C,B in subsequent joints
         c_2 = x * x + y * y
         u = ((a - b) * (a + b) + c_2) / 2  # u = a*c*cos(beta)
         ## v = a*b*sin(gamma) = a*c*sin(beta)
         v = math.sqrt((a * (b + a) - u) * (a * (b - a) + u))
 
-        ## First solution
-        r_2 = (x * u - y * v) / c_2
-        z_2 = (x * v + y * u) / c_2
-        ## Second solution
-        # r_2 = (x * u + y * v) / c_2
-        # z_2 = (-x * v + y * u) / c_2
+        if middle_joint_up:
+            r_2 = (x * u - y * v) / c_2
+            z_2 = (x * v + y * u) / c_2
+        else:
+            r_2 = (x * u + y * v) / c_2
+            z_2 = (-x * v + y * u) / c_2
 
         return r_2, z_2
 
