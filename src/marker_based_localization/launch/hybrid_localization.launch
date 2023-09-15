@@ -3,6 +3,8 @@
         <remap from="~image" to="/front_camera/left/image_rect_gray"/>
         <remap from="~odom" to="/odometry/filtered_map"/>
         <param name="base_link" value="base_link"/>
-        <rosparam param="covariance_diagonal" subst_value="True">[0.5, 0.5, 0.5, 0, 0, 0,]</rosparam>
+        <param name="marker_size" value="0.15"/>
+        <rosparam param="covariance_diagonal">[0.5, 0.5, 0.5, 0, 0, 0,]</rosparam>
+        <rosparam param="marker_offset">[-0.09, 0.0, 0.0]</rosparam>
     </node>
 </launch>
