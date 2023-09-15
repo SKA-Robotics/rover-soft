@@ -11,7 +11,7 @@
     <arg name="gnss"            default="true"  />
     <!-- ERC: Marsyard -->
     <!-- <arg name="spherical_coordinates" default="[50.878151, 20.642273, 144.41]"/> -->
-    <arg name="spherical_coordinates" default="[50.878151, 20.642273, 0]"/>
+    <arg name="spherical_coordinates" default="[50.878151, 20.642273, 64.65475]"/>
     <arg name="elevation" default="308.1445"/>
     <!-- URC: The Mars Desert Research Station  -->
     <!-- <arg name="spherical_coordinates" default="[38.4190235, -110.7823884, 0.0]"/> -->
