@@ -1,0 +1,83 @@
+visual_objects:
+  - name: panel_A
+    file: A.dae
+    tags:
+      - id: 11
+        position:
+          x: 0.042
+          y: 0.0
+          z: -0.042
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
+  - name: panel_B1
+    file: B1.dae
+    tags:
+      - id: 14
+        position:
+          x: 0.104
+          y: 0.0
+          z: -0.042
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
+      - id: 13
+        position:
+          x: 0.104
+          y: 0.0
+          z: -0.113
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
+  - name: panel_B2
+    file: B2.dae
+    tags:
+      - id: 15
+        position:
+          x: 0.042
+          y: 0.0
+          z: -0.113
+        rotation:
+          x: -0.70710678118
+          y: 0.0
+          z: 0.0
+          w: -0.70710678118
+  - name: arm3
+    file: arm3.dae
+    tags:
+      - id: 33
+        position:
+          x: 0.004
+          y: -0.038
+          z: 0.094
+        rotation:
+          x: 0.5
+          y: 0.5
+          z: -0.5
+          w: 0.5
+      - id: 32
+        position:
+          x: 0.0
+          y: 0.038
+          z: 0.043
+        rotation:
+          x: 0.0
+          y: 0.70710678118
+          z: 0.70710678118
+          w: 0.0
+      - id: 31
+        position:
+          x: -0.071
+          y: 0.0046
+          z: 0.0998
+        rotation:
+          x: 0.5
+          y: -0.5
+          z: -0.5
+          w: 0.5

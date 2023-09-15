@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="inertial" params="inertial">
+    <inertial>
+      <mass value="${inertial['mass']}" />
+      <origin
+        xyz="${inertial['mass_center']['x']} ${inertial['mass_center']['y']} ${inertial['mass_center']['z']}"
+        rpy="0.0 0.0 0.0" />
+      <inertia ixx="${inertial['inertia']['ixx']}"
+        ixy="${inertial['inertia']['ixy']}"
+        ixz="${inertial['inertia']['ixz']}"
+        iyy="${inertial['inertia']['iyy']}"
+        iyz="${inertial['inertia']['iyz']}"
+        izz="${inertial['inertia']['izz']}" />
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="gripper" params="package">
+    <xacro:property name="inertial" value="${xacro.load_yaml('manipulator/gripper_inertial.yaml')}" />
+    <xacro:property name="base_length" value="0.05385" />
+    <xacro:property name="beam_distance" value="0.034" />
+    <xacro:property name="beam_length" value="0.04" />
+
+    <link name="gripper">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi} ${pi/2} 0" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/gripper/gripper_base.stl"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="white">
+        </material>
+      </visual>
+      <xacro:inertial inertial="${inertial['gripper']}" />
+      <collision>
+        <origin xyz="0.015 0 0.025" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1 0.1 0.05" />
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="gripper">
+      <material>
+        Gazebo/White
+      </material>
+    </gazebo>
+
+    <joint name="gripper_left_beams" type="revolute">
+      <parent link="gripper" />
+      <child link="left_beams" />
+      <origin xyz="0 ${beam_distance/2} ${base_length}" />
+      <axis xyz="1 0 0" />
+      <limit
+        lower="-1.57"
+        upper="0"
+        effort="100"
+        velocity="50" />
+    </joint>
+    <transmission name="trans_gripper_claws">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="gripper_left_beams">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_gripper_claws">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>2</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <link name="left_beams">
+      <visual>
+        <origin xyz="0 ${-beam_distance/2} ${-base_length}" rpy="${pi} ${pi/2} 0" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/gripper/left_beams.stl"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="grey">
+        </material>
+      </visual>
+      <xacro:inertial inertial="${inertial['left_beams']}" />
+    </link>
+    <gazebo reference="left_beams">
+      <material>
+        Gazebo/Grey
+      </material>
+    </gazebo>
+
+    <joint name="gripper_right_beams" type="revolute">
+      <parent link="gripper" />
+      <child link="right_beams" />
+      <origin xyz="0 ${-beam_distance/2} ${base_length}" />
+      <axis xyz="-1 0 0" />
+      <limit
+        lower="-1.57"
+        upper="0"
+        effort="100"
+        velocity="50" />
+      <mimic joint="gripper_left_beams" multiplier="1" />
+    </joint>
+
+    <link name="right_beams">
+      <visual>
+        <origin xyz="0 ${beam_distance/2} ${-base_length}" rpy="${pi} ${pi/2} 0" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/gripper/right_beams.stl"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="grey">
+        </material>
+      </visual>
+      <xacro:inertial inertial="${inertial['right_beams']}" />
+    </link>
+    <gazebo reference="right_beams">
+      <material>
+        Gazebo/Grey
+      </material>
+    </gazebo>
+
+    <joint name="left_beams_claw" type="revolute">
+      <parent link="left_beams" />
+      <child link="left_claw" />
+      <origin xyz="0 0 ${beam_length}" />
+      <axis xyz="-1 0 0" />
+      <limit
+        lower="-1.57"
+        upper="0"
+        effort="100"
+        velocity="50" />
+      <mimic joint="gripper_left_beams" multiplier="1" />
+    </joint>
+
+    <link name="left_claw">
+      <visual>
+        <origin xyz="0 ${-beam_distance/2} ${-base_length-beam_length}"
+          rpy="${pi} ${pi/2} 0" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/gripper/left_claw.stl"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="white">
+        </material>
+      </visual>
+      <xacro:inertial inertial="${inertial['left_claw']}" />
+      <collision>
+        <origin xyz="-0.005 0.003 0.058" rpy="0 0 0" />
+        <geometry>
+          <box size="0.014 0.04 0.12" />
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="left_claw">
+      <material>
+        Gazebo/White
+      </material>
+    </gazebo>
+
+    <joint name="right_beams_claw" type="revolute">
+      <parent link="right_beams" />
+      <child link="right_claw" />
+      <origin xyz="0 0 ${beam_length}" />
+      <axis xyz="1 0 0" />
+      <limit
+        lower="-1.57"
+        upper="0"
+        effort="100"
+        velocity="50" />
+      <mimic joint="gripper_right_beams" multiplier="1" />
+    </joint>
+
+    <link name="right_claw">
+      <visual>
+        <origin xyz="0 ${beam_distance/2} ${-base_length-beam_length}"
+          rpy="${pi} ${pi/2} 0" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/gripper/right_claw.stl"
+            scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="white">
+        </material>
+      </visual>
+      <xacro:inertial inertial="${inertial['right_claw']}" />
+      <collision>
+        <origin xyz="-0.005 -0.003 0.058" rpy="0 0 0" />
+        <geometry>
+          <box size="0.014 0.04 0.12" />
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="right_claw">
+      <material>
+        Gazebo/White
+      </material>
+    </gazebo>
+  </xacro:macro>
+</robot>

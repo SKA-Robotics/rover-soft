@@ -1,0 +1,14 @@
+<launch>
+    <arg name="camera_name" default="/fake_camera" />
+    <arg name="aruco_size" default="0.05" />
+    <arg name="aruco_size_override" default="" /> <!-- e.g. "1-10: 0.1, 12: 0.2" -->
+
+    <node name="aruco_detect" pkg="aruco_detect" type="aruco_detect" ns="$(arg camera_name)">
+        <param name="dictionary" value="16" /> <!-- DICT_ARUCO_ORIGINAL -->
+        <param name="publish_images" value="true" />
+        <param name="fiducial_len" value="$(arg aruco_size)" />
+        <param name="fiducial_len_override" value="$(arg aruco_size_override)" />
+        <remap from="$(arg camera_name)/camera" to="$(arg camera_name)/image_raw" />
+        <remap from="/fiducial_images" to="$(arg camera_name)/fiducial_images" />
+    </node>
+</launch>
