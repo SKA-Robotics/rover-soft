@@ -10,6 +10,6 @@
         <arg name="frame_id" value="webcam_$(arg camera_id)" />
         <arg name="camera_info_url"
             value="file:///$(find panel_visualization)/config/camera_info.yaml" />
-        <arg name="visualize" value="true" />
+        <!-- <arg name="visualize" value="true" /> -->
     </include>
 </launch>

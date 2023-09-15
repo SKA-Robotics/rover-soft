@@ -36,11 +36,11 @@ This package provides visualization of panel used in maintance task in European 
 
     Parent frame to `/tf` publishing. When it is a one of the visual objects, cameras frames do not have to be known.
 
-  - `~cameras_names`
+  - `~cameras_ids`
     - Type: `string`
     - Default: `[]`
 
-    Name spaces for image transport written in list format. Each one should have an appropriate `aruco_detect` node.
+    ID's associated to name spaces `/web_camera_X/webcam` for image transport written in list format. Each one should have an appropriate `aruco_detect` node.
 
   - `~message_rate`
     - Type: `double`
@@ -100,7 +100,7 @@ This package provides visualization of panel used in maintance task in European 
 ### Subscribed topics
 
 - `<camera_ns>/camera_info` [sensor_msgs/CameraInfo]
-- `<camera_ns>/image` [sensor_msgs/Image]
+- `<camera_ns>/image_raw` [sensor_msgs/Image]
 
     Each instance gets video stream from a camera by topics (similar to image transport convention) with a namespace *<camera_ns>* provided by a parameter.
 
