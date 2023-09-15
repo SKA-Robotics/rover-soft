@@ -11,49 +11,77 @@
     <arg name="test" default="true" />
 
     <!-- Package enable aruco detection from up to 6 cameras streams -->
-    <arg name="camera_name_0" default="/fake_camera" />
-    <arg name="camera_name_1" default="" />
-    <arg name="camera_name_2" default="" />
-    <arg name="camera_name_3" default="" />
-    <arg name="camera_name_4" default="" />
-    <arg name="camera_name_5" default="" />
+    <arg name="camera_id_0" default="0" />
+    <arg name="camera_id_1" default="" />
+    <arg name="camera_id_2" default="" />
+    <arg name="camera_id_3" default="" />
+    <arg name="camera_id_4" default="" />
+    <arg name="camera_id_5" default="" />
 
     <!-- Each aruco_detect node is run only for configured stream -->
     <include file="$(find panel_visualization)/launch/aruco_detection.launch">
-        <arg name="camera_name" default="$(arg camera_name_0)" />
+        <arg name="camera_name" default="/web_camera_$(arg camera_id_0)/webcam" />
         <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
-    <include if="$(eval arg('camera_name_1') != '')"
+    <include file="$(find panel_visualization)/launch/web_cameras.launch">
+        <arg name="camera_id" default="$(arg camera_id_0)" />
+    </include>
+
+    <include if="$(eval arg('camera_id_1') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
-        <arg name="camera_name" default="$(arg camera_name_1)" />
+        <arg name="camera_name" default="/web_camera_$(arg camera_id_1)/webcam" />
         <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
-    <include if="$(eval arg('camera_name_2') != '')"
+    <include if="$(eval arg('camera_id_1') != '')"
+        file="$(find panel_visualization)/launch/web_cameras.launch">
+        <arg name="camera_id" default="$(arg camera_id_1)" />
+    </include>
+
+    <include if="$(eval arg('camera_id_2') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
-        <arg name="camera_name" default="$(arg camera_name_2)" />
+        <arg name="camera_name" default="/web_camera_$(arg camera_id_2)/webcam" />
         <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
-    <include if="$(eval arg('camera_name_3') != '')"
+    <include if="$(eval arg('camera_id_2') != '')"
+        file="$(find panel_visualization)/launch/web_cameras.launch">
+        <arg name="camera_id" default="$(arg camera_id_2)" />
+    </include>
+
+    <include if="$(eval arg('camera_id_3') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
-        <arg name="camera_name" default="$(arg camera_name_3)" />
+        <arg name="camera_name" default="/web_camera_$(arg camera_id_3)/webcam" />
         <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
-    <include if="$(eval arg('camera_name_4') != '')"
+    <include if="$(eval arg('camera_id_3') != '')"
+        file="$(find panel_visualization)/launch/web_cameras.launch">
+        <arg name="camera_id" default="$(arg camera_id_3)" />
+    </include>
+
+    <include if="$(eval arg('camera_id_4') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
-        <arg name="camera_name" default="$(arg camera_name_4)" />
+        <arg name="camera_name" default="/web_camera_$(arg camera_id_4)/webcam" />
         <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
     </include>
-    <include if="$(eval arg('camera_name_5') != '')"
+    <include if="$(eval arg('camera_id_4') != '')"
+        file="$(find panel_visualization)/launch/web_cameras.launch">
+        <arg name="camera_id" default="$(arg camera_id_4)" />
+    </include>
+
+    <include if="$(eval arg('camera_id_5') != '')"
         file="$(find panel_visualization)/launch/aruco_detection.launch">
-        <arg name="camera_name" default="$(arg camera_name_5)" />
+        <arg name="camera_name" default="/web_camera_$(arg camera_id_5)/webcam" />
         <arg name="aruco_size_override" default="$(arg aruco_size_override)" />
+    </include>
+    <include if="$(eval arg('camera_id_5') != '')"
+        file="$(find panel_visualization)/launch/web_cameras.launch">
+        <arg name="camera_id" default="$(arg camera_id_5)" />
     </include>
 
     <node name="panel_tracker" pkg="panel_visualization" type="panel_tracker.py"
         output="screen">
         <param name="base_frame" value="$(arg base_frame)" />
-        <param name="cameras_names"
-            value="[$(arg camera_name_0), $(arg camera_name_1), $(arg camera_name_2), $(arg camera_name_3), $(arg camera_name_4), $(arg camera_name_5)]" />
+        <param name="cameras_ids"
+            value="[$(arg camera_id_0), $(arg camera_id_1), $(arg camera_id_2), $(arg camera_id_3), $(arg camera_id_4), $(arg camera_id_5)]" />
         <param name="message_rate" value="$(arg message_rate)" /> <!-- for marker life time-->
         <param name="filter_size" value="$(arg filter_size)" /> <!-- number of images to average -->
         <param name="marker_length" value="$(arg aruco_size)" />
@@ -65,16 +93,20 @@
         args="-d $(find panel_visualization)/rviz/test_config.rviz" />
 
     <!-- TEST fake stream from images -->
-    <node if="$(arg test)" name="fake_camera" pkg="panel_visualization" type="fake_camera.py"
+    <!-- <node if="$(arg test)" name="fake_camera" pkg="panel_visualization" type="fake_camera.py"
         output="screen">
         <param name="message_rate" value="$(arg message_rate)" />
         <param name="frame_id" value="$(arg fake_camera_frame)" />
-        <param name="camera_name" value="$(arg camera_name_0)" />
-    </node>
+        <param name="camera_name" value="$(arg camera_id_0)" />
+    </node> -->
+
+    <!-- <node if="$(eval arg('test') and not arg('gazebo'))" name="static_transform_publisher_0"
+        pkg="tf2_ros"
+        type="static_transform_publisher"
+        args="0 0 0 0.5 -0.5 0.5 -0.5 $(arg base_frame) $(arg fake_camera_frame)" /> -->
 
     <node if="$(eval arg('test') and not arg('gazebo'))" name="static_transform_publisher_0"
         pkg="tf2_ros"
         type="static_transform_publisher"
-        args="0 0 0 0.5 -0.5 0.5 -0.5 $(arg base_frame) $(arg fake_camera_frame)" />
-
+        args="0 0 0 0.5 -0.5 0.5 -0.5 $(arg base_frame) webcam_$(arg camera_id_0)" />
 </launch>

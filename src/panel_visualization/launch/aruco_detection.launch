@@ -8,7 +8,7 @@
         <param name="publish_images" value="true" />
         <param name="fiducial_len" value="$(arg aruco_size)" />
         <param name="fiducial_len_override" value="$(arg aruco_size_override)" />
-        <remap from="$(arg camera_name)/camera" to="$(arg camera_name)/image" />
+        <remap from="$(arg camera_name)/camera" to="$(arg camera_name)/image_raw" />
         <remap from="/fiducial_images" to="$(arg camera_name)/fiducial_images" />
     </node>
 </launch>

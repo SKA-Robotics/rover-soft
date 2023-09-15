@@ -11,6 +11,7 @@ GET_VIDEO = False
 
 
 class FakeCamera:
+
     def __init__(self) -> None:
         rospy.init_node("fake_camera")
 
@@ -21,18 +22,14 @@ class FakeCamera:
         self.seq_counter = 0
 
         NS = rospy.get_param("~camera_name", "/fake_camera")
-        self.info_pub = rospy.Publisher(f'{NS}/camera_info',
-                                        CameraInfo,
-                                        queue_size=10)
+        self.info_pub = rospy.Publisher(f'{NS}/camera_info', CameraInfo, queue_size=10)
         self.img_pub = rospy.Publisher(f'{NS}/image', Image, queue_size=10)
 
         self.bridge = CvBridge()
 
         ## Choose images for testing
         self.path = f'{SCRIPT_DIR}/../temp'
-        self.img_buff = [
-            cv.imread(f'{self.path}/test_{i}.jpg') for i in range(5, 6)
-        ]
+        self.img_buff = [cv.imread(f'{self.path}/test_{i}.jpg') for i in range(5, 6)]
         self.video = cv.VideoCapture(f'{self.path}/test_video.mp4')
 
     def __del__(self) -> None:
@@ -85,8 +82,7 @@ class FakeCamera:
         return header
 
     def _test(self):
-        cv.imshow(f'image_{0}', cv.cvtColor(self.img_buff[0],
-                                            cv.COLOR_BGR2GRAY))
+        cv.imshow(f'image_{0}', cv.cvtColor(self.img_buff[0], cv.COLOR_BGR2GRAY))
         cv.waitKey(2000)
         cv.destroyAllWindows()
 

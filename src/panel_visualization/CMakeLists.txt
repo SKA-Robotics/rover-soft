@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   visualization_msgs
+  video_stream_opencv
 )
 
 ## System dependencies are found with CMake's conventions

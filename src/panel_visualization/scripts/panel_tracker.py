@@ -15,6 +15,7 @@ YOUR_RVIZ_SPEED = 1.0  # [Real FPS]
 
 
 class PanelTracker:
+
     def __init__(self) -> None:
         rospy.init_node("panel_tracker")
 
@@ -26,33 +27,29 @@ class PanelTracker:
         self.base_frame: str = rospy.get_param("~base_frame", "base_link")
         objects: list[dict] = rospy.get_param("~visual_objects", {})
         self.objects = [
-            VisulObject(obj_params, filter_size,
-                        rospy.Duration.from_sec(lifetime))
-            for obj_params in objects if obj_params['name'] != self.base_frame
+            VisulObject(obj_params, filter_size, rospy.Duration.from_sec(lifetime))
+            for obj_params in objects
+            if obj_params['name'] != self.base_frame
         ]
         base_objs = [obj for obj in objects if obj['name'] == self.base_frame]
-        self.base_object = VisulObject(
-            base_objs[0], 1,
-            rospy.Duration.from_sec(lifetime)) if len(base_objs) else None
+        self.base_object = VisulObject(base_objs[0], 1, rospy.Duration.from_sec(lifetime)) if len(base_objs) else None
 
         self.marker_size: float = rospy.get_param("~marker_length", 0.05)
         lengths: str = rospy.get_param("~marker_lengths_override", "")
         self.sizes = self._translate_marker_sizes(lengths)
 
-        name_list: str = rospy.get_param("~cameras_names", "[]")
+        name_list: str = rospy.get_param("~cameras_ids", "[]")
         if name_list[0] != '[' or name_list[-1] != ']':
             rospy.logwarn("Incorrect syntax for 'camera_name' param!")
             return
 
         for name in name_list[1:-1].split(','):
             if len(name.strip()):
-                rospy.Subscriber(f'{name.strip()}/fiducial_transforms',
+                rospy.Subscriber(f'/web_camera_{name.strip()}/webcam/fiducial_transforms',
                                  FiducialTransformArray,
                                  self._callback,
                                  queue_size=10)
-        self.pub = rospy.Publisher("/visual_objects",
-                                   MarkerArray,
-                                   queue_size=10)
+        self.pub = rospy.Publisher("/visual_objects", MarkerArray, queue_size=10)
 
         self.buffer = Buffer()
         TransformListener(self.buffer)
@@ -66,17 +63,12 @@ class PanelTracker:
             for (k, v) in [scope.split(':') for scope in lengths.split(',')]:
                 if k.find('-') != -1:
                     for (s, e) in [k.split('-')]:
-                        sizes.update(
-                            {i: float(v)
-                             for i in range(int(s),
-                                            int(e) + 1)})
+                        sizes.update({i: float(v) for i in range(int(s), int(e) + 1)})
                 else:
                     sizes.update({int(k): float(v)})
             return sizes
         except:
-            rospy.logwarn(
-                "Marker length override data are incorrect! They have been ignorred."
-            )
+            rospy.logwarn("Marker length override data are incorrect! They have been ignorred.")
             return {}
 
     def _callback(self, msg: FiducialTransformArray) -> None:
@@ -86,8 +78,8 @@ class PanelTracker:
 
         if self.base_object is None:
             try:
-                transform_msg: TransformStamped = self.buffer.lookup_transform(
-                    self.base_frame, msg.header.frame_id, msg.header.stamp)
+                transform_msg: TransformStamped = self.buffer.lookup_transform(self.base_frame, msg.header.frame_id,
+                                                                               msg.header.stamp)
                 frame_transform = transform_msg.transform
             except Exception as ex:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
@@ -98,8 +90,7 @@ class PanelTracker:
             with self.base_object.get_lock():
                 self.base_object.update_pose(transforms_dict, None)
                 if self.base_object.is_ready():
-                    base_header = Header(stamp=msg.header.stamp,
-                                         frame_id=msg.header.frame_id)
+                    base_header = Header(stamp=msg.header.stamp, frame_id=msg.header.frame_id)
                     marker = self.base_object.generate_next_marker(base_header)
                     if marker is not None:
                         marker.color.a = 0.1  # only object's shadow
@@ -107,8 +98,7 @@ class PanelTracker:
                         # Now base object shadows show delayed position from
                         # the time of last sight of this object
                         new_msg.markers.append(marker)
-                        self.base_object.publish_transform(
-                            msg.header.frame_id, True)
+                        self.base_object.publish_transform(msg.header.frame_id, True)
 
                 frame_transform = self.base_object.get_inverse_transform()
                 is_visible = self.base_object.is_visible()
@@ -135,8 +125,7 @@ class PanelTracker:
         new_msg.markers.extend(self._get_test_aruco_markers(msg))
         self.pub.publish(new_msg)
 
-    def _get_test_aruco_markers(self,
-                                msg: FiducialTransformArray) -> 'list[Marker]':
+    def _get_test_aruco_markers(self, msg: FiducialTransformArray) -> 'list[Marker]':
         markers: list[Marker] = []
         transforms: list[FiducialTransform] = msg.transforms
 
@@ -171,15 +160,12 @@ class PanelTracker:
 
 
 class VisulObject:
-    def __init__(self, parameters: dict, fileter_size: int,
-                 lifetime: rospy.Duration) -> None:
+
+    def __init__(self, parameters: dict, fileter_size: int, lifetime: rospy.Duration) -> None:
         name: str = parameters['name']
         file: str = parameters['file']
         self.ros_interface = ROSInterface(name, file, lifetime)
-        self.tags: list[Tag] = [
-            Tag(tag['id'], tag['position'], tag['rotation'])
-            for tag in parameters['tags']
-        ]
+        self.tags: list[Tag] = [Tag(tag['id'], tag['position'], tag['rotation']) for tag in parameters['tags']]
         self.filter_size = fileter_size
         self.counter = 0
         self.last_pose: 'np.matrix | None' = None
@@ -190,8 +176,7 @@ class VisulObject:
     def get_lock(self) -> Lock:
         return self.mutex
 
-    def update_pose(self, transform_msgs: 'dict[int, FiducialTransform]',
-                    camera_to_base: 'Transform | None'):
+    def update_pose(self, transform_msgs: 'dict[int, FiducialTransform]', camera_to_base: 'Transform | None'):
         for tag in self.tags:
             if tag.id not in transform_msgs:
                 tag.update(None, 0.0)
@@ -206,8 +191,7 @@ class VisulObject:
 
         if pose is not None:
             if camera_to_base is not None:
-                t_c2b = self.ros_interface.matrix_from_ros_transform(
-                    camera_to_base)
+                t_c2b = self.ros_interface.matrix_from_ros_transform(camera_to_base)
                 based_pose = np.matmul(t_c2b, pose)
             else:
                 based_pose = pose
@@ -231,8 +215,7 @@ class VisulObject:
 
     def publish_transform(self, frame_id: str, inverse=False) -> None:
         if self.last_pose is not None:
-            self.ros_interface.publish_transform(frame_id, self.last_pose,
-                                                 inverse)
+            self.ros_interface.publish_transform(frame_id, self.last_pose, inverse)
 
     def generate_next_marker(self, header: Header) -> 'Marker | None':
         current_pose = self._get_average_pose()
@@ -252,8 +235,7 @@ class VisulObject:
             self.duration_of_no_pose += 1
 
         color = self._get_color(is_detected, is_restored)
-        marker = self.ros_interface.create_marker(header, color,
-                                                  self.last_pose)
+        marker = self.ros_interface.create_marker(header, color, self.last_pose)
 
         return marker
 
@@ -318,8 +300,7 @@ class VisulObject:
         else:
             return self._calculate_pose_from_multi_tags(valid_tags)
 
-    def _calculate_pose_from_single_tag(
-            self, tag: 'Tag') -> 'tuple[np.matrix, float]':
+    def _calculate_pose_from_single_tag(self, tag: 'Tag') -> 'tuple[np.matrix, float]':
         pose_matrix = tag.get_panel_pose_matrix()
         t_b2c = tag.get_transform_to_camera_rf()
         panel_pose = np.matmul(t_b2c, pose_matrix)
@@ -327,17 +308,10 @@ class VisulObject:
 
         return panel_pose, weight
 
-    def _calculate_pose_from_multi_tags(
-            self, valid_tags: 'list[Tag]') -> 'tuple[np.matrix, float]':
+    def _calculate_pose_from_multi_tags(self, valid_tags: 'list[Tag]') -> 'tuple[np.matrix, float]':
         weights = [1 / tag.get_uncertainty() for tag in valid_tags]
-        p_poses = [
-            tft.translation_from_matrix(tag.get_pose_matrix_from_panel_rf())
-            for tag in valid_tags
-        ]
-        c_poses = [
-            tft.translation_from_matrix(tag.get_pose_matrix_from_camera_rf())
-            for tag in valid_tags
-        ]
+        p_poses = [tft.translation_from_matrix(tag.get_pose_matrix_from_panel_rf()) for tag in valid_tags]
+        c_poses = [tft.translation_from_matrix(tag.get_pose_matrix_from_camera_rf()) for tag in valid_tags]
         mid_point_from_panel = np.average(p_poses, axis=0, weights=weights)
         mid_point_from_camera = np.average(c_poses, axis=0, weights=weights)
         mid_t_p = tft.translation_matrix(mid_point_from_panel)
@@ -369,8 +343,7 @@ class VisulObject:
         current_orientation, current_weight = panel_orientations[0]
         for q, w in panel_orientations[1:]:
             current_weight += w
-            current_orientation = tft.quaternion_slerp(current_orientation, q,
-                                                       w / current_weight)
+            current_orientation = tft.quaternion_slerp(current_orientation, q, w / current_weight)
 
         panel_orientation = tft.quaternion_matrix(current_orientation)
         panel_position = np.linalg.inv(mid_t_p)  # in rf with panel orientation
@@ -381,6 +354,7 @@ class VisulObject:
 
 
 class ROSInterface:
+
     def __init__(self, name: str, file: str, period: rospy.Duration) -> None:
         self.name = name
         self.file = file
@@ -423,10 +397,7 @@ class ROSInterface:
         transform.rotation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
         return transform
 
-    def publish_transform(self,
-                          frame_id: str,
-                          t_matrix: np.matrix,
-                          inverse=False) -> None:
+    def publish_transform(self, frame_id: str, t_matrix: np.matrix, inverse=False) -> None:
         msg = TransformStamped()
         msg.header.stamp = rospy.Time.now()
         if not inverse:
@@ -441,8 +412,7 @@ class ROSInterface:
 
         self.broadcaster.sendTransform(msg)
 
-    def create_marker(self, header: Header, color: ColorRGBA,
-                      pose_matrix: np.matrix) -> Marker:
+    def create_marker(self, header: Header, color: ColorRGBA, pose_matrix: np.matrix) -> Marker:
         marker = create_basic_marker(header)
         marker.color = color
         marker.pose = self.ros_pose_from_matrix(pose_matrix)
@@ -457,6 +427,7 @@ class ROSInterface:
 
 
 class Tag:
+
     def __init__(self, id, position: dict, orientation: dict) -> None:
         self.id = int(id)
         t_mat = tft.translation_matrix([val for val in position.values()])
