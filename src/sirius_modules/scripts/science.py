@@ -3,18 +3,21 @@ from sirius_msgs.msg import JointState as SiriusJointState
 from sensor_msgs.msg import JointState as JointState
 from std_msgs.msg import Float32
 
-DRILL_ROBOCLAW_TOPIC = "/roboclaw1/set_jointstate"
-PUSH_ROBOCLAW_TOPIC = "/roboclaw2/set_jointstate"
-LIFT_ROBOCLAW_TOPIC = "/roboclaw3/set_jointstate"
+DRILL_ROBOCLAW_TOPIC = "/roboclaw_driver/131/motor1/set_joint_state"
+PUSH_ROBOCLAW_TOPIC = "/roboclaw_driver/132/motor2/set_joint_state"
+LIFT_ROBOCLAW_TOPIC = "/roboclaw_driver/131/motor2/set_joint_state"
 
 INTERFACE_TOPIC = "/science/joint_state"
 
-drill_speed = 2.0
-push_speed = 0.1
-lift_speed = 0.5
+drill_speed = 10.0
+push_speed = 1.0
+lift_speed = 3.0
 
 timeout = rospy.Duration(1.0)
 publish_rate = 10.0
+
+def clampToUnitRange(value):
+    return min(1.0, max(-1.0, value)) 
 
 class Node:
     def __init__(self) -> None:
@@ -33,9 +36,9 @@ class Node:
         rospy.spin()
     
     def interface_callback(self, msg):
-        self.drill_speed = msg.effort[0] * drill_speed
-        self.push_speed = msg.effort[1] * push_speed
-        self.lift_speed = msg.effort[2] * lift_speed
+        self.drill_speed = clampToUnitRange(msg.effort[0]) * drill_speed
+        self.push_speed = clampToUnitRange(msg.effort[1]) * push_speed
+        self.lift_speed = clampToUnitRange(msg.effort[2]) * lift_speed
         self.last_command = rospy.Time.now()
 
     def publish_messages(self, _):
