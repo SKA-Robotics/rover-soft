@@ -43,5 +43,6 @@
 
     <include file="$(find sirius_localization)/launch/localization.launch" />
 
+    <include file="$(find sirius_description)/launch/markers_erc_2023.launch" />
     <!--<include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>-->
 </launch>

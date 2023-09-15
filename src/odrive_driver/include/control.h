@@ -32,6 +32,9 @@ class OdriveHWInterface : public hardware_interface::RobotHW
     realtime_tools::RealtimePublisher<sensor_msgs::JointState> publisher[2];
     std::vector<sensor_msgs::JointState> joint_state;
     std::vector<double> target_velocity;
+    std::vector<double> state_velocity;
+    std::vector<double> state_position;
+    std::vector<double> state_effort;
     void motor0_callback(const sensor_msgs::JointState::ConstPtr& msg);
     void motor1_callback(const sensor_msgs::JointState::ConstPtr& msg);
 };

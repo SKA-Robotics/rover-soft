@@ -25,5 +25,5 @@
     <node pkg="tf2_ros" type="static_transform_publisher" name="local_to_w6"        args=" 10.46 16.29  0.40 0 0 0 local w6"/>
     <node pkg="tf2_ros" type="static_transform_publisher" name="local_to_w7"        args=" 13.85 10.86  0.45 0 0 0 local w7"/>
     <node pkg="tf2_ros" type="static_transform_publisher" name="local_to_w8"        args=" 12.45 21.27  1.07 0 0 0 local w8"/>
-    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_local"        args=" 0     0     0    1.128355361414334 0 0 map local"/>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_local"        args=" 0     0     0    1.669407431 0 0 map local"/>
 </launch>
