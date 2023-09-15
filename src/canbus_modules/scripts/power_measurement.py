@@ -29,34 +29,18 @@ class PowerMeasurementCanbus(CanbusInterface):
 
     def receive_frame(self, command_id, data, frame: Frame):
         if command_id == 0:
-            self.readings[0:2] = [
-                (data[index] << 24)
-                | (data[index + 1] << 16)
-                | (data[index + 2] << 8)
-                | data[index + 3]
-                for index in range(0, 8, 4)
-            ]
-        if command_id == 1:
-            self.readings[2:4] = [
-                (data[index] << 24)
-                | (data[index + 1] << 16)
-                | (data[index + 2] << 8)
-                | data[index + 3]
-                for index in range(0, 8, 4)
+            self.readings = [
+                (data[index] << 8)
+                | data[index + 1]
+                for index in range(0, 8, 2)
             ]
 
-        adc_voltages = [
-            (reading if (reading & (1 << 31)) == 0 else (reading - (1 << 32)))
-            * self.voltage_multiplier
-            for reading in self.readings
-        ]
+        battery_voltage = self.readings[0] * 0.0280248834 + 17.9942457203
+        battery_percentage = battery_voltage * 17.8571428571 - 400.0
 
-        battery_voltage = 18.0 + (adc_voltages[1] * 6.10)
-        battery_percentage = 100.0  # todo once we know the battery charge curve
-
-        motor_current = ((adc_voltages[0] * 2.5) - 2.5) / 0.066
-        computer_current = ((adc_voltages[2] * 2.5) - 2.5) / 0.185
-        peripheral_current = ((adc_voltages[3] * 2.5) - 2.5) / 0.185
+        motor_current = self.readings[1] * 0.2075 - 63.08
+        peripheral_current = self.readings[2] * 0.0638461538 - 12.8330769138
+        computer_current = self.readings[3] * 0.0638461538 - 12.8330769138
 
         total_current = motor_current + computer_current + peripheral_current
         total_power = battery_voltage * total_current
