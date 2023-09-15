@@ -56,7 +56,7 @@ class GripperCanbus(CanbusInterface):
     def receive_frame(self, command_id, data, frame: Frame):
         if command_id == 1:
             reading = (data[0] << 8) + data[1]
-            voltage = 1.083 * reading + 27.89
+            voltage = 0.9225 * reading - 25.75
             self.measurement_publisher.publish(Float32(voltage))
 
 
