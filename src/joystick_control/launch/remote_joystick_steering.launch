@@ -22,5 +22,6 @@
 	</node>
     
     <node pkg="rosservice" type="rosservice" name="add_direct_joy_1" args="call --wait /joy_multiplexer/add_joy '{ topic: { name: joy_0 } }'" />
+
     <!-- <node pkg="rosservice" type="rosservice" name="select_direct_joy_1" args="call -wait /joy_multiplexer/select_joy joy_0" /> -->
 </launch>

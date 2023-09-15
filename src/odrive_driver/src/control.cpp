@@ -20,6 +20,10 @@ bool OdriveHWInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
 
     joint_state.resize(number_of_motors);
     target_velocity.resize(number_of_motors);
+    state_velocity.resize(number_of_motors);
+    state_position.resize(number_of_motors);
+    state_effort.resize(number_of_motors);
+
     for (int motor = 0; motor < number_of_motors; motor++)
     {
         std::string joint;
@@ -48,9 +52,9 @@ bool OdriveHWInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
         target_velocity[motor] = 0;
         // State
         hardware_interface::JointStateHandle state_handle(joint,
-                                                          &(joint_state[motor].position[0]),
-                                                          &(joint_state[motor].velocity[0]),
-                                                          &(joint_state[motor].effort[0]));
+                                                          &state_position[motor],
+                                                          &state_velocity[motor],
+                                                          &state_effort[motor]);
         joint_state_interface.registerHandle(state_handle);
         // Velocity
         hardware_interface::JointHandle velocity_handle(state_handle, &target_velocity[motor]);
@@ -65,12 +69,19 @@ bool OdriveHWInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
 void OdriveHWInterface::motor0_callback(const sensor_msgs::JointState::ConstPtr& msg)
 {
     joint_state[0] = *msg;
+    state_position[0] = joint_state[0].position[0];
+    state_velocity[0] = joint_state[0].velocity[0];
+    state_effort[0] = joint_state[0].effort[0];
 };
 void OdriveHWInterface::motor1_callback(const sensor_msgs::JointState::ConstPtr& msg)
 {
     joint_state[number_of_motors - 1] = *msg;
+    state_position[1] = joint_state[1].position[0];
+    state_velocity[1] = joint_state[1].velocity[0];
+    state_effort[1] = joint_state[1].effort[0];
 };
-void OdriveHWInterface::read(const ros::Time& /*time*/, const ros::Duration& /*period*/){};
+void OdriveHWInterface::read(const ros::Time& /*time*/, const ros::Duration& /*period*/){
+};
 void OdriveHWInterface::write(const ros::Time& time, const ros::Duration& /*period*/)
 {
     for (int motor = 0; motor < number_of_motors; motor++)

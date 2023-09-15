@@ -88,6 +88,7 @@ class Node:
 
     def run(self):
         while not rospy.is_shutdown():
+            self.step()
             self.rate.sleep()
 
     def step(self):

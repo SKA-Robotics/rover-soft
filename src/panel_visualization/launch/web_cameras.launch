@@ -1,0 +1,15 @@
+<launch>
+    <arg name="camera_id" default="0" />
+    <include file="$(find video_stream_opencv)/launch/camera.launch"
+        ns="/web_camera_$(arg camera_id)">
+        <arg name="camera_name" value="webcam" />
+        <arg name="video_stream_provider" value="$(arg camera_id)" />
+        <arg name="set_camera_fps" value="25" /> <!-- for camera settings -->
+        <arg name="buffer_queue_size" value="1" />
+        <arg name="fps" value="25" /> <!-- for stream -->
+        <arg name="frame_id" value="webcam_$(arg camera_id)" />
+        <arg name="camera_info_url"
+            value="file:///$(find panel_visualization)/config/camera_info.yaml" />
+        <!-- <arg name="visualize" value="true" /> -->
+    </include>
+</launch>

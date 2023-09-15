@@ -24,7 +24,7 @@ target_link_libraries(${PROJECT_NAME}_oak_d_w PRIVATE ${catkin_LIBRARIES} deptha
 
 install(TARGETS ${PROJECT_NAME}_oak_d_w DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-add_executable(${PROJECT_NAME}_oak_d_w_rect src/oak_d_w.cpp)
+add_executable(${PROJECT_NAME}_oak_d_w_rect src/oak_d_w_rect.cpp)
 target_link_libraries(${PROJECT_NAME}_oak_d_w_rect PRIVATE ${catkin_LIBRARIES} depthai::core)
 
 install(TARGETS ${PROJECT_NAME}_oak_d_w_rect DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
