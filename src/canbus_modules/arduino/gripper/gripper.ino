@@ -8,9 +8,13 @@ const uint8_t canId = 0x31;
 
 MCP2515 mcp2515(8);
 struct can_frame canMsg;
+struct can_frame measureMsg;
+constexpr char kMeasurementFrameId = 0x01;
+constexpr char kMeasurementRateDivisor = 100;
 
 #define LED_PIN 6
 #define SERVO_PIN 9
+#define MEASUREMENT_PIN A6
 
 void setup(void) {
     //Serial.begin(9600);
@@ -25,9 +29,12 @@ void setup(void) {
     //servo.attach(SERVO_PIN);
     //servo.writeMicroseconds(1500);
     pinMode(6, OUTPUT);
+    pinMode(A6, OUTPUT);
 }
 
 char timeoutCount = 0;
+char measurementRateDivisorCount = 0;
+long int measurementValue = 0;
 
 void loop(void) {
     if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
@@ -48,6 +55,20 @@ void loop(void) {
         Serial.println("detach");
         digitalWrite(SERVO_PIN, LOW);
     }
-    
+
+    ++measurementRateDivisorCount;
+    measurementValue += analogRead(A6);
+
+    if (measurementRateDivisorCount >= kMeasurementRateDivisor) {
+      measurementValue /= kMeasurementRateDivisor;
+      measureMsg.can_id = (canId << 5) | kMeasurementFrameId;
+      measureMsg.can_dlc = 2;
+      measureMsg.data[0] = (measurementValue >> 8) & 0xFF;
+      measureMsg.data[1] = measurementValue & 0xFF;
+      mcp2515.sendMessage(&measureMsg);
+      measurementValue = 0;
+      measurementRateDivisorCount = 0;
+    }
+
     delay(10);
 }

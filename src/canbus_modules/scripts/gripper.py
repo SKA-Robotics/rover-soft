@@ -17,6 +17,12 @@ class GripperCanbus(CanbusInterface):
         self.cmd_subscriber = rospy.Subscriber(
             self.cmd_topic, Float32, self.receive_cmd
         )
+        self.measurement_topic = rospy.get_param(
+            "~voltage_measurement_topic", "/voltage_measurement"
+        )
+        self.measurement_publisher = rospy.Publisher(
+            self.measurement_topic, Float32, queue_size=10
+        )
 
         self.open_pwm = rospy.get_param("~open_pwm", 1952)
         self.open_angle = rospy.get_param("~open_angle", 90)
@@ -48,7 +54,10 @@ class GripperCanbus(CanbusInterface):
         )
 
     def receive_frame(self, command_id, data, frame: Frame):
-        pass
+        if command_id == 1:
+            reading = (data[0] << 8) + data[1]
+            voltage = 1.083 * reading + 27.89
+            self.measurement_publisher.publish(Float32(voltage))
 
 
 if __name__ == "__main__":
