@@ -41,5 +41,7 @@
 
     <include file="$(find canbus_modules)/launch/all.launch"/>
 
+    <include file="$(find sirius_localization)/launch/localization.launch" />
+
     <!--<include file="$(find joystick_controller)/launch/single_joystick_steering.launch"/>-->
 </launch>

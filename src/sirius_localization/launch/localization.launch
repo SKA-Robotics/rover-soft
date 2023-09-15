@@ -2,4 +2,5 @@
     <include file="$(find sirius_localization)/launch/madgwick_filter.launch"/>
     <include file="$(find sirius_localization)/launch/odom_sensor_fusion.launch"/>
     <include file="$(find sirius_localization)/launch/map_sensor_fusion.launch"/>
+    <include file="$(find marker_based_localization)/launch/hybrid_localization.launch" />
 </launch>
