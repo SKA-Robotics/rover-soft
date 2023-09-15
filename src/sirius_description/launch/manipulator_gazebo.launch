@@ -81,7 +81,7 @@
         file="$(find panel_visualization)/launch/panel_visualization.launch">
         <arg name="rviz" value="false" />
         <arg name="gazebo" value="true" />
-        <arg name="manip_frame" value="arm3" />
+        <arg name="base_frame" value="arm3" />
     </include>
 
 </launch>

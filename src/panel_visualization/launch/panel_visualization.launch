@@ -4,7 +4,7 @@
     <arg name="fake_camera_frame" default="camera_frame" />
     <arg name="base_frame" default="base_link" />
     <arg name="aruco_size" default="0.05" />
-    <arg name="aruco_size_override" default="13-14: 0.032, 31-33: 0.04" />
+    <arg name="aruco_size_override" default="13-14: 0.032, 31-32: 0.0391, 33: 0.0397" />
 
     <arg name="rviz" default="true" />
     <arg name="gazebo" default="false" />
