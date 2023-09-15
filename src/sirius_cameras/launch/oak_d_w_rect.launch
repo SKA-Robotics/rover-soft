@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="name"            default="front_camera"/>
+    <arg name="enableRviz"            default="true"/>
+
+    <arg name="mxId"                 default="19443010B1B2F51200"/>
+    <arg name="tf"         default="front" />
+    <arg name="imu_frequency"         default="200" />
+    <arg name="fps"            default="30"  />
+    <arg name="monoResolution"        default="720p"/> 
+    <arg name="rgbResolution"        default="1080p"/> 
+    <arg name="angularVelCovariance"  default="0"   />
+    <arg name="linearAccelCovariance" default="0.4"   /> <!-- Variance in m/s^2-->
+    <arg name="rotationCovariance"  default="$(eval pi/6)"   /> <!-- Variance in radians-->
+    <arg name="magneticCovariance" default="0"   />
+
+
+    <node name="$(arg name)" pkg="sirius_cameras" type="sirius_cameras_oak_d_w_rect" output="screen" required="true">
+        <param name="mxId"                  value="$(arg mxId)"/>
+        <param name="imu_frequency"            value="$(arg imu_frequency)" />
+        <param name="tf"            value="$(arg tf)" />
+        <param name="fps"            value="$(arg fps)" />
+        <param name="monoResolution"        value="$(arg monoResolution)" />
+        <param name="rgbResolution"        value="$(arg rgbResolution)" />
+        <param name="angularVelCovariance"  value="$(arg angularVelCovariance)" />
+        <param name="linearAccelCovariance" value="$(arg linearAccelCovariance)" />
+        <param name="rotationCovariance"  value="$(arg rotationCovariance)" />
+        <param name="magneticCovariance" value="$(arg magneticCovariance)" />
+    </node>      
+   
+    
+    <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet" name="depth_image_convertion_nodelet"
+        args="load depth_image_proc/convert_metric nodelet_manager">
+        <remap from="image_raw" to="/$(arg name)/depth/depth_registered_raw"/>    
+        <remap from="image" to="/$(arg name)/depth/depth_registered"/>
+    </node>
+
+
+    <node pkg="nodelet" type="nodelet" name="depth_image_to_rgb_pointcloud"
+        args="load depth_image_proc/point_cloud_xyzrgb nodelet_manager">
+        <param name="queue_size"          value="10"/>
+
+        <remap from="rgb/camera_info" to="/$(arg name)/rgb/camera_info"/>
+        <remap from="rgb/image_rect_color" to="/$(arg name)/rgb/image_raw_rgb"/>
+        <remap from="depth_registered/image_rect" to="/$(arg name)/depth/depth_registered"/>    
+        <remap from="depth_registered/points" to="/$(arg name)/point_cloud/cloud_registered"/>
+    </node>
+
+</launch>

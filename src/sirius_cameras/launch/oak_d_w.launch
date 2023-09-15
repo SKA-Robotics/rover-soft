@@ -4,7 +4,7 @@
     <arg name="enableRviz"            default="true"/>
 
     <arg name="mxId"                 default="19443010B1B2F51200"/>
-    <arg name="tf"         default="front_camera" />
+    <arg name="tf"         default="front" />
     <arg name="imu_frequency"         default="200" />
     <arg name="fps"            default="30"  />
     <arg name="monoResolution"        default="720p"/> 
