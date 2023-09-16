@@ -9,6 +9,7 @@
     <rosparam file="$(find manip_control)/config/roboclaws.yaml" command="load"/> 
 
     <remap from="/sirius/controller/wheels/cmd_vel" to="/cmd_vel" />
+    <remap from="/sirius/controller/wheels/odom" to="/odom" />
 
     <node name="sirius_control_loop" pkg="sirius_control_loop" type="sirius_control_loop" output="screen"/>
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"

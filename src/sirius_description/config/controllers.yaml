@@ -1,54 +1,55 @@
 sirius:
-  wheels_left:
-    hardware_interface:
-      joints:
-        - left_front_wheel_joint
-        - left_back_wheel_joint
-  wheels_right:
-    hardware_interface:
-      joints:
-        - right_front_wheel_joint
-        - right_back_wheel_joint
-  controller:
-    wheels_left_state:
-      type: joint_state_controller/JointStateController
-      publish_rate: 5
-      joints:
-        - left_front_wheel_joint
-        - left_back_wheel_joint
-    wheels_right_state:
-      type: joint_state_controller/JointStateController
-      publish_rate: 5
-      joints:
-        - right_front_wheel_joint
-        - right_back_wheel_joint
-    wheels:
-      type: "diff_drive_controller/DiffDriveController"
-      left_wheel:
-        - "left_front_wheel_joint"
-        - "left_back_wheel_joint"
-      right_wheel:
-        - "right_front_wheel_joint"
-        - "right_back_wheel_joint"
-      publish_rate: 30 # default: 50
-      pose_covariance_diagonal: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-      twist_covariance_diagonal: [0.2, 0.05, 0.05, 0.0, 0.0, 1.0]
-      wheel_separation: 0.69
-      wheel_radius: 0.1
-      cmd_vel_timeout: 1.0
-      linear:
-        x:
-          has_velocity_limits: true
-          max_velocity: 1.0
-          has_acceleration_limits: true
-          max_acceleration: 1.25
-      angular:
-        z:
-          has_velocity_limits: true
-          max_velocity: 1.0
-          has_acceleration_limits: true
-          max_acceleration: 3.14
-      enable_odom_tf: false
+    wheels_left:
+      hardware_interface:
+        joints:
+          - left_front_wheel_joint
+          - left_back_wheel_joint
+    wheels_right:
+      hardware_interface:
+        joints:
+          - right_front_wheel_joint
+          - right_back_wheel_joint
+    controller:
+      wheels_left_state:
+        type: joint_state_controller/JointStateController
+        publish_rate: 5
+        joints:
+          - left_front_wheel_joint
+          - left_back_wheel_joint
+      wheels_right_state:
+        type: joint_state_controller/JointStateController
+        publish_rate: 5
+        joints:
+          - right_front_wheel_joint
+          - right_back_wheel_joint
+      wheels:
+        type        : "diff_drive_controller/DiffDriveController"
+        left_wheel  : 
+          - 'left_front_wheel_joint'
+          - 'left_back_wheel_joint'
+        right_wheel : 
+          - 'right_front_wheel_joint'
+          - 'right_back_wheel_joint'
+        publish_rate: 30               # default: 50
+        pose_covariance_diagonal : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        twist_covariance_diagonal: [0.2, 0.05, 0.05, 0.0, 0.0, 1.0]
+        wheel_separation : 0.565
+        wheel_separation_multiplier: 2
+        wheel_radius : 0.11
+        cmd_vel_timeout: 1.0
+        linear:
+          x:
+            has_velocity_limits: true
+            max_velocity: 1.0
+            has_acceleration_limits: true
+            max_acceleration: 8
+        angular:
+          z:
+            has_velocity_limits: true
+            max_velocity: 1.7699115044247788 # linear_max_velocity/(0.5 * wheel_separation * wheel_separation_multiplier)
+            has_acceleration_limits: true
+            max_acceleration: 14.15929203539823
+        enable_odom_tf: false
 
 manipulator:
   # Publish all joint states -----------------------------------
