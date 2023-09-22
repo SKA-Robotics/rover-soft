@@ -141,7 +141,7 @@ class SiriusII_IKSolver(IKSolver):
 
     def _get_3_links_solution(self, lengths: 'list[float]', r_t: float, z_t: float, alpha: float, elbow_up: bool):
         # Find 3rd link's start position given its absolute angle (alpha) and end position (r_t, z_t)
-        r_3, z_3 = self._get_link3_startposition(lengths, r_t, z_t, alpha)
+        r_3, z_3 = self._get_link3_startposition(r_t, z_t, alpha)
         # Find 2nd link's start position
         # The geometry constraints lead to equation system with two solutions
         # One of them is chosen by 'elbow_up' argumet
@@ -156,7 +156,7 @@ class SiriusII_IKSolver(IKSolver):
         z_3 = z_t + self.lengths[3] * math.sin(alpha)
         return r_3, z_3
 
-    def _find_middlepoint_solution(a: float, b: float, x: float, y: float, middle_joint_up: bool):
+    def _find_middlepoint_solution(self, a: float, b: float, x: float, y: float, middle_joint_up: bool):
         # Standard names for elements of triangle with vertices A,C,B in subsequent joints
         c_2 = x * x + y * y
         u = ((a - b) * (a + b) + c_2) / 2  # u = a*c*cos(beta)
@@ -179,7 +179,7 @@ class SiriusII_IKSolver(IKSolver):
         angles = [angle1, angle2, angle3]
         return [self._normalize_angle_range(fi) for fi in angles]
 
-    def _normalize_angle_range(angle: float):
+    def _normalize_angle_range(self, angle: float):
         return math.pi * (((angle / math.pi % 2) + 3) % 2 - 1)
 
     def _initialize_solution(self):
