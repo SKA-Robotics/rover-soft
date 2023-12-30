@@ -65,13 +65,8 @@
     <xacro:include filename="sirius_2/suspension.urdf.xacro" />
     <xacro:include filename="sirius_2/wheel.urdf.xacro" />
     
-    <xacro:suspension prefix="${prefix}" material="dark_bronze" flip="${flip_y}">
-      <xacro:dark_bronze/>
-    </xacro:suspension>
-    <xacro:wheel prefix="${prefix}" material="dark_gray" material_rim="white" flip="${flip_x}">
-      <xacro:dark_gray/>
-      <xacro:white/>
-    </xacro:wheel>
+    <xacro:suspension prefix="${prefix}" material="dark_bronze" flip="${flip_y}" />
+    <xacro:wheel prefix="${prefix}" material="dark_gray" material_rim="white" flip="${flip_x}" />
 
     <xacro:joint  name="${prefix}_wheel_joint" 
                   type="continuous" 
@@ -96,24 +91,18 @@
 
   <!-- Define subcomponents links -->
   <link name="base_link" />
-  <xacro:platform material="white">
-    <xacro:white/>
-  </xacro:platform>
+  <xacro:platform material="white" />
   <xacro:drive_system prefix="left_back" flip_y="true" />
   <xacro:drive_system prefix="left_front" />
   <xacro:drive_system prefix="right_back" flip_x="true" flip_y="true"/>
   <xacro:drive_system prefix="right_front"  flip_x="true"/>
-  <xacro:indicator_light material="gray"><xacro:gray/></xacro:indicator_light>
+  <xacro:indicator_light material="gray" />
 
   <!-- Define sensors and cameras links -->
-  <xacro:hp_4310 prefix="back_mast" material="black">
-    <xacro:black/>
-  </xacro:hp_4310>
-  <xacro:hp_4310 prefix="front_mast" material="black">
-    <xacro:black/>
-  </xacro:hp_4310>
+  <xacro:hp_4310 prefix="back_mast" material="black" />
+  <xacro:hp_4310 prefix="front_mast" material="black" />
   <xacro:oak-d-w prefix="front"/>
-  <xacro:gnss material="gray"><xacro:gray/></xacro:gnss>
+  <xacro:gnss material="gray" />
 
   <!-- Define subcomponents joints -->
   <xacro:joint name="base_link_to_platform" 

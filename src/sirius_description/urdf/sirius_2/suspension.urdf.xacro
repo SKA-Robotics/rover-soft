@@ -1,5 +1,5 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="suspension" params="prefix material *gazebo_material flip:=false params:=^ package:=^ collisions:=^ inertial:=^">
+<xacro:macro name="suspension" params="prefix material flip:=false params:=^ package:=^ collisions:=^ inertial:=^">
     <link name="${prefix}_suspension">
       <visual>    
         <material name="${material}"/>
@@ -21,7 +21,7 @@
     </link>
     <gazebo reference="${prefix}_suspension">
       <visual>  
-        <xacro:insert_block name="gazebo_material" />
+        <xacro:element xacro:name="xacro:${material}" />
       </visual> 
     </gazebo>
 </xacro:macro>

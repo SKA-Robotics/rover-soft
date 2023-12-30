@@ -1,5 +1,5 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="platform" params="material prefix:='' *gazebo_material  package:=^ collisions:=^ params:=^ inertial:=^">
+<xacro:macro name="platform" params="material prefix:=''  package:=^ collisions:=^ params:=^ inertial:=^">
     <link name="${prefix + '_' if prefix else prefix}platform">
       <visual>    
         <material name="${material}"/>
@@ -73,7 +73,7 @@
     </link>
     <gazebo reference="${prefix + '_' if prefix else prefix}platform">
       <visual>  
-        <xacro:insert_block name="gazebo_material" />
+        <xacro:element xacro:name="xacro:${material}" />
       </visual> 
     </gazebo>
 </xacro:macro>
