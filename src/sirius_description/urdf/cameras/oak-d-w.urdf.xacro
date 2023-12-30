@@ -9,10 +9,13 @@
 
     <link name="${prefix}_camera_center">
       <visual>
+      <material name="oak-d-w-material">
+            <color rgba="0.35 0.35 0.35 1"/>
+      </material>
         <geometry>
           <mesh filename="package://${package}/meshes/cameras/OAK-D-W.stl"/>
         </geometry>
-        <origin xyz="${cameras['oak-d-w_thickness']/2} 0 0" rpy="-${pi/2} ${pi} -${pi/2}"/>
+        <origin xyz="${-cameras['oak-d-w_thickness']/2} 0 0" rpy="-${pi/2} ${pi} ${pi/2}"/>
       </visual>
       <collision>
         <geometry>
@@ -280,6 +283,17 @@
           </sphericalCoordinates>
         </plugin>
       </sensor>
+    </gazebo>
+    
+    <gazebo reference="${prefix}_camera_center">
+        <visual>  
+          <material>  
+            <ambient>0.25 0.25 0.25 1</ambient>  
+            <diffuse>0.25 0.25 0.25 1</diffuse>  
+            <specular>0 0 0 1</specular>  
+            <emissive>0.0 0.0 0.0 0.0</emissive>  
+          </material>  
+        </visual> 
     </gazebo>
   </xacro:macro>
 

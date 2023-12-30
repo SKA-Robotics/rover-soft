@@ -1,26 +1,20 @@
-drive_train_radius: 0.061
-drive_train_width: 0.223
-indicator_light_height: 0.042
-indicator_light_radius: 0.037
-platform_angle: 0.67
-platform_box_length: 0.41
-platform_box_x: 0.165
-platform_height: 0.16
-platform_mast_2g_xyz: 0.446 0.074 0.955
-platform_mast_2g_radius: 0.035
-platform_mast_2g_length: 0.78
-platform_mast_5g_xyz: 0.43 -0.04 0.74
+indicator_light_height: 0.372
+indicator_light_radius: 0.025
+platform_angle: 43.0 # Angle of the profiles at the front of the frame
+platform_box_length: 0.462
+platform_box_x: -0.197
+platform_height: 0.193
+platform_mast_5g_xyz: -0.411 0.081 0.949
 platform_mast_5g_radius: 0.02
 platform_mast_5g_length: 0.35
-platform_mast_height: 0.65
-platform_mast_radius: 0.006
-platform_mast_routers_height: 0.29
-platform_mast_x: 0.384
+platform_mast_height: 0.995
+platform_mast_x: -0.45
 platform_mast_y: 0.081
-platform_profile_size: 0.02
-suspension_angle: 0.59
+platform_profile_size: 0.02 # Width of the frame profiles (beams)
+suspension_angle: -33.80
 suspension_length: 0.31
 suspension_width: 0.091
 suspension_x_shift: 0.015
+suspension_thickness: 0.0225
 gnss_height: 0.0584
 gnss_radius: 0.075

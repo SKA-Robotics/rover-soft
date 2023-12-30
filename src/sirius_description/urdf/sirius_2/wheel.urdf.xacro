@@ -1,11 +1,12 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="wheel" params="prefix material *gazebo_material package:=^ params:=^ inertial:=^">
+<xacro:macro name="wheel" params="prefix material material_rim *gazebo_material **gazebo_material_rim flip:=false package:=^ params:=^ inertial:=^">
     <link name="${prefix}_wheel">
       <visual>
         <material name="${material}" />
         <geometry>
           <mesh filename="package://${package}/meshes/sirius_2/wheel.stl" scale="0.001 0.001 0.001"/>
         </geometry>
+        <origin xyz="0 0 0" />
       </visual>
       <inertial>
         <mass value="${inertial['wheel_mass']}"/>
@@ -17,10 +18,35 @@
         </geometry>
         <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
       </collision>
-    </link>   
+    </link>
+    <link name="${prefix}_wheel_rim">
+      <visual>
+        <material name="${material_rim}" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/sirius_2/rim.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>    
+        <geometry>
+          <cylinder length="${params['rim_width']}" radius="${params['wheel_radius'] * 0.8}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+      </collision>
+    </link>    
+    <joint name="${prefix}_wheel_to_rim" type="fixed">
+      <parent link="${prefix}_wheel"/>
+      <child link="${prefix}_wheel_rim"/>
+      <origin xyz="0 ${ (1 - 2*flip) * (params['wheel_width'] + params['rim_width'])/2} 0" />
+    </joint>
+
     <gazebo reference="${prefix}_wheel">
       <visual>  
         <xacro:insert_block name="gazebo_material" />
+      </visual> 
+    </gazebo>
+    <gazebo reference="${prefix}_wheel_rim">
+      <visual>  
+        <xacro:insert_block name="gazebo_material_rim" />
       </visual> 
     </gazebo>
 </xacro:macro>

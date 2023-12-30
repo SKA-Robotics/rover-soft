@@ -7,15 +7,6 @@ hp_4310_inertia:
   iyz: 0
   izz: 0.000023333
 
-zed2i_mass: 0.166
-zed2i_inertia:
-  ixx: 0.000007583
-  ixy: 0
-  ixz: 0
-  iyy: 0.00002625
-  iyz: 0
-  izz: 0.000023333
-
 oak-d-w_mass: 0.091
 oak-d-w_inertia:
   ixx: 0.000007583
