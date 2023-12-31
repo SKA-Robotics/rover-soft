@@ -6,6 +6,7 @@
   <xacro:arg name="datum" default="[50.878151, 20.642273, 144.41]"/>
   <xacro:arg name="elevation" default="0.0"/>
   <xacro:arg name="imu_frequency" default="200.0"/>
+  <xacro:arg name="manipulator" default="true"/>
   <xacro:arg name="joint_prefix" default=""/>
   <xacro:arg name="link_prefix" default=""/>
   <xacro:arg name="robot_ns" default=""/>
@@ -20,6 +21,7 @@
   <xacro:property name="datum" value="${$(arg datum)}" />
   <xacro:property name="elevation" value="$(arg elevation)" />
   <xacro:property name="imu_frequency" value="$(arg imu_frequency)" />  
+  <xacro:property name="manipulator" value="$(arg manipulator)" />
   <xacro:property name="stereo_fps" value="$(arg stereo_fps)" /> 
   <xacro:property name="year" value="$(arg year)" />
   <xacro:property name="link_prefix" value="$(arg link_prefix)" />
@@ -41,6 +43,9 @@
   <!-- Load subcomponents xacro -->
   <xacro:include filename="sirius_2/indicator_light.urdf.xacro" />
   <xacro:include filename="sirius_2/platform.urdf.xacro" />
+  <xacro:if value="${manipulator}">
+    <xacro:include filename="manipulator.urdf.xacro" />
+  </xacro:if>
 
   <!-- Load sensors and cameras xacro -->
   <xacro:include filename="cameras/hp_4310.urdf.xacro" />
@@ -97,6 +102,9 @@
   <xacro:drive_system prefix="right_back" flip_x="true" flip_y="true"/>
   <xacro:drive_system prefix="right_front"  flip_x="true"/>
   <xacro:indicator_light material="gray" />
+  <xacro:if value="${manipulator}">
+    <xacro:manipulator prefix="manipulator"/>
+  </xacro:if>
 
   <!-- Define sensors and cameras links -->
   <xacro:hp_4310 prefix="back_mast" material="black" />
@@ -128,6 +136,13 @@
                parent="platform" 
                child="indicator_light" 
                xyz="${params['indicator_light_xyz']}"/>
+  <xacro:if value="${manipulator}">
+    <xacro:joint name="base_to_manipulator" 
+                 parent="platform" 
+                 child="manipulator_base" 
+                 xyz="${params['manipulator_xyz']}" 
+                 rpy="${params['manipulator_rpy']}"/>
+  </xacro:if>
 
   <!-- Define sensors and cameras joints -->
   <xacro:joint name="base_to_front_mast_camera" 
