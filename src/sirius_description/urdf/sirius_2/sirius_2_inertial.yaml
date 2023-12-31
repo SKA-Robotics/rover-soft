@@ -9,21 +9,12 @@ platform_inertia:
 
 suspension_mass: 1.947
 suspension_inertia:
-  ixx: 0.03436
-  ixy: 0.00173
-  ixz: 0.02550
-  iyy: 0.05523
-  iyz: 0.00213
-  izz: 0.02139
-
-drive_train_mass: 1.053
-drive_train_inertia: 
-  ixx: 0.02286
-  ixy: 0
-  ixz: 0
-  iyy: 0.00150
-  iyz: 0
-  izz: 0.02286
+  ixx: 0.24144668
+  ixy: 0.04782891
+  ixz: -0.14103386
+  iyy: 0.30310829
+  iyz: -0.06788500
+  izz: 0.14649874
 
 wheel_mass: 2.80242
 wheel_inertia: 

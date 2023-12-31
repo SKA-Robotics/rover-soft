@@ -2,7 +2,7 @@
 <!-- Based on Sparkfun Multi-Band antenna. Mesh generated from step provided by Sparkfun
      https://www.sparkfun.com/products/21801 -->
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="gnss" params="material *gazebo_material package:=^ collisions:=^ inertial:=^ datum:=^ elevation:=^">
+<xacro:macro name="gnss" params="material package:=^ collisions:=^ inertial:=^ datum:=^ elevation:=^">
   <link name="gnss">
     <visual>
       <material name="${material}">
@@ -72,6 +72,12 @@
         <positionCovarianceType>diagonal_known</positionCovarianceType>
       </plugin>
     </sensor>
+  </gazebo>
+  
+  <gazebo reference="gnss">
+      <visual>  
+        <xacro:element xacro:name="xacro:${material}" />
+      </visual> 
   </gazebo>
 </xacro:macro>
 </robot>

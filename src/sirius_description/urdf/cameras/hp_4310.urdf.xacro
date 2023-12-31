@@ -1,5 +1,5 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="hp_4310" params="prefix:=hp_4310 material *gazebo_material package:=^ cameras:=^ cameras_inertial:=^">
+<xacro:macro name="hp_4310" params="prefix:=hp_4310 material package:=^ cameras:=^ cameras_inertial:=^">
   <link name="${prefix}_camera">
     <visual>
       <material name="${material}"/>
@@ -21,7 +21,7 @@
   </link>
   <gazebo reference="${prefix}_camera">
       <visual>  
-        <xacro:insert_block name="gazebo_material" />
+        <xacro:element xacro:name="xacro:${material}" />
       </visual> 
       <sensor type="camera" name="${prefix}_camera">
       <update_rate>30.0</update_rate>
