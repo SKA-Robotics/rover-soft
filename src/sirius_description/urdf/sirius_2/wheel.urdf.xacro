@@ -26,6 +26,13 @@
           <mesh filename="package://${package}/meshes/sirius_2/rim.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
+      <!-- Without inertia link is either lumped with parent or removed from sdf -->
+      <!-- Link cannot be lumped with parent If we want to apply different material to it -->
+      <!-- Zero inertia is not allowed, so we use very small values as a workaround -->
+      <inertial>
+        <mass value="1e-5"/>
+        <inertia ixx="1e-9" ixy="1e-9" ixz="1e-9" iyy="1e-9" iyz="1e-9" izz="1e-9"/>
+      </inertial>
       <collision>    
         <geometry>
           <cylinder length="${params['rim_width']}" radius="${params['wheel_radius'] * 0.8}"/>
@@ -48,6 +55,12 @@
       <visual>  
         <xacro:element xacro:name="xacro:${material_rim}" />
       </visual> 
+    </gazebo>    
+    <!-- This is required so wheel and rim link are not lumped together -->
+    <!-- Otherwise, they would be given the same material (color) during urdf->sdf conversion -->
+    <!-- Possibly, in future versions of gazebo, we could apply different materials to different visual elements in URDF -->
+    <gazebo reference="${prefix}_wheel_to_rim_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
 </xacro:macro>
 </robot>
