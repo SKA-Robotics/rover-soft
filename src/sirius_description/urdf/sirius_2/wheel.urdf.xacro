@@ -6,9 +6,10 @@
         <geometry>
           <mesh filename="package://${package}/meshes/sirius_2/wheel.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <origin xyz="0 0 0" />
+        <origin xyz="0 ${-params['wheel_width']/2} 0" />
       </visual>
       <inertial>
+        <origin xyz="0 0 0" />
         <mass value="${inertial['wheel_mass']}"/>
         <inertia ixx="${inertial['wheel_inertia']['ixx']}" ixy="${inertial['wheel_inertia']['ixy']}" ixz="${inertial['wheel_inertia']['ixz']}" iyy="${inertial['wheel_inertia']['iyy']}" iyz="${inertial['wheel_inertia']['iyz']}" izz="${inertial['wheel_inertia']['izz']}"/>
       </inertial>
