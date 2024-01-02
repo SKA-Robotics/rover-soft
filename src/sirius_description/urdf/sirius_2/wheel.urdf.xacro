@@ -1,4 +1,5 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
+<xacro:include filename="rim.urdf.xacro" />
 <xacro:macro name="wheel" params="prefix material material_rim flip:=false package:=^ params:=^ inertial:=^">
     <link name="${prefix}_wheel">
       <visual>
@@ -20,31 +21,18 @@
         <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
       </collision>
     </link>
-    <link name="${prefix}_wheel_rim">
-      <visual>
-        <material name="${material_rim}" />
-        <geometry>
-          <mesh filename="package://${package}/meshes/sirius_2/rim.stl" scale="0.001 0.001 0.001"/>
-        </geometry>
-      </visual>
-      <!-- Without inertia link is either lumped with parent or removed from sdf -->
-      <!-- Link cannot be lumped with parent If we want to apply different material to it -->
-      <!-- Zero inertia is not allowed, so we use very small values as a workaround -->
-      <inertial>
-        <mass value="1e-5"/>
-        <inertia ixx="1e-9" ixy="1e-9" ixz="1e-9" iyy="1e-9" iyz="1e-9" izz="1e-9"/>
-      </inertial>
-      <collision>    
-        <geometry>
-          <cylinder length="${params['rim_width']}" radius="${params['wheel_radius'] * 0.8}"/>
-        </geometry>
-        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
-      </collision>
-    </link>    
-    <joint name="${prefix}_wheel_to_rim_joint" type="fixed">
+    
+    <xacro:rim prefix="${prefix}_wheel_outside" material="${material_rim}" />
+    <xacro:rim prefix="${prefix}_wheel_inside" material="${material_rim}" />
+    <joint name="${prefix}_wheel_to_outside_rim_joint" type="fixed">
       <parent link="${prefix}_wheel"/>
-      <child link="${prefix}_wheel_rim"/>
+      <child link="${prefix}_wheel_outside_rim"/>
       <origin xyz="0 ${ (1 - 2*flip) * (params['wheel_width'] + params['rim_width'])/2} 0" />
+    </joint>
+    <joint name="${prefix}_wheel_to_inside_rim_joint" type="fixed">
+      <parent link="${prefix}_wheel"/>
+      <child link="${prefix}_wheel_inside_rim"/>
+      <origin xyz="0 ${ (2*flip - 1) * (params['wheel_width'] + params['rim_width'])/2} 0" />
     </joint>
 
     <gazebo reference="${prefix}_wheel">
@@ -52,15 +40,13 @@
         <xacro:element xacro:name="xacro:${material}" />
       </visual> 
     </gazebo>
-    <gazebo reference="${prefix}_wheel_rim">
-      <visual>  
-        <xacro:element xacro:name="xacro:${material_rim}" />
-      </visual> 
-    </gazebo>    
     <!-- This is required so wheel and rim link are not lumped together -->
     <!-- Otherwise, they would be given the same material (color) during urdf->sdf conversion -->
     <!-- Possibly, in future versions of gazebo, we could apply different materials to different visual elements in URDF -->
-    <gazebo reference="${prefix}_wheel_to_rim_joint">
+    <gazebo reference="${prefix}_wheel_to_outside_rim_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>    
+    <gazebo reference="${prefix}_wheel_to_inside_rim_joint">
       <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
 </xacro:macro>
