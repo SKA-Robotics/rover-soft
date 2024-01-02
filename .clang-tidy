@@ -1,0 +1,95 @@
+# Source: https://github.com/cpp-best-practices/gui_starter_template
+---
+Checks: '*,
+        -abseil-*,
+        -altera-*,
+        -android-*,
+        -fuchsia-*,
+        -google-*,
+        -llvm*,
+        -modernize-use-trailing-return-type,
+        -zircon-*,
+        -readability-else-after-return,
+        -readability-static-accessed-through-instance,
+        -readability-avoid-const-params-in-decls,
+        -cppcoreguidelines-non-private-member-variables-in-classes,
+        -misc-non-private-member-variables-in-classes,
+        -cppcoreguidelines-pro-type-vararg,
+        -hicpp-vararg,
+        -hicpp-no-array-decay,
+        -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+        -cppcoreguidelines-avoid-magic-numbers,
+        -readability-magic-numbers,
+        -cppcoreguidelines-avoid-non-const-global-variables'
+WarningsAsErrors: '*'
+HeaderFilterRegex: ''
+IgnoreMacros: true
+
+CheckOptions:
+# Classes, structs, ...
+  - key:    readability-identifier-naming.NamespaceCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ClassCase
+    value:  CamelCase
+  - key:    readability-identifier-naming.StructCase
+    value:  CamelCase
+  - key:    readability-identifier-naming.EnumCase
+    value:  CamelCase
+  - key:    readability-identifier-naming.UnionCase
+    value:  CamelCase
+  - key:    readability-identifier-naming.TypedefCase
+    value:  CamelCase
+
+# Variables, member variables, ...
+  - key:    readability-identifier-naming.ParameterCase
+    value:  lower_case
+  - key:    readability-identifier-naming.VariableCase
+    value:  lower_case
+  - key:    readability-identifier-naming.MemberCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ClassMemberSuffix
+    value:  '_'
+  - key:    readability-identifier-naming.PublicMemberCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ProtectedMemberCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ProtectedMemberSuffix
+    value:  '_'
+  - key:    readability-identifier-naming.PrivateMemberCase
+    value:  lower_case
+  - key:    readability-identifier-naming.PrivateMemberSuffix
+    value:  _
+
+# Functions, methods, ...
+  - key:    readability-identifier-naming.FunctionCase
+    value:  camelBack
+  - key:    readability-identifier-naming.MethodCase
+    value:  camelBack
+
+# Constants
+  - key:    readability-identifier-naming.ConstantPrefix
+    value:  ''
+  - key:    readability-identifier-naming.ConstantCase
+    value:  UPPER_CASE
+  - key:    readability-identifier-naming.ConstantMemberPrefix
+    value:  ''
+  - key:    readability-identifier-naming.ConstantMemberCase
+    value:  UPPER_CASE
+  - key:    readability-identifier-naming.ConstantParameterCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ConstantParameterPrefix
+    value:  ''
+  - key:    readability-identifier-naming.EnumConstantCase
+    value:  UPPER_CASE
+  - key:    readability-identifier-naming.StaticConstantCase
+    value:  UPPER_CASE
+  - key:    readability-identifier-naming.ClassConstantCase
+    value:  UPPER_CASE
+  - key:    readability-identifier-naming.GlobalVariableCase
+    value:  UPPER_CASE
+
+# design / refactoring (other parameters don't work well with macros)
+  - key:    readability-function-size.LineThreshold
+    value:  80
+  - key:    readability-function-size.ParameterThreshold
+    value:  5

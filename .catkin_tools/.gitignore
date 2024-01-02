@@ -1,0 +1,7 @@
+# Ignore everything in this directory except gitignore
+# We don't want to commit contents of this directory,
+# but we need .catkin_tools folder, so the ROS extension
+# knows what is the default build tool for the workspace 
+# (catkin_tools)
+*
+!.gitignore

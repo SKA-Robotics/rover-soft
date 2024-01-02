@@ -1,0 +1,33 @@
+{
+    "editor.formatOnSave": true,
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}",
+        "--completion-style=detailed",
+        "--clang-tidy"
+    ],
+    "python.autoComplete.extraPaths": [
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.defaultInterpreterPath": "python",
+    "editor.defaultFormatter": "ms-iot.vscode-ros",
+    "python.analysis.extraPaths": [
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "ros.distro": "noetic",
+    "[cmake]": {
+        "editor.defaultFormatter": "cheshirekow.cmake-format"
+    },
+    "files.exclude": {
+        ".catkin_tools/": true,
+        "build*/": true,
+        "install*/": true,
+        "devel*/": true,
+        "logs*/": true,
+        ".cache*/": true,
+    },
+    "[python]": {
+        "editor.defaultFormatter": "eeyore.yapf"
+    },
+    "cmake.configureOnOpen": false,
+}
