@@ -1,0 +1,43 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "catkin",
+			"args": [
+				"build",
+				"--cmake-args",
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+			],
+			"problemMatcher": [
+				"$catkin-gcc"
+			],
+			"group": {
+				"kind": "build"
+			},
+			"label": "catkin: build"
+		},
+		{
+			"type": "catkin",
+			"args": [
+				"build_compile_cmd"
+			],
+			"problemMatcher": [
+				"$catkin-gcc"
+			],
+			"group": {
+				"kind": "build"
+			},
+			"label": "catkin: export compile commands"
+		},
+		{
+			"label": "catkin: build and export compile commands",
+			"dependsOrder": "sequence",
+			"dependsOn": ["catkin: build", "catkin: export compile commands"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}		  
+	]
+}
