@@ -1,4 +1,5 @@
-#Config based on ROS guidelines https://github.com/PickNikRobotics/roscpp_code_format
+# source: https://github.com/PickNikRobotics/roscpp_code_format
+---
 BasedOnStyle: Google
 AccessModifierOffset: -2
 ConstructorInitializerIndentWidth: 2
@@ -13,8 +14,7 @@ AlwaysBreakBeforeMultilineStrings: true
 BreakBeforeBinaryOperators: false
 BreakBeforeTernaryOperators: false
 BreakConstructorInitializersBeforeComma: true
-BinPackParameters: false
-BinPackArguments: false
+BinPackParameters: true
 ColumnLimit: 120
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 DerivePointerBinding: false
@@ -33,7 +33,7 @@ PenaltyReturnTypeOnItsOwnLine: 90
 SpacesBeforeTrailingComments: 2
 Cpp11BracedListStyle: false
 Standard: Auto
-IndentWidth: 4
+IndentWidth: 2
 TabWidth: 2
 UseTab: Never
 IndentFunctionDeclarationAfterType: false
