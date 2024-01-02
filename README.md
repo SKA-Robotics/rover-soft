@@ -41,6 +41,7 @@ For an optimal development experience, we recommend using VSCode, which comes wi
    - Run `pip install catkin-tools-clangd`.  
    This tool is essential for generating the `compile_commands.json` file, which is required for clangd.
    - After installation, use the command `catkin build_compile_cmd` or the default build task as a substitute for `catkin build`. 
+   - Note: The build type is set to debug by default, with no additional flags provided. It’s recommended to use catkin config to modify build settings. For example, use `catkin config -j1` to limit the maximum number of build jobs to 1.
 
 2. **Setting Up VSCode**:  
    Follow the prompts in VSCode to install recommended extensions. You might also receive prompts to install missing tools, such as `clangd`. 
