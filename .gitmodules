@@ -7,3 +7,6 @@
 [submodule "src/external/depthai-ros"]
 	path = src/external/depthai-ros
 	url = https://github.com/luxonis/depthai-ros.git
+[submodule "src/external/odrive_driver"]
+	path = src/external/odrive_driver
+	url = https://github.com/rxsio/odrive_driver.git
