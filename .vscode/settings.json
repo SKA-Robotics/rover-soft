@@ -29,4 +29,5 @@
     "[python]": {
         "editor.defaultFormatter": "eeyore.yapf"
     },
+    "cmake.configureOnOpen": false,
 }
