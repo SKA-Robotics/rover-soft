@@ -61,10 +61,10 @@
   </xacro:macro>
 
   <!-- Macro to combine suspension and wheel -->
+  <xacro:include filename="sirius_2/suspension.urdf.xacro" />
+  <xacro:include filename="sirius_2/wheel.urdf.xacro" />
+  
   <xacro:macro name="drive_system" params="flip_x:=false flip_y:=false prefix:='' params:=^">
-    <xacro:include filename="sirius_2/suspension.urdf.xacro" />
-    <xacro:include filename="sirius_2/wheel.urdf.xacro" />
-    
     <xacro:suspension prefix="${prefix}" material="dark_bronze" flip="${flip_y}" />
     <xacro:wheel prefix="${prefix}" material="dark_gray" material_rim="white" flip="${flip_x}" />
 
