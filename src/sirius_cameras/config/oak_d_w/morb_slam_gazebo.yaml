@@ -1,4 +1,6 @@
-%YAML:1.0
+%YAML 1.1
+---
+
 File.version: "1.0"
 Camera.type: "Rectified"
 
