@@ -1,4 +1,5 @@
-# %YAML:1.0
+%YAML 1.1
+---
 
 cam0:
   T_cam_imu:
