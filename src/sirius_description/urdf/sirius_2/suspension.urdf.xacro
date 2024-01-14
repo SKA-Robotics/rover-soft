@@ -1,11 +1,12 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="suspension" params="prefix material *gazebo_material params:=^ package:=^ collisions:=^ inertial:=^">
+<xacro:macro name="suspension" params="prefix material flip:=false params:=^ package:=^ collisions:=^ inertial:=^">
     <link name="${prefix}_suspension">
       <visual>    
         <material name="${material}"/>
         <geometry>
           <mesh filename="package://${package}/meshes/sirius_2/suspension.stl" scale="0.001 0.001 0.001"/>
         </geometry>
+        <origin xyz="0 0 0" rpy="0 0 ${pi if flip else 0}" />
       </visual>
       <inertial>
         <mass value="${inertial['suspension_mass']}"/>
@@ -13,14 +14,14 @@
       </inertial>
       <collision>    
         <geometry>
-          <box size="${collisions['suspension_width']} ${params['suspension_thickness']} ${collisions['suspension_length']}"/>
+          <box size="${collisions['suspension_width']} ${collisions['suspension_thickness']} ${collisions['suspension_length']}"/>
         </geometry>
-        <origin xyz="${-params['wheel_base']/4 + params['suspension_separation_x']/4 - collisions['suspension_x_shift']} ${-params['suspension_thickness']/2} ${-params['suspension_height']/2}" rpy="0 ${collisions['suspension_angle']} 0" />
+        <origin xyz="${(1 - 2 * flip) * (params['wheel_base']/4 - params['suspension_separation_x']/4 + collisions['suspension_x_shift'])} 0 ${-params['suspension_height']/2}" rpy="0 ${collisions['suspension_angle'] * pi / 180} ${pi if flip else 0}" />
       </collision>
     </link>
     <gazebo reference="${prefix}_suspension">
       <visual>  
-        <xacro:insert_block name="gazebo_material" />
+        <xacro:element xacro:name="xacro:${material}" />
       </visual> 
     </gazebo>
 </xacro:macro>

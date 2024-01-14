@@ -1,0 +1,30 @@
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+<xacro:macro name="rim" params="prefix material package:=^ params:=^">
+    <link name="${prefix}_rim">
+      <visual>
+        <material name="${material}" />
+        <geometry>
+          <mesh filename="package://${package}/meshes/sirius_2/rim.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <!-- Without inertia link is either lumped with parent or removed from sdf -->
+      <!-- Link cannot be lumped with parent If we want to apply different material to it -->
+      <!-- Zero inertia is not allowed, so we use very small values as a workaround -->
+      <inertial>
+        <mass value="1e-5"/>
+        <inertia ixx="1e-9" ixy="1e-9" ixz="1e-9" iyy="1e-9" iyz="1e-9" izz="1e-9"/>
+      </inertial>
+      <collision>    
+        <geometry>
+          <cylinder length="${params['rim_width']}" radius="${params['wheel_radius'] * 0.8}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+      </collision>
+    </link>    
+    <gazebo reference="${prefix}_wheel_rim">
+      <visual>  
+        <xacro:element xacro:name="xacro:${material}" />
+      </visual> 
+    </gazebo>    
+</xacro:macro>
+</robot>

@@ -1,13 +1,16 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="wheel" params="prefix material *gazebo_material package:=^ params:=^ inertial:=^">
+<xacro:include filename="rim.urdf.xacro" />
+<xacro:macro name="wheel" params="prefix material material_rim flip:=false package:=^ params:=^ inertial:=^">
     <link name="${prefix}_wheel">
       <visual>
         <material name="${material}" />
         <geometry>
           <mesh filename="package://${package}/meshes/sirius_2/wheel.stl" scale="0.001 0.001 0.001"/>
         </geometry>
+        <origin xyz="0 0 0" />
       </visual>
       <inertial>
+        <origin xyz="0 ${-params['wheel_width']/2} 0" />
         <mass value="${inertial['wheel_mass']}"/>
         <inertia ixx="${inertial['wheel_inertia']['ixx']}" ixy="${inertial['wheel_inertia']['ixy']}" ixz="${inertial['wheel_inertia']['ixz']}" iyy="${inertial['wheel_inertia']['iyy']}" iyz="${inertial['wheel_inertia']['iyz']}" izz="${inertial['wheel_inertia']['izz']}"/>
       </inertial>
@@ -17,11 +20,34 @@
         </geometry>
         <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
       </collision>
-    </link>   
+    </link>
+    
+    <xacro:rim prefix="${prefix}_wheel_outside" material="${material_rim}" />
+    <xacro:rim prefix="${prefix}_wheel_inside" material="${material_rim}" />
+    <joint name="${prefix}_wheel_to_outside_rim_joint" type="fixed">
+      <parent link="${prefix}_wheel"/>
+      <child link="${prefix}_wheel_outside_rim"/>
+      <origin xyz="0 ${ (1 - 2*flip) * (params['wheel_width'] + params['rim_width'])/2} 0" />
+    </joint>
+    <joint name="${prefix}_wheel_to_inside_rim_joint" type="fixed">
+      <parent link="${prefix}_wheel"/>
+      <child link="${prefix}_wheel_inside_rim"/>
+      <origin xyz="0 ${ (2*flip - 1) * (params['wheel_width'] + params['rim_width'])/2} 0" />
+    </joint>
+
     <gazebo reference="${prefix}_wheel">
       <visual>  
-        <xacro:insert_block name="gazebo_material" />
+        <xacro:element xacro:name="xacro:${material}" />
       </visual> 
+    </gazebo>
+    <!-- This is required so wheel and rim link are not lumped together -->
+    <!-- Otherwise, they would be given the same material (color) during urdf->sdf conversion -->
+    <!-- Possibly, in future versions of gazebo, we could apply different materials to different visual elements in URDF -->
+    <gazebo reference="${prefix}_wheel_to_outside_rim_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>    
+    <gazebo reference="${prefix}_wheel_to_inside_rim_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
 </xacro:macro>
 </robot>

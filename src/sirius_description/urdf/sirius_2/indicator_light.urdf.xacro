@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-<xacro:macro name="indicator_light" params="prefix material *gazebo_material package:=^ collisions:=^ inertial:=^">
-  <link name="${prefix}_indicator_light">
+<xacro:macro name="indicator_light" params="material prefix:='' package:=^ collisions:=^ inertial:=^">
+  <link name="${prefix + '_' if prefix else prefix}indicator_light">
     <visual>
       <material name="${material}">
       </material>
@@ -20,9 +20,9 @@
       <origin xyz="0 0 ${collisions['indicator_light_height']/2}" />
     </collision>
   </link>
-  <gazebo reference="${prefix}_indicator_light">
+  <gazebo reference="${prefix + '_' if prefix else prefix}indicator_light">
       <visual>  
-        <xacro:insert_block name="gazebo_material" />
+        <xacro:element xacro:name="xacro:${material}" />
       </visual> 
   </gazebo>
 </xacro:macro>
